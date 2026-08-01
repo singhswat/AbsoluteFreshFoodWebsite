@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FL4T5WHM8W"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FL4T5WHM8W');
+  </script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Partner Dashboard — Absolute Fresh</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F9FAFB;min-height:100vh;padding-bottom:80px}
+
+    /* ── Top bar ── */
+    .topbar{background:#fff;border-bottom:1px solid #E5E7EB;padding:12px 16px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:50}
+    .logo{font-size:1.3rem}
+    .topbar-title{flex:1;font-weight:600;color:#111827;font-size:.9rem}
+    .profile-chip{background:#F3F4F6;color:#374151;border-radius:8px;padding:4px 12px;font-size:.75rem;font-weight:600}
+    .logout-btn{background:none;border:1px solid #E5E7EB;color:#6B7280;border-radius:6px;padding:4px 10px;font-size:.8rem;cursor:pointer}
+
+    /* ── Stats bar ── */
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0;background:#fff;border-bottom:1px solid #E5E7EB}
+    .stat-card{text-align:center;padding:14px 8px;border-right:1px solid #F3F4F6}
+    .stat-card:last-child{border-right:none}
+    .stat-val{font-size:1.35rem;font-weight:700;font-family:monospace;color:#111827}
+    .stat-lbl{font-size:.65rem;color:#6B7280;text-transform:uppercase;letter-spacing:.05em;margin-top:3px}
+
+    /* ── Tab nav ── */
+    .tab-nav{display:flex;background:#fff;border-bottom:2px solid #E5E7EB;overflow-x:auto;position:sticky;top:53px;z-index:40}
+    .tab-btn{flex:1;min-width:70px;padding:12px 8px;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;font-size:.78rem;font-weight:600;color:#6B7280;cursor:pointer;white-space:nowrap;text-align:center}
+    .tab-btn.active{color:#16A34A;border-bottom-color:#16A34A}
+
+    /* ── Content area ── */
+    .content{padding:14px;max-width:800px;margin:0 auto}
+
+    /* ── Cards ── */
+    .section{background:#fff;border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid #E5E7EB}
+    .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .section-title{font-weight:600;color:#111827;font-size:.9rem}
+    .section-badge{background:#F3F4F6;color:#6B7280;border-radius:6px;padding:2px 8px;font-size:.7rem;font-weight:600}
+
+    /* ── Buttons ── */
+    .btn-primary{background:#16A34A;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:.85rem;font-weight:600;cursor:pointer}
+    .btn-primary:active{background:#15803D}
+    .btn-primary:disabled{opacity:.5;cursor:not-allowed}
+    .btn-ghost{background:#fff;border:1px solid #D1D5DB;color:#374151;border-radius:6px;padding:7px 12px;font-size:.78rem;cursor:pointer}
+    .btn-ghost:active{background:#F9FAFB}
+    .btn-full{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:10px;font-size:.95rem;font-weight:600;margin-bottom:14px;cursor:pointer;border:none;background:#16A34A;color:#fff}
+
+    /* ── Coupon card ── */
+    .coupon-card{border:1px solid #E5E7EB;border-radius:10px;padding:14px;margin-bottom:10px;background:#FAFAFA}
+    .coupon-header{display:flex;align-items:start;justify-content:space-between;margin-bottom:10px}
+    .coupon-code{font-size:1.1rem;font-weight:700;font-family:monospace;color:#16A34A}
+    .coupon-status{font-size:.7rem;padding:3px 8px;border-radius:6px;font-weight:600}
+    .status-active{background:#D1FAE5;color:#065F46}
+    .status-expired{background:#FEE2E2;color:#991B1B}
+    .status-paused{background:#FEF3C7;color:#92400E}
+    .coupon-meta{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:.75rem;color:#6B7280;margin-bottom:10px}
+    .coupon-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding-top:10px;border-top:1px solid #E5E7EB}
+    .coupon-stat{text-align:center}
+    .coupon-stat-val{font-size:1rem;font-weight:700;font-family:monospace;color:#111827}
+    .coupon-stat-lbl{font-size:.65rem;color:#9CA3AF;margin-top:2px}
+    .coupon-actions{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap}
+    .coupon-btn{flex:1;min-width:80px;background:#fff;border:1px solid #D1D5DB;color:#374151;border-radius:6px;padding:8px 4px;font-size:.73rem;cursor:pointer;text-align:center}
+    .coupon-btn:active{background:#F9FAFB}
+
+    /* ── Sample request card ── */
+    .request-card{border:1px solid #E5E7EB;border-radius:10px;padding:14px;margin-bottom:10px}
+    .request-card .req-header{display:flex;justify-content:space-between;align-items:start;margin-bottom:8px}
+    .req-product{font-weight:600;color:#111827;font-size:.88rem}
+    .req-meta{font-size:.75rem;color:#6B7280;line-height:1.6;margin-bottom:8px}
+    .req-status{font-size:.7rem;padding:3px 10px;border-radius:10px;font-weight:600;display:inline-block}
+    .req-pending{background:#FEF3C7;color:#92400E}
+    .req-approved{background:#D1FAE5;color:#065F46}
+    .req-rejected{background:#FEE2E2;color:#991B1B}
+    .req-delivered{background:#DBEAFE;color:#1E40AF}
+    .req-posted{background:#EDE9FE;color:#6D28D9}
+
+    /* ── Content card ── */
+    .content-card{border:1px solid #E5E7EB;border-radius:10px;padding:14px;margin-bottom:10px}
+    .content-card .c-type{font-size:.7rem;background:#F3F4F6;color:#374151;padding:2px 8px;border-radius:4px;font-weight:600;display:inline-block;margin-bottom:6px}
+    .content-card .c-caption{font-size:.82rem;color:#374151;line-height:1.5;margin-bottom:8px;word-break:break-word}
+    .content-card .c-feedback{font-size:.78rem;color:#1E40AF;background:#DBEAFE;padding:8px 10px;border-radius:6px;margin-top:8px;line-height:1.4}
+    .content-card .c-feedback.changes{background:#FEF3C7;color:#92400E}
+    .content-card .c-feedback.rejected{background:#FEE2E2;color:#991B1B}
+
+    /* ── Earnings ── */
+    .earnings-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #F3F4F6;font-size:.85rem}
+    .earnings-row:last-child{border:none}
+    .earnings-label{color:#6B7280}
+    .earnings-value{font-weight:600;color:#111827;font-family:monospace}
+    .tier-bar{background:#F3F4F6;border-radius:6px;height:8px;margin:8px 0;overflow:hidden}
+    .tier-fill{height:100%;border-radius:6px;background:#16A34A;transition:width .5s ease}
+    .tier-labels{display:flex;justify-content:space-between;font-size:.65rem;color:#9CA3AF}
+
+    /* ── Forms ── */
+    .form-group{margin-bottom:14px}
+    .form-label{display:block;font-size:.8rem;font-weight:500;color:#374151;margin-bottom:5px}
+    .form-label .req{color:#EF4444}
+    .form-input{width:100%;padding:11px 12px;border:1px solid #D1D5DB;border-radius:8px;font-size:.9rem;font-family:inherit;outline:none;transition:border .15s;background:#fff}
+    .form-input:focus{border-color:#16A34A}
+    .form-input::placeholder{color:#9CA3AF}
+    textarea.form-input{min-height:80px;resize:vertical}
+    select.form-input{cursor:pointer;-webkit-appearance:none}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .err-msg{background:#FEE2E2;color:#991B1B;border-radius:6px;padding:10px 12px;font-size:.8rem;margin-bottom:12px;display:none}
+    .err-msg.show{display:block}
+    .info-box{background:#DBEAFE;color:#1E40AF;border-radius:8px;padding:12px;font-size:.8rem;line-height:1.5;margin-bottom:14px}
+    .success-box{background:#D1FAE5;color:#065F46;border-radius:8px;padding:12px;font-size:.82rem;line-height:1.5;margin-bottom:14px;display:none}
+
+    /* ── Modals ── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:flex-end;z-index:100}
+    .modal-overlay.show{display:flex}
+    .modal{background:#fff;border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:92vh;overflow-y:auto}
+    .modal-handle{width:32px;height:4px;background:#D1D5DB;border-radius:2px;margin:0 auto 16px}
+    .modal h3{font-size:1rem;font-weight:600;color:#111827;margin-bottom:4px}
+    .modal-sub{font-size:.78rem;color:#6B7280;margin-bottom:14px}
+    .modal-actions{display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-top:14px}
+    .btn-cancel{background:#fff;border:1px solid #D1D5DB;color:#6B7280;border-radius:8px;padding:12px;font-size:.88rem;cursor:pointer}
+
+    /* ── QR ── */
+    .qr-display{text-align:center;padding:16px}
+    .qr-img{max-width:250px;margin:0 auto 14px;border:1px solid #E5E7EB;border-radius:8px}
+    .qr-actions{display:flex;gap:8px}
+    .qr-btn{flex:1;background:#F3F4F6;border:none;color:#374151;border-radius:8px;padding:10px;font-size:.85rem;cursor:pointer}
+
+    /* ── Empty ── */
+    .empty{text-align:center;padding:2.5rem 1rem;color:#9CA3AF}
+    .empty-icon{font-size:2.2rem;margin-bottom:8px}
+    .empty-text{font-size:.85rem;line-height:1.5}
+
+    /* ── Performance section ── */
+    .perf-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #F3F4F6;font-size:.82rem}
+    .perf-row:last-child{border:none}
+    .perf-label{color:#6B7280}
+    .perf-val{font-weight:600;color:#111827}
+
+    /* ── WhatsApp share ── */
+    .wa-share{background:#25D366;color:#fff;border:none;border-radius:8px;padding:10px 14px;font-size:.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px}
+  </style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<div class="topbar">
+  <span class="logo">🥬</span>
+  <div class="topbar-title">Partner Dashboard</div>
+  <span class="profile-chip" id="profile-name">—</span>
+  <button class="logout-btn" onclick="logout()">Sign Out</button>
+</div>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat-card">
+    <div class="stat-val" id="stat-orders">0</div>
+    <div class="stat-lbl">Orders</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-val" style="color:#16A34A" id="stat-revenue">₹0</div>
+    <div class="stat-lbl">Revenue</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-val" style="color:#F59E0B" id="stat-commission">₹0</div>
+    <div class="stat-lbl">Earned</div>
+  </div>
+</div>
+
+<!-- Tab Nav -->
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('coupons',this)">🎟️ Coupons</button>
+  <button class="tab-btn" onclick="switchTab('samples',this)">📦 Samples</button>
+  <button class="tab-btn" onclick="switchTab('content',this)">📸 Content</button>
+  <button class="tab-btn" onclick="switchTab('earnings',this)">💰 Earnings</button>
+</div>
+
+<!-- ═══════════════ COUPONS TAB ═══════════════ -->
+<div id="tab-coupons" class="content">
+  <button class="btn-full" onclick="openCreateCoupon()">
+    <span style="font-size:1.1rem">➕</span> Create New Coupon
+  </button>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">Your Coupons</div>
+      <div class="section-badge" id="coupon-count">0 active</div>
+    </div>
+    <div id="coupons-list">
+      <div class="empty"><div class="empty-icon">🎟️</div><div class="empty-text">No coupons yet.<br>Create your first one!</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><div class="section-title">Performance</div></div>
+    <div class="perf-row"><span class="perf-label">Discount Ceiling</span><strong class="perf-val" id="ceiling">—%</strong></div>
+    <div class="perf-row"><span class="perf-label">Total Clicks</span><strong class="perf-val" id="clicks">—</strong></div>
+    <div class="perf-row"><span class="perf-label">Conversion Rate</span><strong class="perf-val" id="conversion">—</strong></div>
+    <div class="perf-row"><span class="perf-label">Commission Tier</span><strong class="perf-val" style="color:#F59E0B" id="tier">—</strong></div>
+    <div class="perf-row"><span class="perf-label">COD Rejection Rate</span><strong class="perf-val" id="cod-rate">—</strong></div>
+  </div>
+</div>
+
+<!-- ═══════════════ SAMPLES TAB ═══════════════ -->
+<div id="tab-samples" class="content" style="display:none">
+  <div class="info-box">
+    📦 Request product samples to try before promoting. Approved samples will be delivered within 2-3 days. You commit to posting a review within 7 days of delivery.
+  </div>
+
+  <button class="btn-full" onclick="openSampleRequest()">
+    <span style="font-size:1.1rem">➕</span> Request Product Sample
+  </button>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">My Sample Requests</div>
+      <div class="section-badge" id="sample-count">0 total</div>
+    </div>
+    <div id="samples-list">
+      <div class="empty"><div class="empty-icon">📦</div><div class="empty-text">No sample requests yet.<br>Request samples to promote!</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ CONTENT TAB ═══════════════ -->
+<div id="tab-content" class="content" style="display:none">
+  <div class="info-box">
+    📸 Submit your content draft for review before posting. Get feedback within 24 hours. Approved content is valid for 7 days.
+  </div>
+
+  <button class="btn-full" onclick="openContentSubmit()">
+    <span style="font-size:1.1rem">📤</span> Submit Content for Review
+  </button>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">Content Submissions</div>
+      <div class="section-badge" id="content-count">0 total</div>
+    </div>
+    <div id="content-list">
+      <div class="empty"><div class="empty-icon">📸</div><div class="empty-text">No content submitted yet.<br>Submit your first draft!</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ EARNINGS TAB ═══════════════ -->
+<div id="tab-earnings" class="content" style="display:none">
+  <div class="section">
+    <div class="section-header"><div class="section-title">Commission Tier Progress</div></div>
+    <div style="padding:4px 0">
+      <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:6px">
+        <span style="color:#6B7280">Progress to next tier</span>
+        <span style="font-weight:600;color:#111827" id="tier-label">—</span>
+      </div>
+      <div class="tier-bar"><div class="tier-fill" id="tier-fill" style="width:0%"></div></div>
+      <div class="tier-labels">
+        <span>🥉 Bronze<br>₹30/order</span>
+        <span style="text-align:center">🥈 Silver (11)<br>₹50/order</span>
+        <span style="text-align:right">🥇 Gold (31)<br>₹75/order</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><div class="section-title">This Month</div></div>
+    <div class="earnings-row"><span class="earnings-label">Orders Delivered</span><span class="earnings-value" id="e-orders">0</span></div>
+    <div class="earnings-row"><span class="earnings-label">Revenue Generated</span><span class="earnings-value" id="e-revenue">₹0</span></div>
+    <div class="earnings-row"><span class="earnings-label">Current Tier</span><span class="earnings-value" id="e-tier">Bronze</span></div>
+    <div class="earnings-row"><span class="earnings-label">Rate per Order</span><span class="earnings-value" id="e-rate">₹30</span></div>
+    <div class="earnings-row" style="background:#F9FAFB;margin:8px -16px;padding:10px 16px;border-radius:8px"><span class="earnings-label" style="font-weight:600;color:#111827">Estimated Commission</span><span class="earnings-value" style="color:#16A34A;font-size:1.1rem" id="e-commission">₹0</span></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><div class="section-title">Payment History</div></div>
+    <div id="payment-history">
+      <div class="empty"><div class="empty-icon">💳</div><div class="empty-text">No payments yet.<br>First payment after month-end.</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><div class="section-title">Payment Details</div></div>
+    <div class="info-box" id="payment-info-box" style="display:none"></div>
+    <form id="payment-form">
+      <div class="form-group">
+        <label class="form-label">UPI ID</label>
+        <input id="p-upi" class="form-input" placeholder="name@upi" autocomplete="off"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Bank Account No.</label>
+          <input id="p-bank" class="form-input" placeholder="Account number" autocomplete="off"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">IFSC Code</label>
+          <input id="p-ifsc" class="form-input" placeholder="IFSC0000000" style="text-transform:uppercase"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">PAN Number (for TDS)</label>
+        <input id="p-pan" class="form-input" placeholder="ABCDE1234F" maxlength="10" style="text-transform:uppercase"/>
+      </div>
+      <button type="button" class="btn-primary" onclick="savePaymentDetails()">Save Details</button>
+    </form>
+  </div>
+</div>
+
+<!-- ════ MODAL: Create Coupon ════ -->
+<div class="modal-overlay" id="create-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3>Create New Coupon</h3>
+    <div class="modal-sub">Share with your followers to earn commission on every order.</div>
+    <div id="create-err" class="err-msg"></div>
+    <div class="info-box">
+      Your discount ceiling: <strong id="ceiling-info">—%</strong>. Earn ₹30-75 per delivered order!
+    </div>
+    <form id="create-form">
+      <div class="form-group">
+        <label class="form-label">Coupon Code <span class="req">*</span></label>
+        <input id="c-code" class="form-input" placeholder="PRIYA20" style="text-transform:uppercase;font-family:monospace;letter-spacing:.1em" required/>
+        <div style="font-size:.7rem;color:#6B7280;margin-top:4px">6–12 characters, letters & numbers only</div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Discount % <span class="req">*</span></label>
+          <input id="c-discount" type="number" class="form-input" placeholder="20" min="5" max="50" step="1" required/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Valid Days</label>
+          <input id="c-days" type="number" class="form-input" value="30" min="7" max="90"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Min Order Value (₹)</label>
+        <input id="c-min" type="number" class="form-input" placeholder="0 = no minimum" min="0" step="50"/>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" onclick="closeModal('create-modal')">Cancel</button>
+        <button type="submit" class="btn-primary" style="width:100%;border-radius:8px;padding:12px" id="create-btn">Create Coupon</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ════ MODAL: QR Code ════ -->
+<div class="modal-overlay" id="qr-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3>Share Your Link</h3>
+    <div class="qr-display">
+      <div id="qr-code" class="qr-img"></div>
+      <div style="font-size:.82rem;color:#6B7280;margin-bottom:12px">
+        Coupon: <strong id="qr-coupon-code" style="color:#16A34A;font-family:monospace">—</strong>
+      </div>
+      <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;padding:10px;margin-bottom:14px;font-size:.8rem;color:#374151;word-break:break-all" id="qr-link-display">—</div>
+      <div class="qr-actions">
+        <button class="qr-btn" onclick="copyQRLink()">📋 Copy Link</button>
+        <button class="qr-btn" onclick="shareOnWhatsApp()">📱 WhatsApp</button>
+        <button class="qr-btn" onclick="downloadQR()">⬇️ Download QR</button>
+      </div>
+      <button class="qr-btn" style="width:100%;margin-top:8px" onclick="closeModal('qr-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL: Sample Request ════ -->
+<div class="modal-overlay" id="sample-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3>Request Product Sample</h3>
+    <div class="modal-sub">We'll deliver a free sample for you to try and review.</div>
+    <div id="sample-err" class="err-msg"></div>
+    <div id="sample-ok" class="success-box">✅ Sample request submitted! We'll review and get back to you within 24 hours.</div>
+    <form id="sample-form">
+      <div class="form-group">
+        <label class="form-label">Product <span class="req">*</span></label>
+        <select id="s-product" class="form-input" required>
+          <option value="">Select product...</option>
+          <option value="idli-batter">Idli Batter (1 kg)</option>
+          <option value="dosa-batter">Dosa Batter (1 kg)</option>
+          <option value="idli-batter-2kg">Idli Batter (2 kg)</option>
+          <option value="dosa-batter-2kg">Dosa Batter (2 kg)</option>
+          <option value="combo-pack">Combo Pack (Idli + Dosa)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Content Type You'll Create <span class="req">*</span></label>
+        <select id="s-content-type" class="form-input" required>
+          <option value="">Select type...</option>
+          <option value="instagram_post">Instagram Post</option>
+          <option value="story">Instagram Story</option>
+          <option value="reel">Instagram Reel</option>
+          <option value="youtube">YouTube Video</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Estimated Posting Date</label>
+        <input id="s-date" type="date" class="form-input"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Delivery Address <span class="req">*</span></label>
+        <textarea id="s-address" class="form-input" placeholder="Full delivery address..." required style="min-height:70px"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Pincode <span class="req">*</span></label>
+        <input id="s-pincode" class="form-input" placeholder="226001" maxlength="6" inputmode="numeric" required/>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" onclick="closeModal('sample-modal')">Cancel</button>
+        <button type="submit" class="btn-primary" style="width:100%;border-radius:8px;padding:12px" id="sample-btn">Request Sample</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ════ MODAL: Submit Content ════ -->
+<div class="modal-overlay" id="content-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3>Submit Content for Review</h3>
+    <div class="modal-sub">Our team reviews within 24 hours. Approved content stays valid for 7 days.</div>
+    <div id="content-err" class="err-msg"></div>
+    <div id="content-ok" class="success-box">✅ Content submitted! You'll be notified once reviewed.</div>
+    <form id="content-form">
+      <div class="form-group">
+        <label class="form-label">Content Type <span class="req">*</span></label>
+        <select id="ct-type" class="form-input" required>
+          <option value="">Select type...</option>
+          <option value="instagram_post">Instagram Post</option>
+          <option value="story">Instagram Story</option>
+          <option value="reel">Instagram Reel</option>
+          <option value="youtube">YouTube Video</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Caption / Script <span class="req">*</span></label>
+        <textarea id="ct-caption" class="form-input" placeholder="Write your caption or script here..." required style="min-height:100px"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Hashtags</label>
+        <input id="ct-hashtags" class="form-input" placeholder="#AbsoluteFresh #IdliBatter #HealthyEating"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Draft / Preview Link (optional)</label>
+        <input id="ct-media" type="url" class="form-input" placeholder="Google Drive or Instagram draft link"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Planned Posting Date</label>
+        <input id="ct-date" type="date" class="form-input"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Related Coupon</label>
+        <select id="ct-coupon" class="form-input">
+          <option value="">No specific coupon</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" onclick="closeModal('content-modal')">Cancel</button>
+        <button type="submit" class="btn-primary" style="width:100%;border-radius:8px;padding:12px" id="content-btn">Submit Content</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script>
+  const SUPABASE_URL = 'https://fbfopgzblqmsflkfejwa.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_r7mYhsyIKtBjBKzxH8St9g_OHjTU-RQ';
+  const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  let currentInfluencer = null;
+  let currentQRLink = '';
+  let currentQRCode = '';
+  let allCoupons = [];
+
+  // ─── Init ───────────────────────────────────────────────────
+  (async () => {
+    const stored = localStorage.getItem('influencer');
+    if (!stored) { location.href = 'login.html'; return; }
+    currentInfluencer = JSON.parse(stored);
+
+    // Refresh data from DB
+    const { data } = await db.from('influencers')
+      .select('*').eq('id', currentInfluencer.id).single();
+    if (data) {
+      currentInfluencer = data;
+      localStorage.setItem('influencer', JSON.stringify(data));
+    }
+
+    // Render basics
+    document.getElementById('profile-name').textContent = currentInfluencer.name.split(' ')[0];
+    document.getElementById('ceiling-info').textContent = (currentInfluencer.discount_ceiling || 25) + '%';
+
+    await Promise.all([loadStats(), loadCoupons()]);
+    populatePaymentForm();
+  })();
+
+  // ─── Tab switching ──────────────────────────────────────────
+  function switchTab(name, btn) {
+    ['coupons','samples','content','earnings'].forEach(t => {
+      document.getElementById('tab-' + t).style.display = t === name ? 'block' : 'none';
+    });
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    // Lazy load
+    if (name === 'samples') loadSamples();
+    if (name === 'content') loadContent();
+    if (name === 'earnings') loadEarnings();
+  }
+
+  // ─── Stats ──────────────────────────────────────────────────
+  async function loadStats() {
+    const i = currentInfluencer;
+    document.getElementById('stat-orders').textContent = i.total_orders || 0;
+    document.getElementById('stat-revenue').textContent = '₹' + fmt(i.total_revenue || 0);
+    document.getElementById('stat-commission').textContent = '₹' + fmt(i.total_commission_earned || 0);
+    document.getElementById('ceiling').textContent = (i.discount_ceiling || 25) + '%';
+    document.getElementById('cod-rate').textContent = ((i.cod_rejection_rate || 0)).toFixed(1) + '%';
+
+    const orders = i.total_orders || 0;
+    const tier = orders >= 31 ? '🥇 Gold (₹75/order)' : orders >= 11 ? '🥈 Silver (₹50/order)' : '🥉 Bronze (₹30/order)';
+    document.getElementById('tier').textContent = tier;
+
+    try {
+      const { data: clicks, count } = await db.from('influencer_clicks')
+        .select('id', { count: 'exact', head: true })
+        .eq('influencer_id', currentInfluencer.id);
+      const total = count || 0;
+      document.getElementById('clicks').textContent = total;
+      document.getElementById('conversion').textContent = total > 0
+        ? ((orders / total) * 100).toFixed(1) + '%'
+        : '—';
+    } catch (_) {
+      document.getElementById('clicks').textContent = '—';
+      document.getElementById('conversion').textContent = '—';
+    }
+  }
+
+  // ─── Coupons ─────────────────────────────────────────────────
+  async function loadCoupons() {
+    const { data: coupons } = await db.from('coupons')
+      .select('*')
+      .eq('influencer_id', currentInfluencer.id)
+      .order('created_at', { ascending: false });
+
+    allCoupons = coupons || [];
+    const active = allCoupons.filter(c => c.status === 'active');
+    document.getElementById('coupon-count').textContent = active.length + ' active';
+
+    if (!allCoupons.length) {
+      document.getElementById('coupons-list').innerHTML = `
+        <div class="empty"><div class="empty-icon">🎟️</div><div class="empty-text">No coupons yet.<br>Create your first one!</div></div>`;
+      return;
+    }
+
+    document.getElementById('coupons-list').innerHTML = allCoupons.map(c => {
+      const expires = new Date(c.expires_on).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' });
+      const statusClass = c.status === 'active' ? 'status-active' : c.status === 'paused' ? 'status-paused' : 'status-expired';
+      const statusText = c.status.charAt(0).toUpperCase() + c.status.slice(1);
+
+      return `
+        <div class="coupon-card">
+          <div class="coupon-header">
+            <div class="coupon-code">${c.code}</div>
+            <div class="coupon-status ${statusClass}">${statusText}</div>
+          </div>
+          <div class="coupon-meta">
+            <div>💰 ${c.discount_value}% off</div>
+            <div>📅 Exp ${expires}</div>
+            <div>🎯 Min ₹${c.min_order_value || 0}</div>
+            <div>✓ ${c.times_used}/${c.usage_limit_total || '∞'} uses</div>
+          </div>
+          <div class="coupon-stats">
+            <div class="coupon-stat">
+              <div class="coupon-stat-val">${c.times_used}</div>
+              <div class="coupon-stat-lbl">Orders</div>
+            </div>
+            <div class="coupon-stat">
+              <div class="coupon-stat-val" id="clicks-${c.id}">—</div>
+              <div class="coupon-stat-lbl">Clicks</div>
+            </div>
+            <div class="coupon-stat">
+              <div class="coupon-stat-val" id="cvr-${c.id}">—</div>
+              <div class="coupon-stat-lbl">CVR</div>
+            </div>
+          </div>
+          <div class="coupon-actions">
+            <button class="coupon-btn" onclick="showQR('${c.code}','${c.short_link || ''}')">📱 QR</button>
+            <button class="coupon-btn" onclick="shareOnWhatsAppDirect('${c.code}','${c.short_link || ''}')">📤 Share</button>
+            ${c.status === 'active'
+              ? `<button class="coupon-btn" onclick="toggleCoupon('${c.id}','paused')">⏸ Pause</button>`
+              : c.status === 'paused'
+                ? `<button class="coupon-btn" onclick="toggleCoupon('${c.id}','active')">▶️ Resume</button>`
+                : ''}
+          </div>
+        </div>`;
+    }).join('');
+
+    // Load click counts per coupon
+    allCoupons.forEach(c => loadCouponClicks(c.id));
+  }
+
+  async function loadCouponClicks(couponId) {
+    try {
+      const { count } = await db.from('influencer_clicks')
+        .select('id', { count: 'exact', head: true })
+        .eq('coupon_id', couponId);
+      const total = count || 0;
+      const el = document.getElementById(`clicks-${couponId}`);
+      if (el) el.textContent = total;
+      const coupon = allCoupons.find(c => c.id === couponId);
+      const cvrEl = document.getElementById(`cvr-${couponId}`);
+      if (cvrEl && coupon) {
+        cvrEl.textContent = total > 0
+          ? ((coupon.times_used / total) * 100).toFixed(0) + '%'
+          : '—';
+      }
+    } catch (_) {}
+  }
+
+  // ─── Create Coupon ───────────────────────────────────────────
+  function openCreateCoupon() {
+    document.getElementById('create-err').classList.remove('show');
+    document.getElementById('create-form').reset();
+    document.getElementById('c-days').value = 30;
+    openModal('create-modal');
+  }
+
+  document.getElementById('create-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const code = document.getElementById('c-code').value.trim().toUpperCase();
+    const discount = parseFloat(document.getElementById('c-discount').value);
+    const days = parseInt(document.getElementById('c-days').value);
+    const minOrder = parseFloat(document.getElementById('c-min').value) || 0;
+    const err = document.getElementById('create-err');
+    const btn = document.getElementById('create-btn');
+
+    if (!/^[A-Z0-9]{6,12}$/.test(code)) {
+      err.textContent = 'Code must be 6–12 characters, letters & numbers only.';
+      err.classList.add('show'); return;
+    }
+    if (discount > currentInfluencer.discount_ceiling) {
+      err.textContent = `Discount cannot exceed your ceiling of ${currentInfluencer.discount_ceiling}%.`;
+      err.classList.add('show'); return;
+    }
+    if (discount < 5 || discount > 50) {
+      err.textContent = 'Discount must be between 5% and 50%.';
+      err.classList.add('show'); return;
+    }
+
+    btn.disabled = true; btn.textContent = 'Creating...';
+    err.classList.remove('show');
+
+    try {
+      const expiresOn = new Date();
+      expiresOn.setDate(expiresOn.getDate() + days);
+
+      const { data, error } = await db.from('coupons').insert({
+        code,
+        influencer_id: currentInfluencer.id,
+        discount_type: 'percentage',
+        discount_value: discount,
+        min_order_value: minOrder,
+        expires_on: expiresOn.toISOString(),
+        short_link: `https://af.in/${code.toLowerCase()}`,
+        status: 'active',
+        created_by: currentInfluencer.id
+      }).select().single();
+
+      if (error) {
+        err.textContent = error.code === '23505'
+          ? 'This code is already taken. Try a different one.'
+          : error.message;
+        err.classList.add('show');
+        btn.disabled = false; btn.textContent = 'Create Coupon';
+        return;
+      }
+
+      closeModal('create-modal');
+      await loadCoupons();
+    } catch (ex) {
+      err.textContent = 'Failed to create coupon. Please try again.';
+      err.classList.add('show');
+      btn.disabled = false; btn.textContent = 'Create Coupon';
+    }
+  });
+
+  async function toggleCoupon(id, newStatus) {
+    await db.from('coupons').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('id', id);
+    loadCoupons();
+  }
+
+  // ─── QR & Share ─────────────────────────────────────────────
+  function showQR(code, link) {
+    currentQRCode = code;
+    currentQRLink = link || `https://absolutefreshfood.com?coupon=${code}`;
+    document.getElementById('qr-coupon-code').textContent = code;
+    document.getElementById('qr-link-display').textContent = currentQRLink;
+    document.getElementById('qr-code').innerHTML = '';
+    QRCode.toCanvas(document.createElement('canvas'), currentQRLink, { width: 250, margin: 2 }, (err, canvas) => {
+      if (!err) document.getElementById('qr-code').appendChild(canvas);
+    });
+    openModal('qr-modal');
+  }
+
+  function downloadQR() {
+    const canvas = document.querySelector('#qr-code canvas');
+    if (canvas) {
+      const a = document.createElement('a');
+      a.download = `qr-${currentQRCode}.png`;
+      a.href = canvas.toDataURL();
+      a.click();
+    }
+  }
+
+  function copyQRLink() {
+    navigator.clipboard.writeText(currentQRLink).then(() => alert('Link copied!'));
+  }
+
+  function shareOnWhatsApp() {
+    const text = `🥬 Try Absolute Fresh idli & dosa batter!\nUse my code *${currentQRCode}* at checkout for a discount.\n👉 ${currentQRLink}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  }
+
+  function shareOnWhatsAppDirect(code, link) {
+    const shareLink = link || `https://absolutefreshfood.com?coupon=${code}`;
+    const text = `🥬 Try Absolute Fresh idli & dosa batter!\nUse my code *${code}* at checkout for a discount.\n👉 ${shareLink}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  }
+
+  // ─── Samples ─────────────────────────────────────────────────
+  async function loadSamples() {
+    const { data } = await db.from('sample_requests')
+      .select('*')
+      .eq('influencer_id', currentInfluencer.id)
+      .order('requested_at', { ascending: false });
+
+    const list = data || [];
+    document.getElementById('sample-count').textContent = list.length + ' total';
+
+    if (!list.length) {
+      document.getElementById('samples-list').innerHTML = `
+        <div class="empty"><div class="empty-icon">📦</div><div class="empty-text">No sample requests yet.<br>Request samples to promote!</div></div>`;
+      return;
+    }
+
+    const statusLabels = {
+      pending: { cls: 'req-pending', label: '⏳ Pending Review' },
+      approved: { cls: 'req-approved', label: '✅ Approved' },
+      rejected: { cls: 'req-rejected', label: '❌ Rejected' },
+      delivered: { cls: 'req-delivered', label: '📬 Delivered' },
+      posted: { cls: 'req-posted', label: '📸 Posted' }
+    };
+
+    const productNames = {
+      'idli-batter': 'Idli Batter (1 kg)',
+      'dosa-batter': 'Dosa Batter (1 kg)',
+      'idli-batter-2kg': 'Idli Batter (2 kg)',
+      'dosa-batter-2kg': 'Dosa Batter (2 kg)',
+      'combo-pack': 'Combo Pack'
+    };
+
+    document.getElementById('samples-list').innerHTML = list.map(r => {
+      const s = statusLabels[r.status] || { cls: 'req-pending', label: r.status };
+      const reqDate = new Date(r.requested_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+      const contentTypeLabel = r.content_type ? r.content_type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : '—';
+      return `
+        <div class="request-card">
+          <div class="req-header">
+            <div class="req-product">${productNames[r.product_id] || r.product_id || 'Product'}</div>
+            <span class="req-status ${s.cls}">${s.label}</span>
+          </div>
+          <div class="req-meta">
+            📅 Requested ${reqDate} &nbsp;•&nbsp; 🎬 ${contentTypeLabel}
+            ${r.rejection_reason ? `<br>⚠️ ${r.rejection_reason}` : ''}
+            ${r.delivered_at ? `<br>📬 Delivered ${new Date(r.delivered_at).toLocaleDateString('en-IN', {day:'numeric',month:'short'})}` : ''}
+          </div>
+          ${r.status === 'delivered' && !r.post_url ? `
+            <div style="margin-top:8px">
+              <input class="form-input" id="post-url-${r.id}" placeholder="Paste your live post URL..." style="font-size:.8rem;padding:8px 10px"/>
+              <button class="btn-ghost" style="margin-top:6px;width:100%;font-size:.78rem" onclick="markPosted('${r.id}')">📸 Mark as Posted</button>
+            </div>` : ''}
+          ${r.post_url ? `<div style="margin-top:6px;font-size:.75rem;color:#16A34A">✅ Posted: <a href="${r.post_url}" target="_blank" style="color:#16A34A">${r.post_url.substring(0,40)}…</a></div>` : ''}
+        </div>`;
+    }).join('');
+  }
+
+  function openSampleRequest() {
+    document.getElementById('sample-err').classList.remove('show');
+    document.getElementById('sample-ok').style.display = 'none';
+    document.getElementById('sample-form').reset();
+    // Set min date to tomorrow
+    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 4);
+    document.getElementById('s-date').min = tomorrow.toISOString().split('T')[0];
+    openModal('sample-modal');
+  }
+
+  document.getElementById('sample-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const err = document.getElementById('sample-err');
+    const btn = document.getElementById('sample-btn');
+
+    const productId = document.getElementById('s-product').value;
+    const contentType = document.getElementById('s-content-type').value;
+    const address = document.getElementById('s-address').value.trim();
+    const pincode = document.getElementById('s-pincode').value.trim();
+    const dateVal = document.getElementById('s-date').value;
+
+    if (!productId || !contentType || !address || !pincode) {
+      err.textContent = 'Please fill all required fields.';
+      err.classList.add('show'); return;
+    }
+    if (!/^\d{6}$/.test(pincode)) {
+      err.textContent = 'Please enter a valid 6-digit pincode.';
+      err.classList.add('show'); return;
+    }
+
+    btn.disabled = true; btn.textContent = 'Submitting...';
+    err.classList.remove('show');
+
+    try {
+      const { error } = await db.from('sample_requests').insert({
+        influencer_id: currentInfluencer.id,
+        product_id: productId,
+        content_type: contentType,
+        estimated_posting_date: dateVal || null,
+        delivery_address: address,
+        pincode,
+        status: 'pending'
+      });
+
+      if (error) throw error;
+
+      document.getElementById('sample-form').style.display = 'none';
+      document.getElementById('sample-ok').style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Request Sample';
+
+      setTimeout(() => {
+        closeModal('sample-modal');
+        document.getElementById('sample-form').style.display = 'block';
+        document.getElementById('sample-ok').style.display = 'none';
+        loadSamples();
+      }, 2000);
+
+    } catch (ex) {
+      err.textContent = ex.message || 'Failed to submit. Please try again.';
+      err.classList.add('show');
+      btn.disabled = false; btn.textContent = 'Request Sample';
+    }
+  });
+
+  async function markPosted(requestId) {
+    const url = document.getElementById(`post-url-${requestId}`)?.value.trim();
+    if (!url) { alert('Please enter your post URL.'); return; }
+    await db.from('sample_requests').update({
+      post_url: url,
+      posted_at: new Date().toISOString(),
+      status: 'posted',
+      updated_at: new Date().toISOString()
+    }).eq('id', requestId);
+    loadSamples();
+  }
+
+  // ─── Content ──────────────────────────────────────────────────
+  async function loadContent() {
+    const { data } = await db.from('content_approvals')
+      .select('*, coupons(code)')
+      .eq('influencer_id', currentInfluencer.id)
+      .order('submitted_at', { ascending: false });
+
+    const list = data || [];
+    document.getElementById('content-count').textContent = list.length + ' total';
+
+    if (!list.length) {
+      document.getElementById('content-list').innerHTML = `
+        <div class="empty"><div class="empty-icon">📸</div><div class="empty-text">No content submitted yet.<br>Submit your first draft!</div></div>`;
+      return;
+    }
+
+    const statusConfig = {
+      pending: { cls: 'req-pending', label: '⏳ Under Review' },
+      approved: { cls: 'req-approved', label: '✅ Approved' },
+      rejected: { cls: 'req-rejected', label: '❌ Rejected' },
+      changes_requested: { cls: 'req-pending', label: '✏️ Changes Requested' },
+      posted: { cls: 'req-posted', label: '📸 Live' }
+    };
+
+    document.getElementById('content-list').innerHTML = list.map(c => {
+      const s = statusConfig[c.status] || { cls: 'req-pending', label: c.status };
+      const typeLabel = c.content_type.replace(/_/g, ' ').replace(/\b\w/g, ch => ch.toUpperCase());
+      const date = new Date(c.submitted_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+      const feedbackCls = c.status === 'changes_requested' ? 'changes' : c.status === 'rejected' ? 'rejected' : '';
+
+      return `
+        <div class="content-card">
+          <span class="c-type">${typeLabel}</span>
+          ${c.coupons?.code ? `<span class="c-type" style="margin-left:4px;background:#D1FAE5;color:#065F46">${c.coupons.code}</span>` : ''}
+          <span style="float:right;font-size:.7rem;color:#9CA3AF">${date}</span>
+          <div class="c-caption">${c.caption || '—'}</div>
+          ${c.hashtags?.length ? `<div style="font-size:.72rem;color:#6B7280;margin-bottom:6px">${c.hashtags.join(' ')}</div>` : ''}
+          <span class="req-status ${s.cls}">${s.label}</span>
+          ${c.feedback ? `<div class="c-feedback ${feedbackCls}">💬 ${c.feedback}</div>` : ''}
+          ${c.live_post_url ? `
+            <div style="margin-top:8px">
+              <input class="form-input" id="live-url-${c.id}" placeholder="Live post URL..." value="${c.live_post_url || ''}" style="font-size:.8rem;padding:8px 10px"/>
+              <button class="btn-ghost" style="margin-top:6px;font-size:.78rem" onclick="markLivePost('${c.id}')">✅ Update Live URL</button>
+            </div>` : ''}
+          ${c.status === 'approved' && !c.live_post_url ? `
+            <div style="margin-top:8px">
+              <input class="form-input" id="live-url-${c.id}" placeholder="Paste live post URL after posting..." style="font-size:.8rem;padding:8px 10px"/>
+              <button class="btn-ghost" style="margin-top:6px;font-size:.78rem" onclick="markLivePost('${c.id}')">📤 Mark as Posted</button>
+            </div>` : ''}
+        </div>`;
+    }).join('');
+  }
+
+  function openContentSubmit() {
+    document.getElementById('content-err').classList.remove('show');
+    document.getElementById('content-ok').style.display = 'none';
+    document.getElementById('content-form').reset();
+
+    // Populate coupon dropdown
+    const sel = document.getElementById('ct-coupon');
+    sel.innerHTML = '<option value="">No specific coupon</option>';
+    allCoupons.filter(c => c.status === 'active').forEach(c => {
+      sel.innerHTML += `<option value="${c.id}">${c.code} (${c.discount_value}% off)</option>`;
+    });
+
+    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+    document.getElementById('ct-date').min = tomorrow.toISOString().split('T')[0];
+    openModal('content-modal');
+  }
+
+  document.getElementById('content-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const err = document.getElementById('content-err');
+    const btn = document.getElementById('content-btn');
+
+    const type = document.getElementById('ct-type').value;
+    const caption = document.getElementById('ct-caption').value.trim();
+    const hashtags = document.getElementById('ct-hashtags').value.trim()
+      .split(/[\s,]+/).filter(h => h.startsWith('#'));
+    const mediaUrl = document.getElementById('ct-media').value.trim() || null;
+    const dateVal = document.getElementById('ct-date').value || null;
+    const couponId = document.getElementById('ct-coupon').value || null;
+
+    if (!type || !caption) {
+      err.textContent = 'Please select content type and write a caption.';
+      err.classList.add('show'); return;
+    }
+    if (caption.length < 20) {
+      err.textContent = 'Caption must be at least 20 characters.';
+      err.classList.add('show'); return;
+    }
+
+    btn.disabled = true; btn.textContent = 'Submitting...';
+    err.classList.remove('show');
+
+    // Approval expires 7 days from now
+    const approvalExpires = new Date();
+    approvalExpires.setDate(approvalExpires.getDate() + 7);
+
+    try {
+      const { error } = await db.from('content_approvals').insert({
+        influencer_id: currentInfluencer.id,
+        coupon_id: couponId,
+        content_type: type,
+        caption,
+        hashtags: hashtags.length ? hashtags : null,
+        media_url: mediaUrl,
+        intended_posting_date: dateVal ? new Date(dateVal).toISOString() : null,
+        status: 'pending',
+        approval_expires_at: approvalExpires.toISOString()
+      });
+
+      if (error) throw error;
+
+      document.getElementById('content-form').style.display = 'none';
+      document.getElementById('content-ok').style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Submit Content';
+
+      setTimeout(() => {
+        closeModal('content-modal');
+        document.getElementById('content-form').style.display = 'block';
+        document.getElementById('content-ok').style.display = 'none';
+        loadContent();
+      }, 2000);
+    } catch (ex) {
+      err.textContent = ex.message || 'Failed to submit. Please try again.';
+      err.classList.add('show');
+      btn.disabled = false; btn.textContent = 'Submit Content';
+    }
+  });
+
+  async function markLivePost(approvalId) {
+    const url = document.getElementById(`live-url-${approvalId}`)?.value.trim();
+    if (!url) { alert('Please enter the live post URL.'); return; }
+    await db.from('content_approvals').update({
+      live_post_url: url,
+      posted_at: new Date().toISOString(),
+      status: 'posted',
+      updated_at: new Date().toISOString()
+    }).eq('id', approvalId);
+    loadContent();
+  }
+
+  // ─── Earnings ─────────────────────────────────────────────────
+  async function loadEarnings() {
+    const i = currentInfluencer;
+    const orders = i.total_orders || 0;
+    const tier = orders >= 31 ? 'Gold' : orders >= 11 ? 'Silver' : 'Bronze';
+    const rate = orders >= 31 ? 75 : orders >= 11 ? 50 : 30;
+    const commission = orders * rate;
+
+    // Tier progress
+    const nextTier = orders < 11 ? 11 : orders < 31 ? 31 : 999;
+    const prevTier = orders < 11 ? 0 : orders < 31 ? 11 : 31;
+    const progress = nextTier === 999 ? 100 : ((orders - prevTier) / (nextTier - prevTier)) * 100;
+    const tierLabel = orders >= 31 ? '🥇 Gold — Max tier!' : orders >= 11
+      ? `🥈 Silver — ${31 - orders} more orders to Gold`
+      : `🥉 Bronze — ${11 - orders} more orders to Silver`;
+
+    document.getElementById('tier-fill').style.width = Math.min(100, progress) + '%';
+    document.getElementById('tier-label').textContent = tierLabel;
+
+    document.getElementById('e-orders').textContent = orders;
+    document.getElementById('e-revenue').textContent = '₹' + fmt(i.total_revenue || 0);
+    document.getElementById('e-tier').textContent = tier;
+    document.getElementById('e-rate').textContent = '₹' + rate;
+    document.getElementById('e-commission').textContent = '₹' + fmt(commission);
+
+    // Payment history
+    const { data: payments } = await db.from('commissions')
+      .select('*')
+      .eq('influencer_id', currentInfluencer.id)
+      .order('month', { ascending: false });
+
+    const hist = payments || [];
+    if (!hist.length) {
+      document.getElementById('payment-history').innerHTML = `
+        <div class="empty"><div class="empty-icon">💳</div><div class="empty-text">No payments yet.<br>First payment after month-end.</div></div>`;
+      return;
+    }
+
+    const statusColor = { paid: '#16A34A', processing: '#F59E0B', pending: '#6B7280', failed: '#EF4444' };
+    document.getElementById('payment-history').innerHTML = hist.map(p => {
+      const month = new Date(p.month).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+      const color = statusColor[p.payment_status] || '#6B7280';
+      return `
+        <div class="earnings-row">
+          <div>
+            <div style="font-size:.82rem;font-weight:600;color:#111827">${month}</div>
+            <div style="font-size:.72rem;color:#6B7280">${p.orders_delivered} orders · ${p.tier || '—'} tier · TDS ₹${fmt(p.tds_amount || 0)}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-family:monospace;font-weight:700;color:#16A34A">₹${fmt(p.net_payout || 0)}</div>
+            <div style="font-size:.7rem;color:${color};font-weight:600;text-transform:capitalize">${p.payment_status}</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ─── Payment details ──────────────────────────────────────────
+  function populatePaymentForm() {
+    if (currentInfluencer.upi_id) document.getElementById('p-upi').value = currentInfluencer.upi_id;
+    if (currentInfluencer.bank_account) document.getElementById('p-bank').value = currentInfluencer.bank_account;
+    if (currentInfluencer.ifsc_code) document.getElementById('p-ifsc').value = currentInfluencer.ifsc_code;
+    if (currentInfluencer.pan_number) document.getElementById('p-pan').value = currentInfluencer.pan_number;
+  }
+
+  async function savePaymentDetails() {
+    const upi = document.getElementById('p-upi').value.trim();
+    const bank = document.getElementById('p-bank').value.trim();
+    const ifsc = document.getElementById('p-ifsc').value.trim().toUpperCase();
+    const pan = document.getElementById('p-pan').value.trim().toUpperCase();
+
+    const infoBox = document.getElementById('payment-info-box');
+    infoBox.style.display = 'none';
+
+    const { error } = await db.from('influencers').update({
+      upi_id: upi || null,
+      bank_account: bank || null,
+      ifsc_code: ifsc || null,
+      pan_number: pan || null,
+      updated_at: new Date().toISOString()
+    }).eq('id', currentInfluencer.id);
+
+    if (!error) {
+      currentInfluencer.upi_id = upi;
+      currentInfluencer.bank_account = bank;
+      currentInfluencer.ifsc_code = ifsc;
+      currentInfluencer.pan_number = pan;
+      localStorage.setItem('influencer', JSON.stringify(currentInfluencer));
+      infoBox.textContent = '✅ Payment details saved!';
+      infoBox.style.display = 'block';
+    } else {
+      infoBox.textContent = '❌ Failed to save. Please try again.';
+      infoBox.style.display = 'block';
+    }
+  }
+
+  // ─── Utilities ────────────────────────────────────────────────
+  function fmt(n) {
+    return Number(n).toLocaleString('en-IN');
+  }
+
+  function openModal(id) {
+    document.getElementById(id).classList.add('show');
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('show');
+  }
+
+  // Close modals on backdrop click
+  ['create-modal','qr-modal','sample-modal','content-modal'].forEach(id => {
+    document.getElementById(id).addEventListener('click', e => {
+      if (e.target.id === id) closeModal(id);
+    });
+  });
+
+  function logout() {
+    localStorage.removeItem('influencer');
+    location.href = 'login.html';
+  }
+</script>
+</body>
+</html>
