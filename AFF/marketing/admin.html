@@ -901,7 +901,14 @@
   let allPayouts = [];
   let editingCampaignId = null;
 
-  if (sessionStorage.getItem('aff_admin') === 'ok') loadAdminApp();
+  // Accept either PIN session OR unified session login
+  (function() {
+    if (sessionStorage.getItem('aff_admin') === 'ok') { loadAdminApp(); return; }
+    try {
+      const s = JSON.parse(sessionStorage.getItem('aff_session') || 'null');
+      if (s && s.role === 'admin') { sessionStorage.setItem('aff_admin','ok'); loadAdminApp(); }
+    } catch(e) {}
+  })();
 
   document.getElementById('login-form').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -927,7 +934,8 @@
 
   function signOut() {
     sessionStorage.removeItem('aff_admin');
-    location.reload();
+    sessionStorage.removeItem('aff_session');
+    location.href = '../login.html';
   }
 
   // ── Tab switching ────────────────────────────────────────────

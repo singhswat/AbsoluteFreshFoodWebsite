@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Join — Absolute Fresh</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      background:#0D0D0D;color:#CBD5E1;
+      min-height:100vh;min-height:100dvh;
+      display:flex;flex-direction:column;align-items:center;
+      padding:24px 16px 40px;
+    }
+
+    .logo-wrap{text-align:center;margin-bottom:24px;margin-top:8px}
+    .logo-wrap img{height:36px;width:auto;object-fit:contain}
+    .portal-tag{font-size:.65rem;color:#334155;text-transform:uppercase;letter-spacing:.1em;margin-top:6px}
+
+    h2{font-size:1.1rem;font-weight:700;color:#F1F5F9;margin-bottom:3px;text-align:center}
+    .sub{font-size:.78rem;color:#475569;margin-bottom:20px;text-align:center}
+
+    /* ── Step 1: Role picker ── */
+    #step-pick{width:100%;max-width:480px}
+    .role-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+    .role-card{
+      background:#111111;border:2px solid #1E1E1E;border-radius:14px;
+      padding:18px 14px;cursor:pointer;text-align:center;
+      transition:border-color .15s,transform .1s;
+    }
+    .role-card:hover{transform:translateY(-1px)}
+    .role-card.selected-partner{border-color:#22C55E;background:#0A1F0E}
+    .role-card.selected-sales{border-color:#60A5FA;background:#060D1A}
+    .role-card .rc-icon{font-size:2.2rem;margin-bottom:8px}
+    .role-card .rc-title{font-size:.88rem;font-weight:700;color:#F1F5F9;margin-bottom:4px}
+    .role-card .rc-desc{font-size:.7rem;color:#475569;line-height:1.4}
+
+    /* ── Step 2: Form ── */
+    #step-form{width:100%;max-width:420px;display:none}
+    .back-btn{
+      background:none;border:none;color:#475569;font-size:.78rem;
+      cursor:pointer;margin-bottom:14px;padding:0;display:flex;align-items:center;gap:5px;
+    }
+    .back-btn:hover{color:#94A3B8}
+
+    .card{
+      background:#111111;border:1px solid #1E1E1E;border-radius:18px;
+      padding:24px 20px;
+    }
+    .role-banner{
+      border-radius:8px;padding:8px 12px;font-size:.76rem;font-weight:600;
+      margin-bottom:18px;display:flex;align-items:center;gap:8px;
+    }
+    .banner-partner{background:#052e16;border:1px solid #14532D;color:#4ADE80}
+    .banner-sales  {background:#061520;border:1px solid #0C2A3E;color:#7DD3FC}
+
+    .field{margin-bottom:14px}
+    .lbl{display:block;font-size:.68rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+    .inp{
+      width:100%;background:#0A0A0A;border:1.5px solid #1E1E1E;color:#F1F5F9;
+      border-radius:9px;padding:12px 13px;font-size:.9rem;
+      font-family:inherit;outline:none;transition:border .15s;-webkit-appearance:none;
+    }
+    .inp:focus{border-color:#CC0000}
+    select.inp{cursor:pointer}
+    .inp-partner:focus{border-color:#22C55E}
+    .inp-sales:focus  {border-color:#60A5FA}
+    .srow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+    .error{
+      background:#1A0000;border:1px solid #3A0000;color:#F87171;
+      border-radius:8px;padding:10px 12px;font-size:.78rem;
+      margin-bottom:12px;display:none;line-height:1.4;
+    }
+    .error.show{display:block}
+
+    .btn{
+      width:100%;border:none;border-radius:10px;padding:13px;
+      font-size:.92rem;font-weight:700;cursor:pointer;margin-top:4px;
+      transition:opacity .15s;letter-spacing:.01em;
+    }
+    .btn:disabled{opacity:.45;cursor:not-allowed}
+    .btn-partner{background:#16A34A;color:#fff}
+    .btn-partner:hover{background:#15803D}
+    .btn-sales  {background:#1D4ED8;color:#fff}
+    .btn-sales:hover{background:#1E40AF}
+
+    .hint{font-size:.7rem;color:#334155;margin-top:5px;line-height:1.4}
+
+    /* ── Step 3: Success ── */
+    #step-done{display:none;text-align:center;max-width:380px}
+    .success-icon{font-size:3.5rem;margin-bottom:14px}
+    .success-title{font-size:1.1rem;font-weight:700;color:#F1F5F9;margin-bottom:8px}
+    .success-msg{font-size:.82rem;color:#64748B;line-height:1.6;margin-bottom:20px}
+    .goto-login{
+      display:inline-block;background:#CC0000;color:#fff;
+      border-radius:10px;padding:12px 28px;font-weight:700;font-size:.88rem;
+      text-decoration:none;transition:background .15s;
+    }
+    .goto-login:hover{background:#B91C1C}
+
+    .sign-in-link{text-align:center;margin-top:18px;font-size:.78rem;color:#475569}
+    .sign-in-link a{color:#F87171;font-weight:600;text-decoration:none}
+  </style>
+</head>
+<body>
+
+<div class="logo-wrap">
+  <img src="images/logo.png" alt="Absolute Fresh"/>
+  <div class="portal-tag">Join the Portal</div>
+</div>
+
+<!-- Step 1: Pick role -->
+<div id="step-pick">
+  <h2>How do you want to join?</h2>
+  <p class="sub">Choose your role — you can request upgrades later</p>
+
+  <div class="role-cards">
+    <div class="role-card" id="card-partner" onclick="selectRole('partner')">
+      <div class="rc-icon">🤝</div>
+      <div class="rc-title">Partner / Influencer</div>
+      <div class="rc-desc">Promote Absolute Fresh, earn commissions on every order through your coupon</div>
+    </div>
+    <div class="role-card" id="card-sales" onclick="selectRole('sales')">
+      <div class="rc-icon">📱</div>
+      <div class="rc-title">Sales Team</div>
+      <div class="rc-desc">Sales rep or delivery driver — request access to the field operations app</div>
+    </div>
+  </div>
+</div>
+
+<!-- Step 2: Form -->
+<div id="step-form">
+  <button class="back-btn" onclick="goBack()">← Change role</button>
+
+  <!-- Partner form -->
+  <div id="form-partner" style="display:none">
+    <div class="card">
+      <div class="role-banner banner-partner">🤝 Partner / Influencer Application</div>
+      <div id="err-partner" class="error"></div>
+      <div class="field"><label class="lbl">Full Name *</label>
+        <input id="p-name" class="inp inp-partner" placeholder="Your full name" required/>
+      </div>
+      <div class="field"><label class="lbl">Email *</label>
+        <input id="p-email" type="email" class="inp inp-partner" placeholder="you@email.com" required/>
+      </div>
+      <div class="field"><label class="lbl">Password *</label>
+        <input id="p-pw" type="password" class="inp inp-partner" placeholder="Create a password" autocomplete="new-password"/>
+        <div class="hint">Min 8 characters. You'll use this to log in.</div>
+      </div>
+      <div class="srow">
+        <div class="field"><label class="lbl">Instagram Handle</label>
+          <input id="p-insta" class="inp inp-partner" placeholder="@yourhandle"/>
+        </div>
+        <div class="field"><label class="lbl">City</label>
+          <input id="p-city" class="inp inp-partner" placeholder="Lucknow"/>
+        </div>
+      </div>
+      <div class="field"><label class="lbl">Phone</label>
+        <input id="p-phone" class="inp inp-partner" placeholder="10-digit number" inputmode="tel"/>
+      </div>
+      <div class="field"><label class="lbl">How do you plan to promote?</label>
+        <select id="p-type" class="inp inp-partner">
+          <option value="instagram">Instagram</option>
+          <option value="youtube">YouTube</option>
+          <option value="whatsapp">WhatsApp Groups</option>
+          <option value="society">Society / Apartment</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="hint" style="margin-bottom:14px">Your application will be reviewed within 24–48 hours. Once approved you'll receive your personal discount coupon code.</div>
+      <button class="btn btn-partner" id="btn-partner" onclick="submitPartner()">Submit Application →</button>
+    </div>
+  </div>
+
+  <!-- Sales team form -->
+  <div id="form-sales" style="display:none">
+    <div class="card">
+      <div class="role-banner banner-sales">📱 Sales Team Access Request</div>
+      <div id="err-sales" class="error"></div>
+      <div class="field"><label class="lbl">Full Name *</label>
+        <input id="s-name" class="inp inp-sales" placeholder="Your full name" required/>
+      </div>
+      <div class="field"><label class="lbl">Email *</label>
+        <input id="s-email" type="email" class="inp inp-sales" placeholder="you@absolutefreshfood.com" required/>
+      </div>
+      <div class="field"><label class="lbl">Phone *</label>
+        <input id="s-phone" class="inp inp-sales" placeholder="10-digit number" inputmode="tel" required/>
+      </div>
+      <div class="srow">
+        <div class="field"><label class="lbl">Role applying for *</label>
+          <select id="s-role" class="inp inp-sales">
+            <option value="rep">Sales Representative</option>
+            <option value="driver">Delivery Driver</option>
+          </select>
+        </div>
+        <div class="field"><label class="lbl">Area / Zone</label>
+          <input id="s-area" class="inp inp-sales" placeholder="Vrindavan Colony"/>
+        </div>
+      </div>
+      <div class="hint" style="margin-bottom:14px">Your admin will review this request, set your area and activate your account. You'll be contacted on the phone number above.</div>
+      <button class="btn btn-sales" id="btn-sales" onclick="submitSales()">Request Access →</button>
+    </div>
+  </div>
+
+  <div class="sign-in-link">Already have an account? <a href="login.html">Sign in</a></div>
+</div>
+
+<!-- Step 3: Success -->
+<div id="step-done">
+  <div id="done-icon" class="success-icon">✅</div>
+  <div id="done-title" class="success-title">Application Submitted!</div>
+  <div id="done-msg" class="success-msg"></div>
+  <a href="login.html" class="goto-login">Go to Sign In</a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = 'https://fbfopgzblqmsflkfejwa.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_r7mYhsyIKtBjBKzxH8St9g_OHjTU-RQ';
+  const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  let currentRole = null;
+
+  function selectRole(role) {
+    currentRole = role;
+    document.getElementById('card-partner').classList.remove('selected-partner');
+    document.getElementById('card-sales').classList.remove('selected-sales');
+    document.getElementById(`card-${role === 'partner' ? 'partner' : 'sales'}`).classList.add(`selected-${role === 'partner' ? 'partner' : 'sales'}`);
+
+    document.getElementById('step-pick').style.display = 'none';
+    document.getElementById('step-form').style.display = 'block';
+    document.getElementById('form-partner').style.display = role === 'partner' ? 'block' : 'none';
+    document.getElementById('form-sales').style.display   = role === 'sales'   ? 'block' : 'none';
+  }
+
+  function goBack() {
+    document.getElementById('step-pick').style.display = 'block';
+    document.getElementById('step-form').style.display = 'none';
+    currentRole = null;
+  }
+
+  function showDone(icon, title, msg) {
+    document.getElementById('step-form').style.display = 'none';
+    document.getElementById('step-pick').style.display = 'none';
+    document.getElementById('done-icon').textContent  = icon;
+    document.getElementById('done-title').textContent = title;
+    document.getElementById('done-msg').textContent   = msg;
+    document.getElementById('step-done').style.display = 'block';
+  }
+
+  async function sha256(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  async function submitPartner() {
+    const errEl = document.getElementById('err-partner');
+    const btn   = document.getElementById('btn-partner');
+    errEl.classList.remove('show');
+
+    const name  = document.getElementById('p-name').value.trim();
+    const email = document.getElementById('p-email').value.trim().toLowerCase();
+    const pw    = document.getElementById('p-pw').value;
+    const insta = document.getElementById('p-insta').value.trim().replace(/^@/,'');
+    const city  = document.getElementById('p-city').value.trim();
+    const phone = document.getElementById('p-phone').value.trim();
+    const type  = document.getElementById('p-type').value;
+
+    if (!name || !email) { errEl.textContent='Name and email are required.'; errEl.classList.add('show'); return; }
+    if (!pw || pw.length < 8) { errEl.textContent='Password must be at least 8 characters.'; errEl.classList.add('show'); return; }
+
+    btn.disabled = true; btn.textContent = 'Submitting…';
+
+    // Check if email already exists
+    const { data: existing } = await db.from('influencers').select('id').eq('email', email).maybeSingle();
+    if (existing) {
+      errEl.textContent = 'This email is already registered. Try signing in.';
+      errEl.classList.add('show'); btn.disabled=false; btn.textContent='Submit Application →'; return;
+    }
+
+    const hash = await sha256(pw);
+    const { error } = await db.from('influencers').insert({
+      name, email, phone: phone||null,
+      instagram_handle: insta ? '@'+insta : null,
+      city: city||null,
+      content_type: type,
+      password_hash: hash,
+      status: 'pending',
+      discount_ceiling: 20,
+      total_orders: 0,
+      total_revenue: 0,
+      total_commission_earned: 0,
+    });
+
+    if (error) {
+      errEl.textContent = 'Submission failed: ' + error.message;
+      errEl.classList.add('show'); btn.disabled=false; btn.textContent='Submit Application →'; return;
+    }
+
+    showDone('🎉', 'Application Received!',
+      `Thanks ${name}! Your partner application is under review. We'll contact you at ${email} within 24–48 hours. Once approved, you'll get your personal coupon code and can start earning commissions.`);
+  }
+
+  async function submitSales() {
+    const errEl = document.getElementById('err-sales');
+    const btn   = document.getElementById('btn-sales');
+    errEl.classList.remove('show');
+
+    const name  = document.getElementById('s-name').value.trim();
+    const email = document.getElementById('s-email').value.trim().toLowerCase();
+    const phone = document.getElementById('s-phone').value.trim();
+    const role  = document.getElementById('s-role').value;
+    const area  = document.getElementById('s-area').value.trim();
+
+    if (!name || !email || !phone) { errEl.textContent='Name, email and phone are required.'; errEl.classList.add('show'); return; }
+
+    btn.disabled = true; btn.textContent = 'Sending request…';
+
+    // Check if email already exists
+    const { data: existing } = await db.from('users').select('id').eq('email', email).maybeSingle();
+    if (existing) {
+      errEl.textContent = 'This email is already in the system. Contact your admin or try signing in.';
+      errEl.classList.add('show'); btn.disabled=false; btn.textContent='Request Access →'; return;
+    }
+
+    const { error } = await db.from('users').insert({
+      name, email, phone: phone||null,
+      role, area: area||null,
+      is_active: false, // admin must activate
+    });
+
+    if (error) {
+      errEl.textContent = 'Request failed: ' + error.message;
+      errEl.classList.add('show'); btn.disabled=false; btn.textContent='Request Access →'; return;
+    }
+
+    showDone('📋', 'Access Request Sent!',
+      `Your request has been submitted, ${name}. The admin will review it, assign your area and activate your account. You'll be contacted on ${phone}.`);
+  }
+</script>
+</body>
+</html>
