@@ -179,6 +179,9 @@
     <button class="tab-btn" onclick="switchTab('payouts',this)">💰 Payouts</button>
     <button class="tab-btn" onclick="switchTab('analytics',this)">📊 Analytics</button>
     <button class="tab-btn" onclick="switchTab('weborders',this)">🛒 Web Orders</button>
+    <button class="tab-btn" onclick="switchTab('salesreps',this)">👷 Sales Reps</button>
+    <button class="tab-btn" onclick="switchTab('beatplans',this)">🗺️ Beat Plans</button>
+    <button class="tab-btn" onclick="switchTab('salesdash',this)">📊 Sales Ops</button>
   </div>
 
   <div class="page-wrap">
@@ -418,6 +421,195 @@
       </div>
     </div>
 
+
+    <!-- ═══════════ SALES REPS ═══════════ -->
+    <div id="tab-salesreps" style="display:none">
+      <div class="toolbar">
+        <button class="add-btn" onclick="openAddRepModal()">+ Add Rep</button>
+      </div>
+      <div class="grid-wrap">
+        <table>
+          <thead><tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Area</th>
+            <th>Beat Days</th>
+            <th>Status</th>
+            <th>Password</th>
+            <th>Actions</th>
+          </tr></thead>
+          <tbody id="reps-body"><tr class="empty-row"><td colspan="8">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════ SALES OPS DASHBOARD ═══════════ -->
+    <div id="tab-salesdash" style="display:none">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+        <select id="sd-range" class="sinp" style="max-width:160px" onchange="loadSalesDash()">
+          <option value="today">Today</option>
+          <option value="week">This Week</option>
+          <option value="month">This Month</option>
+          <option value="all">All Time</option>
+        </select>
+        <button class="t-btn" onclick="loadSalesDash()">↻ Refresh</button>
+        <span id="sd-last-updated" style="font-size:.7rem;color:#475569;margin-left:4px"></span>
+      </div>
+
+      <!-- Top KPI cards -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px" id="sd-kpis">
+        <div class="s-card"><div class="s-lbl">Kg Ordered</div><div class="s-val" style="color:#60A5FA" id="sd-kg-ord">—</div></div>
+        <div class="s-card"><div class="s-lbl">Kg Delivered</div><div class="s-val" style="color:#4ADE80" id="sd-kg-del">—</div></div>
+        <div class="s-card"><div class="s-lbl">Fill Rate</div><div class="s-val" style="color:#FBBF24" id="sd-fill">—</div></div>
+        <div class="s-card"><div class="s-lbl">Collections (₹)</div><div class="s-val" style="color:#34D399;font-size:.95rem" id="sd-coll">—</div></div>
+        <div class="s-card"><div class="s-lbl">Pending Orders</div><div class="s-val" style="color:#FB923C" id="sd-pending">—</div></div>
+        <div class="s-card"><div class="s-lbl">Total Orders</div><div class="s-val" style="color:#A78BFA" id="sd-total-ord">—</div></div>
+      </div>
+
+      <!-- Per-rep cards -->
+      <div class="section-head">Rep Performance</div>
+      <div id="sd-rep-cards" style="display:grid;gap:10px">
+        <div style="text-align:center;padding:2rem;color:#475569">Loading…</div>
+      </div>
+
+      <!-- Recent orders table -->
+      <div class="section-head" style="margin-top:16px">Recent Orders</div>
+      <div class="grid-wrap">
+        <table>
+          <thead><tr>
+            <th>Date</th>
+            <th>Rep</th>
+            <th>Outlet</th>
+            <th>Kg Ordered</th>
+            <th>Kg Delivered</th>
+            <th>Amount (₹)</th>
+            <th>Collected (₹)</th>
+            <th>Status</th>
+          </tr></thead>
+          <tbody id="sd-orders-body"><tr class="empty-row"><td colspan="8">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════ BEAT PLANS ═══════════ -->
+    <div id="tab-beatplans" style="display:none">
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+        <select id="bp-rep-select" class="sinp" style="max-width:200px" onchange="loadBeatPlan()">
+          <option value="">— Select Rep —</option>
+        </select>
+        <input type="month" id="bp-month-select" class="sinp" style="max-width:160px" onchange="loadBeatPlan()"/>
+        <button class="add-btn" onclick="openAddOutletToPlan()">+ Add Outlet</button>
+        <button id="bp-publish-btn" class="t-btn" style="background:#052e16;border-color:#166534;color:#4ADE80;display:none" onclick="publishBeatPlan()">✅ Publish Plan</button>
+        <button class="t-btn" style="margin-left:auto" onclick="initPlansForAllReps()">⚡ Init All Reps</button>
+        <button class="t-btn" onclick="publishAllDrafts()">📢 Publish All Drafts</button>
+      </div>
+      <div id="bp-status-bar" style="margin-bottom:10px"></div>
+      <div class="grid-wrap">
+        <table>
+          <thead><tr>
+            <th>#</th>
+            <th>Outlet</th>
+            <th>Area</th>
+            <th>Visit Days</th>
+            <th>Frequency</th>
+            <th>Target (kg)</th>
+            <th>Actions</th>
+          </tr></thead>
+          <tbody id="bp-body"><tr class="empty-row"><td colspan="7">Select a rep and month to view beat plan</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════ MODAL: Set Rep Password ════ -->
+<div class="modal-overlay" id="modal-set-password">
+  <div class="sheet">
+    <div class="handle"></div>
+    <h3>Set Password</h3>
+    <div class="sheet-sub" id="set-pw-sub">—</div>
+    <input type="hidden" id="set-pw-rep-id"/>
+    <div class="sfield">
+      <label class="slbl">New Password</label>
+      <input id="set-pw-val" type="password" class="sinp" placeholder="Enter new password" autocomplete="new-password"/>
+    </div>
+    <div class="m-actions">
+      <button class="m-cancel" onclick="closeModal('modal-set-password')">Cancel</button>
+      <button class="m-save" onclick="saveRepPassword()">Set Password ✅</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL: Add Rep ════ -->
+<div class="modal-overlay" id="modal-add-rep">
+  <div class="sheet">
+    <div class="handle"></div>
+    <h3>Add Sales Rep / Driver</h3>
+    <div id="add-rep-err" style="background:#450a0a;border:1px solid #7f1d1d;color:#FCA5A5;border-radius:8px;padding:10px;font-size:.8rem;margin-bottom:10px;display:none"></div>
+    <div class="sfield"><label class="slbl">Name</label><input id="rep-name" class="sinp" placeholder="Full name"/></div>
+    <div class="sfield"><label class="slbl">Email</label><input id="rep-email" type="email" class="sinp" placeholder="email@absolutefreshfood.com"/></div>
+    <div class="sfield"><label class="slbl">Phone</label><input id="rep-phone" class="sinp" placeholder="10-digit phone"/></div>
+    <div class="srow">
+      <div class="sfield">
+        <label class="slbl">Role</label>
+        <select id="rep-role" class="sinp">
+          <option value="rep">Sales Rep</option>
+          <option value="driver">Driver</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div class="sfield"><label class="slbl">Area</label><input id="rep-area" class="sinp" placeholder="Vrindavan Colony"/></div>
+    </div>
+    <div class="sfield"><label class="slbl">Password</label><input id="rep-password" type="password" class="sinp" placeholder="Initial password"/></div>
+    <div class="m-actions">
+      <button class="m-cancel" onclick="closeModal('modal-add-rep')">Cancel</button>
+      <button class="m-save" onclick="saveNewRep()">Add Rep</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL: Add Outlet to Beat Plan ════ -->
+<div class="modal-overlay" id="modal-add-outlet-bp">
+  <div class="sheet">
+    <div class="handle"></div>
+    <h3>Add Outlet to Beat Plan</h3>
+    <div class="sfield">
+      <label class="slbl">Outlet</label>
+      <select id="bp-outlet-select" class="sinp"></select>
+    </div>
+    <div class="sfield">
+      <label class="slbl">Visit Days</label>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px" id="bp-days-check">
+        <label style="display:flex;align-items:center;gap:5px;font-size:.82rem;color:#CBD5E1"><input type="checkbox" value="Monday"/> Mon</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:.82rem;color:#CBD5E1"><input type="checkbox" value="Tuesday"/> Tue</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:.82rem;color:#CBD5E1"><input type="checkbox" value="Wednesday"/> Wed</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:.82rem;color:#CBD5E1"><input type="checkbox" value="Thursday"/> Thu</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:.82rem;color:#CBD5E1"><input type="checkbox" value="Friday"/> Fri</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:.82rem;color:#CBD5E1"><input type="checkbox" value="Saturday"/> Sat</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:.82rem;color:#CBD5E1"><input type="checkbox" value="Sunday"/> Sun</label>
+      </div>
+    </div>
+    <div class="srow">
+      <div class="sfield">
+        <label class="slbl">Frequency</label>
+        <select id="bp-freq" class="sinp">
+          <option value="weekly">Weekly</option>
+          <option value="biweekly">Bi-weekly</option>
+          <option value="monthly">Monthly</option>
+        </select>
+      </div>
+      <div class="sfield">
+        <label class="slbl">Target (kg/visit)</label>
+        <input id="bp-target-kg" type="number" class="sinp" placeholder="10" min="1" step="0.5"/>
+      </div>
+    </div>
+    <div class="sfield"><label class="slbl">Notes (optional)</label><textarea id="bp-notes" class="sinp" style="min-height:60px"></textarea></div>
+    <div class="m-actions">
+      <button class="m-cancel" onclick="closeModal('modal-add-outlet-bp')">Cancel</button>
+      <button class="m-save" onclick="saveBeatItem()">Add to Plan ✅</button>
+    </div>
   </div>
 </div>
 
@@ -650,7 +842,7 @@
 
   // ── Tab switching ────────────────────────────────────────────
   function switchTab(name, btn) {
-    ['influencers','coupons','campaigns','samples','reviews','payouts','analytics','weborders'].forEach(t => {
+    ['influencers','coupons','campaigns','samples','reviews','payouts','analytics','weborders','salesreps','beatplans','salesdash'].forEach(t => {
       document.getElementById('tab-' + t).style.display = t === name ? 'block' : 'none';
     });
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -662,6 +854,9 @@
     if (name === 'payouts') loadPayouts();
     if (name === 'analytics') loadAnalytics();
     if (name === 'weborders') loadWebOrders('today');
+    if (name === 'salesreps') loadSalesReps();
+    if (name === 'beatplans') { loadSalesReps(); document.getElementById('bp-month-select').value = new Date().toISOString().slice(0,7); }
+    if (name === 'salesdash') loadSalesDash();
   }
 
   // ── Stats ────────────────────────────────────────────────────
@@ -1265,7 +1460,7 @@
   function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 
   // Close modals on backdrop click
-  ['ceiling-modal','campaign-modal','review-modal','payout-modal','sample-modal','modal-edit-weborder'].forEach(id => {
+  ['ceiling-modal','campaign-modal','review-modal','payout-modal','sample-modal','modal-edit-weborder','modal-set-password','modal-add-rep','modal-add-outlet-bp'].forEach(id => {
     document.getElementById(id).addEventListener('click', e => {
       if (e.target.id === id) closeModal(id);
     });
@@ -1389,6 +1584,362 @@
   // Init cutoff display from localStorage
   const _storedHour = localStorage.getItem('aff_cutoff_hour');
   if (_storedHour) document.getElementById('cutoff-time-input').value = _storedHour.padStart(2,'0') + ':00';
+
+  // ── Sales Reps ───────────────────────────────────────────────
+  let allReps = [];
+  async function loadSalesReps() {
+    const { data } = await db.from('users').select('*').order('role').order('name');
+    allReps = data || [];
+    renderSalesReps(allReps);
+    // populate rep dropdown in beat plans
+    const sel = document.getElementById('bp-rep-select');
+    sel.innerHTML = '<option value="">— Select Rep —</option>';
+    (data || []).filter(r => r.role === 'rep').forEach(r => {
+      sel.innerHTML += `<option value="${r.id}">${r.name} (${r.area || 'No area'})</option>`;
+    });
+  }
+
+  function renderSalesReps(list) {
+    const tbody = document.getElementById('reps-body');
+    if (!list.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="8">No users found</td></tr>'; return; }
+    const roleColor = { admin:'#F59E0B', rep:'#4ADE80', driver:'#60A5FA' };
+    tbody.innerHTML = list.map(r => `<tr>
+      <td class="bold">${r.name}</td>
+      <td style="font-size:.76rem;color:#94A3B8">${r.email}</td>
+      <td><span class="pill" style="background:#1e293b;color:${roleColor[r.role]||'#CBD5E1'}">${r.role}</span></td>
+      <td style="font-size:.78rem">${r.area || '—'}</td>
+      <td style="font-size:.72rem;color:#64748B">${(r.beat_days||[]).join(', ') || '—'}</td>
+      <td><span class="pill ${r.is_active ? 'pill-approved' : 'pill-rejected'}">${r.is_active ? 'Active' : 'Inactive'}</span></td>
+      <td style="font-size:.72rem;color:${r.password_hash ? '#4ADE80' : '#F87171'}">${r.password_hash ? '✅ Set' : '❌ Not set'}</td>
+      <td>
+        <button class="act-btn" onclick="openSetPassword('${r.id}','${esc(r.name)}')">Set PW</button>
+        <button class="act-btn ${r.is_active ? 'danger' : 'approve'}" onclick="toggleRepActive('${r.id}',${r.is_active})">${r.is_active ? 'Deactivate' : 'Activate'}</button>
+      </td>
+    </tr>`).join('');
+  }
+
+  function openAddRepModal() {
+    ['rep-name','rep-email','rep-phone','rep-area','rep-password'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('rep-role').value = 'rep';
+    document.getElementById('add-rep-err').style.display = 'none';
+    openModal('modal-add-rep');
+  }
+
+  async function saveNewRep() {
+    const name = document.getElementById('rep-name').value.trim();
+    const email = document.getElementById('rep-email').value.trim();
+    const phone = document.getElementById('rep-phone').value.trim();
+    const role = document.getElementById('rep-role').value;
+    const area = document.getElementById('rep-area').value.trim();
+    const pw = document.getElementById('rep-password').value;
+    const errEl = document.getElementById('add-rep-err');
+    if (!name || !email) { errEl.textContent = 'Name and email are required.'; errEl.style.display = 'block'; return; }
+    const payload = { name, email, role, area: area || null, phone: phone || null, is_active: true };
+    if (pw) payload.password_hash = await sha256(pw);
+    const { error } = await db.from('users').insert(payload);
+    if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; return; }
+    closeModal('modal-add-rep');
+    loadSalesReps();
+  }
+
+  function openSetPassword(id, name) {
+    document.getElementById('set-pw-rep-id').value = id;
+    document.getElementById('set-pw-sub').textContent = name;
+    document.getElementById('set-pw-val').value = '';
+    openModal('modal-set-password');
+  }
+
+  async function saveRepPassword() {
+    const id = document.getElementById('set-pw-rep-id').value;
+    const pw = document.getElementById('set-pw-val').value;
+    if (!pw) { alert('Please enter a password.'); return; }
+    const hash = await sha256(pw);
+    const { error } = await db.from('users').update({ password_hash: hash }).eq('id', id);
+    if (error) { alert('Error: ' + error.message); return; }
+    closeModal('modal-set-password');
+    loadSalesReps();
+  }
+
+  async function toggleRepActive(id, current) {
+    await db.from('users').update({ is_active: !current }).eq('id', id);
+    loadSalesReps();
+  }
+
+  async function sha256(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  // ── Beat Plans ───────────────────────────────────────────────
+  let currentPlanId = null;
+  let allOutlets = [];
+
+  async function loadBeatPlan() {
+    const repId = document.getElementById('bp-rep-select').value;
+    const month = document.getElementById('bp-month-select').value;
+    const tbody = document.getElementById('bp-body');
+    const statusBar = document.getElementById('bp-status-bar');
+    const publishBtn = document.getElementById('bp-publish-btn');
+
+    if (!repId || !month) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Select a rep and month to view beat plan</td></tr>';
+      statusBar.innerHTML = '';
+      publishBtn.style.display = 'none';
+      currentPlanId = null;
+      return;
+    }
+
+    const monthDate = month + '-01';
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Loading…</td></tr>';
+
+    // Get or create plan
+    let { data: plan } = await db.from('monthly_beat_plans')
+      .select('*').eq('rep_id', repId).eq('month', monthDate).maybeSingle();
+
+    if (!plan) {
+      const { data: newPlan } = await db.from('monthly_beat_plans')
+        .insert({ rep_id: repId, month: monthDate, status: 'draft' })
+        .select().single();
+      plan = newPlan;
+    }
+    currentPlanId = plan?.id;
+
+    // Status bar
+    const statusColor = plan.status === 'published' ? '#4ADE80' : '#FBBF24';
+    statusBar.innerHTML = `<div class="info-box" style="background:#0f172a;border-color:#334155">
+      Plan status: <strong style="color:${statusColor}">${plan.status?.toUpperCase()}</strong>
+      ${plan.published_at ? ' · Published ' + new Date(plan.published_at).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : ''}
+    </div>`;
+    publishBtn.style.display = plan.status !== 'published' ? 'inline-block' : 'none';
+
+    // Load items
+    const { data: items } = await db.from('monthly_beat_items')
+      .select('*, outlets(name, area, owner_name, phone)')
+      .eq('monthly_plan_id', currentPlanId)
+      .order('visit_sequence');
+
+    if (!items?.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="7">No outlets added yet. Click "+ Add Outlet" to start.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = items.map((item, i) => `<tr>
+      <td class="mono" style="color:#64748B">${item.visit_sequence || i+1}</td>
+      <td class="bold">${item.outlets?.name || '—'}<br/><span style="font-size:.68rem;color:#64748B">${item.outlets?.owner_name || ''} · ${item.outlets?.phone || ''}</span></td>
+      <td style="font-size:.76rem;color:#94A3B8">${item.outlets?.area || '—'}</td>
+      <td style="font-size:.76rem">${(item.preferred_days||[]).join(', ') || '—'}</td>
+      <td style="font-size:.76rem;text-transform:capitalize">${item.visit_frequency || '—'}</td>
+      <td class="mono">${item.target_kg || '—'} kg</td>
+      <td><button class="act-btn danger" onclick="removeBeatItem('${item.id}')">Remove</button></td>
+    </tr>`).join('');
+  }
+
+  async function openAddOutletToPlan() {
+    if (!currentPlanId) { alert('Select a rep and month first.'); return; }
+    // Load all outlets
+    const { data } = await db.from('outlets').select('*').eq('status','active').order('name');
+    allOutlets = data || [];
+    const sel = document.getElementById('bp-outlet-select');
+    sel.innerHTML = allOutlets.map(o => `<option value="${o.id}">${o.name} — ${o.area}</option>`).join('');
+    document.querySelectorAll('#bp-days-check input').forEach(cb => cb.checked = false);
+    document.getElementById('bp-freq').value = 'weekly';
+    document.getElementById('bp-target-kg').value = '';
+    document.getElementById('bp-notes').value = '';
+    openModal('modal-add-outlet-bp');
+  }
+
+  async function saveBeatItem() {
+    const outletId = document.getElementById('bp-outlet-select').value;
+    const days = [...document.querySelectorAll('#bp-days-check input:checked')].map(cb => cb.value);
+    const freq = document.getElementById('bp-freq').value;
+    const kg = parseFloat(document.getElementById('bp-target-kg').value) || 10;
+    const notes = document.getElementById('bp-notes').value.trim() || null;
+    if (!days.length) { alert('Select at least one visit day.'); return; }
+
+    // Get next sequence number
+    const { data: existing } = await db.from('monthly_beat_items')
+      .select('visit_sequence').eq('monthly_plan_id', currentPlanId).order('visit_sequence', {ascending:false}).limit(1);
+    const nextSeq = (existing?.[0]?.visit_sequence || 0) + 1;
+
+    const { error } = await db.from('monthly_beat_items').insert({
+      monthly_plan_id: currentPlanId,
+      outlet_id: outletId,
+      preferred_days: days,
+      visit_frequency: freq,
+      target_kg: kg,
+      visit_sequence: nextSeq,
+      notes
+    });
+    if (error) { alert('Error: ' + error.message); return; }
+    closeModal('modal-add-outlet-bp');
+    loadBeatPlan();
+  }
+
+  async function removeBeatItem(itemId) {
+    if (!confirm('Remove this outlet from the beat plan?')) return;
+    await db.from('monthly_beat_items').delete().eq('id', itemId);
+    loadBeatPlan();
+  }
+
+  async function publishBeatPlan() {
+    if (!currentPlanId) return;
+    if (!confirm('Publish this beat plan? The sales rep will be able to see it.')) return;
+    await db.from('monthly_beat_plans').update({
+      status: 'published',
+      published_at: new Date().toISOString()
+    }).eq('id', currentPlanId);
+    loadBeatPlan();
+  }
+
+  async function initPlansForAllReps() {
+    const month = document.getElementById('bp-month-select').value;
+    if (!month) { alert('Select a month first.'); return; }
+    if (!confirm(`Create draft beat plans for all active reps for ${month}?`)) return;
+    const { data: reps } = await db.from('users').select('id,name').eq('role','rep').eq('is_active',true);
+    if (!reps?.length) { alert('No active reps found.'); return; }
+    const monthDate = month + '-01';
+    let created = 0;
+    for (const rep of reps) {
+      const { data: existing } = await db.from('monthly_beat_plans')
+        .select('id').eq('rep_id', rep.id).eq('month', monthDate).maybeSingle();
+      if (!existing) {
+        await db.from('monthly_beat_plans').insert({ rep_id: rep.id, month: monthDate, status: 'draft' });
+        created++;
+      }
+    }
+    alert(`✅ Created ${created} new draft plan(s). ${reps.length - created} already existed.`);
+  }
+
+  async function publishAllDrafts() {
+    const month = document.getElementById('bp-month-select').value;
+    if (!month) { alert('Select a month first.'); return; }
+    if (!confirm(`Publish ALL draft beat plans for ${month}?`)) return;
+    const monthDate = month + '-01';
+    const { data, error } = await db.from('monthly_beat_plans')
+      .update({ status: 'published', published_at: new Date().toISOString() })
+      .eq('month', monthDate).eq('status', 'draft').select();
+    if (error) { alert('Error: ' + error.message); return; }
+    alert(`✅ Published ${data?.length || 0} plan(s).`);
+    loadBeatPlan();
+  }
+
+  // ── Sales Ops Dashboard ─────────────────────────────────────
+  async function loadSalesDash() {
+    const range = document.getElementById('sd-range').value;
+    document.getElementById('sd-last-updated').textContent = 'Loading…';
+
+    // Date range filter
+    const now = new Date();
+    let fromDate = null;
+    if (range === 'today') {
+      fromDate = now.toISOString().split('T')[0] + 'T00:00:00';
+    } else if (range === 'week') {
+      const d = new Date(now); d.setDate(d.getDate() - 6);
+      fromDate = d.toISOString().split('T')[0] + 'T00:00:00';
+    } else if (range === 'month') {
+      fromDate = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-01T00:00:00';
+    }
+
+    // Load orders with items and rep info
+    let query = db.from('orders')
+      .select('id,status,total_amount,collected_amount,order_date,rep_id,outlets(name,area),users(name),order_items(kg_ordered,kg_delivered,unit_price)')
+      .order('order_date', { ascending: false })
+      .limit(200);
+    if (fromDate) query = query.gte('order_date', fromDate.split('T')[0]);
+
+    const { data: orders, error } = await query;
+    if (error) {
+      document.getElementById('sd-last-updated').textContent = 'Error: ' + error.message;
+      return;
+    }
+
+    const rows = orders || [];
+
+    // Compute KPIs
+    let totalKgOrd = 0, totalKgDel = 0, totalColl = 0, totalAmt = 0;
+    rows.forEach(o => {
+      (o.order_items || []).forEach(i => {
+        totalKgOrd += parseFloat(i.kg_ordered) || 0;
+        totalKgDel += parseFloat(i.kg_delivered) || 0;
+      });
+      totalColl += parseFloat(o.collected_amount) || 0;
+      totalAmt  += parseFloat(o.total_amount) || 0;
+    });
+    const fillRate = totalKgOrd > 0 ? ((totalKgDel / totalKgOrd) * 100).toFixed(1) + '%' : '—';
+    const pending = rows.filter(o => ['pending','confirmed','partial_delivered'].includes(o.status)).length;
+
+    document.getElementById('sd-kg-ord').textContent   = totalKgOrd.toFixed(1);
+    document.getElementById('sd-kg-del').textContent   = totalKgDel.toFixed(1);
+    document.getElementById('sd-fill').textContent     = fillRate;
+    document.getElementById('sd-coll').textContent     = '₹' + fmt(totalColl);
+    document.getElementById('sd-pending').textContent  = pending;
+    document.getElementById('sd-total-ord').textContent = rows.length;
+    document.getElementById('sd-last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+
+    // Per-rep breakdown
+    const repMap = {};
+    rows.forEach(o => {
+      const repId = o.rep_id;
+      const repName = o.users?.name || 'Unknown';
+      if (!repMap[repId]) repMap[repId] = { name: repName, orders: 0, kgOrd: 0, kgDel: 0, coll: 0 };
+      repMap[repId].orders++;
+      (o.order_items || []).forEach(i => {
+        repMap[repId].kgOrd += parseFloat(i.kg_ordered) || 0;
+        repMap[repId].kgDel += parseFloat(i.kg_delivered) || 0;
+      });
+      repMap[repId].coll += parseFloat(o.collected_amount) || 0;
+    });
+
+    const repCards = document.getElementById('sd-rep-cards');
+    const repEntries = Object.values(repMap);
+    if (!repEntries.length) {
+      repCards.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#475569">No orders in this period</div>';
+    } else {
+      repCards.innerHTML = repEntries.map(r => {
+        const fill = r.kgOrd > 0 ? ((r.kgDel / r.kgOrd) * 100).toFixed(0) : 0;
+        const fillColor = fill >= 90 ? '#4ADE80' : fill >= 70 ? '#FBBF24' : '#F87171';
+        return `<div style="background:#1E293B;border:1px solid #334155;border-radius:10px;padding:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <span style="font-weight:700;color:#F1F5F9">${r.name}</span>
+            <span style="font-size:.75rem;color:${fillColor};font-weight:700">${fill}% fill</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center">
+            <div><div style="font-size:1rem;font-weight:700;color:#60A5FA;font-family:monospace">${r.orders}</div><div style="font-size:.62rem;color:#64748B">Orders</div></div>
+            <div><div style="font-size:1rem;font-weight:700;color:#4ADE80;font-family:monospace">${r.kgOrd.toFixed(1)}</div><div style="font-size:.62rem;color:#64748B">Kg Ord</div></div>
+            <div><div style="font-size:1rem;font-weight:700;color:#34D399;font-family:monospace">${r.kgDel.toFixed(1)}</div><div style="font-size:.62rem;color:#64748B">Kg Del</div></div>
+            <div><div style="font-size:1rem;font-weight:700;color:#FBBF24;font-family:monospace">₹${fmt(r.coll)}</div><div style="font-size:.62rem;color:#64748B">Collected</div></div>
+          </div>
+          <div style="margin-top:8px;background:#0F172A;border-radius:4px;height:5px;overflow:hidden">
+            <div style="height:100%;width:${Math.min(fill,100)}%;background:${fillColor};border-radius:4px;transition:width .4s"></div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    // Recent orders table
+    const tbody = document.getElementById('sd-orders-body');
+    if (!rows.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="8">No orders found</td></tr>';
+      return;
+    }
+    const statusColor = { pending:'#FBBF24', confirmed:'#60A5FA', partial_delivered:'#FB923C', delivered:'#4ADE80', cancelled:'#F87171' };
+    tbody.innerHTML = rows.slice(0, 50).map(o => {
+      const kgOrd = (o.order_items||[]).reduce((s,i)=>s+parseFloat(i.kg_ordered||0),0);
+      const kgDel = (o.order_items||[]).reduce((s,i)=>s+parseFloat(i.kg_delivered||0),0);
+      const color = statusColor[o.status] || '#94A3B8';
+      const date = o.order_date ? new Date(o.order_date).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '—';
+      return `<tr>
+        <td style="font-size:.76rem;color:#94A3B8">${date}</td>
+        <td class="bold">${o.users?.name || '—'}</td>
+        <td style="font-size:.76rem">${o.outlets?.name || '—'}<br/><span style="color:#475569;font-size:.66rem">${o.outlets?.area||''}</span></td>
+        <td class="mono">${kgOrd.toFixed(1)}</td>
+        <td class="mono" style="color:#4ADE80">${kgDel.toFixed(1)}</td>
+        <td class="mono">₹${fmt(o.total_amount||0)}</td>
+        <td class="mono" style="color:#34D399">₹${fmt(o.collected_amount||0)}</td>
+        <td><span style="font-size:.68rem;font-weight:700;color:${color};text-transform:capitalize">${o.status?.replace(/_/g,' ')||'—'}</span></td>
+      </tr>`;
+    }).join('');
+  }
 </script>
 </body>
 </html>
