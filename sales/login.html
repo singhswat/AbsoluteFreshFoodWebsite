@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign In — Absolute Fresh</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      background:#0D0D0D;
+      min-height:100vh;min-height:100dvh;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      padding:24px 16px;
+    }
+
+    .logo-wrap{text-align:center;margin-bottom:28px}
+    .logo-wrap img{height:40px;width:auto;object-fit:contain}
+    .portal-tag{font-size:.68rem;color:#334155;text-transform:uppercase;letter-spacing:.1em;margin-top:8px}
+
+    .card{
+      background:#111111;
+      border:1px solid #1E1E1E;
+      border-radius:20px;
+      padding:28px 22px 24px;
+      width:100%;max-width:400px;
+      box-shadow:0 24px 60px rgba(0,0,0,.5);
+    }
+
+    h2{font-size:1.15rem;font-weight:700;color:#F1F5F9;margin-bottom:3px}
+    .sub{font-size:.78rem;color:#475569;margin-bottom:22px}
+
+    .field{margin-bottom:16px}
+    .lbl{display:block;font-size:.68rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px}
+    .inp-wrap{position:relative}
+    .inp{
+      width:100%;background:#0A0A0A;border:1.5px solid #1E1E1E;
+      color:#F1F5F9;border-radius:10px;padding:13px 14px 13px 42px;
+      font-size:.95rem;font-family:inherit;outline:none;transition:border .15s;
+      -webkit-appearance:none;
+    }
+    .inp:focus{border-color:#CC0000}
+    .ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:1rem;pointer-events:none}
+    .pw-inp{padding-right:56px}
+    .pw-toggle{
+      position:absolute;right:12px;top:50%;transform:translateY(-50%);
+      background:none;border:none;cursor:pointer;
+      font-size:.72rem;font-weight:600;color:#475569;padding:6px 4px;
+    }
+
+    .error{
+      background:#1A0000;border:1px solid #3A0000;color:#F87171;
+      border-radius:8px;padding:10px 12px;font-size:.8rem;
+      margin-bottom:14px;display:none;line-height:1.4;
+    }
+    .error.show{display:block}
+
+    .btn{
+      width:100%;background:#CC0000;color:#fff;border:none;
+      border-radius:10px;padding:14px;font-size:.95rem;font-weight:700;
+      cursor:pointer;margin-top:6px;transition:background .15s;letter-spacing:.01em;
+    }
+    .btn:hover{background:#B91C1C}
+    .btn:active{background:#991B1B}
+    .btn:disabled{opacity:.45;cursor:not-allowed}
+
+    .divider{
+      display:flex;align-items:center;gap:10px;
+      margin:18px 0;font-size:.72rem;color:#1E1E1E;
+    }
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:#1E1E1E}
+
+    .links{text-align:center;font-size:.8rem;color:#475569}
+    .links a{color:#F87171;font-weight:600;text-decoration:none}
+    .links a:hover{text-decoration:underline}
+
+    /* Role badge shown after typing email (future enhancement placeholder) */
+    .role-hint{
+      display:none;background:#0A1A0A;border:1px solid #1E3A22;
+      border-radius:7px;padding:7px 11px;font-size:.75rem;color:#4ADE80;
+      margin-bottom:12px;align-items:center;gap:7px;
+    }
+    .role-hint.show{display:flex}
+
+    .back-link{
+      display:block;text-align:center;margin-top:20px;
+      font-size:.75rem;color:#334155;text-decoration:none;
+    }
+    .back-link:hover{color:#64748B}
+  </style>
+</head>
+<body>
+
+<div class="logo-wrap">
+  <img src="images/logo.png" alt="Absolute Fresh"/>
+  <div class="portal-tag">Operations Portal</div>
+</div>
+
+<div class="card">
+  <h2>Welcome back 👋</h2>
+  <p class="sub">Sign in to your account</p>
+
+  <div id="error" class="error"></div>
+
+  <form id="form">
+    <div class="field">
+      <label class="lbl">Email</label>
+      <div class="inp-wrap">
+        <span class="ico">✉️</span>
+        <input id="email" type="email" class="inp" placeholder="you@example.com"
+               autocomplete="email" inputmode="email" required/>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="lbl">Password</label>
+      <div class="inp-wrap">
+        <span class="ico">🔒</span>
+        <input id="password" type="password" class="inp pw-inp"
+               placeholder="Your password" autocomplete="current-password" required/>
+        <button type="button" class="pw-toggle" id="pw-btn" onclick="togglePw()">Show</button>
+      </div>
+    </div>
+
+    <button type="submit" class="btn" id="submit-btn">Sign In →</button>
+  </form>
+
+  <div class="divider">or</div>
+
+  <div class="links">
+    New here? <a href="signup.html">Request access / Join as partner</a>
+  </div>
+  <div class="links" style="margin-top:10px">
+    <a href="forgot-password.html" style="color:#475569">Forgot password?</a>
+  </div>
+</div>
+
+<a class="back-link" href="index.html">← Back to portal home</a>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = 'https://fbfopgzblqmsflkfejwa.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_r7mYhsyIKtBjBKzxH8St9g_OHjTU-RQ';
+  const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // Already logged in?
+  const _existing = sessionStorage.getItem('aff_session');
+  if (_existing) {
+    try { routeUser(JSON.parse(_existing)); } catch(e) {}
+  }
+
+  function togglePw() {
+    const inp = document.getElementById('password');
+    const btn = document.getElementById('pw-btn');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+    btn.textContent = inp.type === 'password' ? 'Show' : 'Hide';
+  }
+
+  async function sha256(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('error');
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+
+  function routeUser(user) {
+    const role = user.role;
+    if (role === 'admin') {
+      sessionStorage.setItem('aff_admin', 'ok'); // backward compat for admin.html
+      location.href = 'marketing/admin.html';
+    } else if (role === 'influencer') {
+      location.href = 'marketing/dashboard.html';
+    } else if (role === 'rep') {
+      location.href = 'salesrep/index.html';
+    } else if (role === 'driver') {
+      location.href = 'salesrep/deliveries.html';
+    } else {
+      location.href = 'marketing/dashboard.html';
+    }
+  }
+
+  document.getElementById('form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn    = document.getElementById('submit-btn');
+    const errEl  = document.getElementById('error');
+    const email  = document.getElementById('email').value.trim().toLowerCase();
+    const password = document.getElementById('password').value;
+
+    errEl.classList.remove('show');
+    btn.disabled = true;
+    btn.textContent = 'Signing in…';
+
+    try {
+      const hash = await sha256(password);
+
+      // ── 1. Check users table (staff: admin, rep, driver) ──────
+      const { data: user } = await db.from('users')
+        .select('*').eq('email', email).maybeSingle();
+
+      if (user) {
+        const validHash  = user.password_hash && user.password_hash === hash;
+        const adminPin   = user.role === 'admin' && password === '123456789'; // fallback PIN
+        if (!validHash && !adminPin) {
+          showError('Incorrect password. Please try again.');
+          btn.disabled = false; btn.textContent = 'Sign In →'; return;
+        }
+        if (!user.is_active) {
+          showError('Your account is inactive. Contact your admin.');
+          btn.disabled = false; btn.textContent = 'Sign In →'; return;
+        }
+        const session = { ...user, table: 'users' };
+        sessionStorage.setItem('aff_session', JSON.stringify(session));
+        routeUser(session);
+        return;
+      }
+
+      // ── 2. Check influencers table (partners) ─────────────────
+      const { data: inf } = await db.from('influencers')
+        .select('id,name,email,status,password_hash,instagram_handle,city,discount_ceiling,total_orders,total_revenue,total_commission_earned')
+        .eq('email', email).maybeSingle();
+
+      if (inf) {
+        if (!inf.password_hash || inf.password_hash !== hash) {
+          showError('Incorrect password. Please try again.');
+          btn.disabled = false; btn.textContent = 'Sign In →'; return;
+        }
+        if (inf.status !== 'approved') {
+          showError('Your partner account is pending approval. We\'ll notify you shortly.');
+          btn.disabled = false; btn.textContent = 'Sign In →'; return;
+        }
+        const session = { ...inf, role: 'influencer', table: 'influencers' };
+        sessionStorage.setItem('aff_session', JSON.stringify(session));
+        // also set legacy key for existing dashboard.html
+        localStorage.setItem('influencer', JSON.stringify(inf));
+        routeUser(session);
+        return;
+      }
+
+      // ── 3. Not found ──────────────────────────────────────────
+      showError('No account found with this email. Want to join? Sign up below.');
+
+    } catch (ex) {
+      showError('Login failed. Check your connection and try again.');
+      console.error(ex);
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Sign In →';
+  });
+</script>
+</body>
+</html>
