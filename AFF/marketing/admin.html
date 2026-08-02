@@ -171,7 +171,8 @@
 
   <!-- Tab Nav -->
   <div class="tab-nav">
-    <button class="tab-btn active" onclick="switchTab('influencers',this)">👥 Influencers</button>
+    <button class="tab-btn active" onclick="switchTab('home',this)">🏠 Home</button>
+    <button class="tab-btn" onclick="switchTab('influencers',this)">👥 Influencers</button>
     <button class="tab-btn" onclick="switchTab('coupons',this)">🎟️ Coupons</button>
     <button class="tab-btn" onclick="switchTab('campaigns',this)">📣 Campaigns</button>
     <button class="tab-btn" onclick="switchTab('samples',this)">📦 Samples</button>
@@ -186,8 +187,97 @@
 
   <div class="page-wrap">
 
+    <!-- ═══════════ HOME ═══════════ -->
+    <div id="tab-home">
+      <div style="padding:6px 0 14px">
+        <div style="font-size:.72rem;color:#475569;text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">Quick Actions</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+
+          <!-- Marketing -->
+          <div onclick="switchTabByName('influencers')" style="background:#0F1F13;border:1px solid #1E3A22;border-radius:14px;padding:16px;cursor:pointer;transition:border-color .15s" onmouseenter="this.style.borderColor='#22C55E'" onmouseleave="this.style.borderColor='#1E3A22'">
+            <div style="font-size:1.8rem;margin-bottom:8px">📣</div>
+            <div style="font-weight:700;color:#F1F5F9;font-size:.88rem;margin-bottom:4px">Marketing</div>
+            <div style="font-size:.72rem;color:#64748B;line-height:1.4">Influencers, coupons, campaigns, content</div>
+            <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:4px">
+              <span style="font-size:.6rem;background:#052e16;color:#4ADE80;padding:2px 6px;border-radius:4px">Influencers</span>
+              <span style="font-size:.6rem;background:#052e16;color:#4ADE80;padding:2px 6px;border-radius:4px">Coupons</span>
+              <span style="font-size:.6rem;background:#052e16;color:#4ADE80;padding:2px 6px;border-radius:4px">Campaigns</span>
+            </div>
+          </div>
+
+          <!-- Sales Ops -->
+          <div onclick="switchTabByName('salesdash')" style="background:#0A1929;border:1px solid #0C2A3E;border-radius:14px;padding:16px;cursor:pointer;transition:border-color .15s" onmouseenter="this.style.borderColor='#38BDF8'" onmouseleave="this.style.borderColor='#0C2A3E'">
+            <div style="font-size:1.8rem;margin-bottom:8px">📊</div>
+            <div style="font-weight:700;color:#F1F5F9;font-size:.88rem;margin-bottom:4px">Sales Ops</div>
+            <div style="font-size:.72rem;color:#64748B;line-height:1.4">Live dashboard, rep performance, fill rates</div>
+            <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:4px">
+              <span style="font-size:.6rem;background:#061520;color:#7DD3FC;padding:2px 6px;border-radius:4px">Dashboard</span>
+              <span style="font-size:.6rem;background:#061520;color:#7DD3FC;padding:2px 6px;border-radius:4px">Orders</span>
+              <span style="font-size:.6rem;background:#061520;color:#7DD3FC;padding:2px 6px;border-radius:4px">Collections</span>
+            </div>
+          </div>
+
+          <!-- Beat Plans -->
+          <div onclick="switchTabByName('beatplans')" style="background:#1A0F00;border:1px solid #3A2000;border-radius:14px;padding:16px;cursor:pointer;transition:border-color .15s" onmouseenter="this.style.borderColor='#FBBF24'" onmouseleave="this.style.borderColor='#3A2000'">
+            <div style="font-size:1.8rem;margin-bottom:8px">🗺️</div>
+            <div style="font-weight:700;color:#F1F5F9;font-size:.88rem;margin-bottom:4px">Beat Plans</div>
+            <div style="font-size:.72rem;color:#64748B;line-height:1.4">Plan rep routes, assign outlets, publish monthly plans</div>
+            <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:4px">
+              <span style="font-size:.6rem;background:#1c0f00;color:#FBBF24;padding:2px 6px;border-radius:4px">Monthly Plans</span>
+              <span style="font-size:.6rem;background:#1c0f00;color:#FBBF24;padding:2px 6px;border-radius:4px">Outlets</span>
+            </div>
+          </div>
+
+          <!-- Web Orders -->
+          <div onclick="switchTabByName('weborders')" style="background:#140D2A;border:1px solid #2D1B4E;border-radius:14px;padding:16px;cursor:pointer;transition:border-color .15s" onmouseenter="this.style.borderColor='#A855F7'" onmouseleave="this.style.borderColor='#2D1B4E'">
+            <div style="font-size:1.8rem;margin-bottom:8px">🛒</div>
+            <div style="font-weight:700;color:#F1F5F9;font-size:.88rem;margin-bottom:4px">Web Orders</div>
+            <div style="font-size:.72rem;color:#64748B;line-height:1.4">Online customer orders, delivery status, cutoff time</div>
+            <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:4px">
+              <span style="font-size:.6rem;background:#140D2A;color:#C4B5FD;padding:2px 6px;border-radius:4px">Orders</span>
+              <span style="font-size:.6rem;background:#140D2A;color:#C4B5FD;padding:2px 6px;border-radius:4px">Delivery</span>
+            </div>
+          </div>
+
+          <!-- Sales Reps -->
+          <div onclick="switchTabByName('salesreps')" style="background:#0A1A1A;border:1px solid #0C2E2E;border-radius:14px;padding:16px;cursor:pointer;transition:border-color .15s" onmouseenter="this.style.borderColor='#2DD4BF'" onmouseleave="this.style.borderColor='#0C2E2E'">
+            <div style="font-size:1.8rem;margin-bottom:8px">👷</div>
+            <div style="font-weight:700;color:#F1F5F9;font-size:.88rem;margin-bottom:4px">Sales Reps</div>
+            <div style="font-size:.72rem;color:#64748B;line-height:1.4">Manage rep accounts, areas, passwords, active status</div>
+            <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:4px">
+              <span style="font-size:.6rem;background:#061515;color:#5EEAD4;padding:2px 6px;border-radius:4px">Team</span>
+              <span style="font-size:.6rem;background:#061515;color:#5EEAD4;padding:2px 6px;border-radius:4px">Passwords</span>
+            </div>
+          </div>
+
+          <!-- Payouts & Analytics -->
+          <div onclick="switchTabByName('payouts')" style="background:#1A0A0A;border:1px solid #3A0C0C;border-radius:14px;padding:16px;cursor:pointer;transition:border-color .15s" onmouseenter="this.style.borderColor='#F87171'" onmouseleave="this.style.borderColor='#3A0C0C'">
+            <div style="font-size:1.8rem;margin-bottom:8px">💰</div>
+            <div style="font-weight:700;color:#F1F5F9;font-size:.88rem;margin-bottom:4px">Payouts & Analytics</div>
+            <div style="font-size:.72rem;color:#64748B;line-height:1.4">Influencer commissions, ROI, top coupons</div>
+            <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:4px">
+              <span style="font-size:.6rem;background:#1A0A0A;color:#FCA5A5;padding:2px 6px;border-radius:4px">Commissions</span>
+              <span style="font-size:.6rem;background:#1A0A0A;color:#FCA5A5;padding:2px 6px;border-radius:4px">ROI</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Quick stats summary -->
+        <div style="margin-top:18px;background:#111A14;border:1px solid #1E2D22;border-radius:12px;padding:14px">
+          <div style="font-size:.68rem;color:#475569;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">At a Glance</div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px" id="home-stats">
+            <div style="text-align:center"><div style="font-size:1.3rem;font-weight:700;color:#60A5FA;font-family:monospace" id="hs-inf">—</div><div style="font-size:.62rem;color:#475569">Influencers</div></div>
+            <div style="text-align:center"><div style="font-size:1.3rem;font-weight:700;color:#4ADE80;font-family:monospace" id="hs-cpn">—</div><div style="font-size:.62rem;color:#475569">Active Coupons</div></div>
+            <div style="text-align:center"><div style="font-size:1.3rem;font-weight:700;color:#FBBF24;font-family:monospace" id="hs-reps">—</div><div style="font-size:.62rem;color:#475569">Sales Reps</div></div>
+            <div style="text-align:center"><div style="font-size:1.3rem;font-weight:700;color:#C4B5FD;font-family:monospace" id="hs-worders">—</div><div style="font-size:.62rem;color:#475569">Web Orders Today</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Stats -->
-    <div class="stats">
+    <div class="stats" style="display:none" id="global-stats">
       <div class="s-card"><div class="s-lbl">Influencers</div><div class="s-val" style="color:#60A5FA" id="s-inf">—</div></div>
       <div class="s-card"><div class="s-lbl">Coupons</div><div class="s-val" style="color:#4ADE80" id="s-cpn">—</div></div>
       <div class="s-card"><div class="s-lbl">Orders via Coupon</div><div class="s-val" style="color:#FBBF24" id="s-ord">—</div></div>
@@ -830,9 +920,9 @@
   function loadAdminApp() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
-    loadStats();
-    loadInfluencers();
-    loadCoupons();
+    // Show home tab by default
+    const homeBtn = document.querySelector('.tab-btn');
+    switchTab('home', homeBtn);
   }
 
   function signOut() {
@@ -842,7 +932,7 @@
 
   // ── Tab switching ────────────────────────────────────────────
   function switchTab(name, btn) {
-    ['influencers','coupons','campaigns','samples','reviews','payouts','analytics','weborders','salesreps','beatplans','salesdash'].forEach(t => {
+    ['home','influencers','coupons','campaigns','samples','reviews','payouts','analytics','weborders','salesreps','beatplans','salesdash'].forEach(t => {
       document.getElementById('tab-' + t).style.display = t === name ? 'block' : 'none';
     });
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -857,6 +947,12 @@
     if (name === 'salesreps') loadSalesReps();
     if (name === 'beatplans') { loadSalesReps(); document.getElementById('bp-month-select').value = new Date().toISOString().slice(0,7); }
     if (name === 'salesdash') loadSalesDash();
+    if (name === 'home') loadHomeStats();
+  }
+
+  function switchTabByName(name) {
+    const btn = [...document.querySelectorAll('.tab-btn')].find(b => b.getAttribute('onclick')?.includes("'"+name+"'"));
+    if (btn) switchTab(name, btn);
   }
 
   // ── Stats ────────────────────────────────────────────────────
@@ -1821,6 +1917,21 @@
     if (error) { alert('Error: ' + error.message); return; }
     alert(`✅ Published ${data?.length || 0} plan(s).`);
     loadBeatPlan();
+  }
+
+  // ── Home Stats ──────────────────────────────────────────────
+  async function loadHomeStats() {
+    const today = new Date().toISOString().split('T')[0];
+    const [{ data: infs }, { data: cpns }, { data: reps }, { data: worders }] = await Promise.all([
+      db.from('influencers').select('id', { count: 'exact', head: true }),
+      db.from('coupons').select('id', { count: 'exact', head: true }).eq('status','active'),
+      db.from('users').select('id', { count: 'exact', head: true }).eq('role','rep').eq('is_active',true),
+      db.from('web_orders').select('id', { count: 'exact', head: true }).gte('created_at', today + 'T00:00:00'),
+    ]);
+    document.getElementById('hs-inf').textContent    = infs?.length ?? '—';
+    document.getElementById('hs-cpn').textContent    = cpns?.length ?? '—';
+    document.getElementById('hs-reps').textContent   = reps?.length ?? '—';
+    document.getElementById('hs-worders').textContent = worders?.length ?? '—';
   }
 
   // ── Sales Ops Dashboard ─────────────────────────────────────
