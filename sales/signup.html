@@ -318,17 +318,17 @@
 
     btn.disabled = true; btn.textContent = 'Sending request…';
 
-    // Check if email already exists
-    const { data: existing } = await db.from('users').select('id').eq('email', email).maybeSingle();
+    // Check if already requested
+    const { data: existing } = await db.from('staff_requests').select('id').eq('email', email).maybeSingle();
     if (existing) {
-      errEl.textContent = 'This email is already in the system. Contact your admin or try signing in.';
+      errEl.textContent = 'A request with this email already exists. Your admin will contact you.';
       errEl.classList.add('show'); btn.disabled=false; btn.textContent='Request Access →'; return;
     }
 
-    const { error } = await db.from('users').insert({
+    const { error } = await db.from('staff_requests').insert({
       name, email, phone: phone||null,
-      role, area: area||null,
-      is_active: false, // admin must activate
+      role_requested: role,
+      area: area||null,
     });
 
     if (error) {
