@@ -98,17 +98,17 @@
 
 <div class="card">
   <h2>Welcome back 👋</h2>
-  <p class="sub">Sign in to your account</p>
+  <p class="sub">Sign in with your mobile number</p>
 
   <div id="error" class="error"></div>
 
   <form id="form">
     <div class="field">
-      <label class="lbl">Email</label>
+      <label class="lbl">Mobile Number</label>
       <div class="inp-wrap">
-        <span class="ico">✉️</span>
-        <input id="email" type="email" class="inp" placeholder="you@example.com"
-               autocomplete="email" inputmode="email" required/>
+        <span class="ico">📱</span>
+        <input id="phone" type="text" class="inp" placeholder="07417427612"
+               autocomplete="tel" inputmode="numeric" required/>
       </div>
     </div>
 
@@ -131,7 +131,7 @@
     New here? <a href="signup.html">Request access / Join as partner</a>
   </div>
   <div class="links" style="margin-top:10px">
-    <a href="forgot-password.html" style="color:#475569">Forgot password?</a>
+    <a href="mailto:admin@absolutefreshfood.com?subject=Password Reset Request" style="color:#475569">Forgot password? Contact admin</a>
   </div>
 </div>
 
@@ -186,9 +186,19 @@
   document.getElementById('form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn    = document.getElementById('submit-btn');
-    const errEl  = document.getElementById('error');
-    const email  = document.getElementById('email').value.trim().toLowerCase();
+    const errEl   = document.getElementById('error');
+    const rawPhone = document.getElementById('phone').value.trim();
     const password = document.getElementById('password').value;
+
+    // Detect if input is email or phone
+    const isEmail = rawPhone.includes('@');
+    const phone = isEmail ? rawPhone.trim().toLowerCase()
+      : rawPhone.replace(/[\s\-]/g,'').replace(/^\+91/,'').replace(/^0/,'');
+
+    if (!isEmail && phone.length < 10) {
+      showError('Please enter a valid 10-digit mobile number.');
+      return;
+    }
 
     errEl.classList.remove('show');
     btn.disabled = true;
@@ -197,19 +207,23 @@
     try {
       const hash = await sha256(password);
 
+      // Build filter: phone OR email depending on what was entered
+      const userFilter   = isEmail ? `email.eq.${phone}` : `phone.eq.${phone},phone.eq.0${phone}`;
+      const infFilter    = isEmail ? `email.eq.${phone}` : `phone.eq.${phone},phone.eq.0${phone}`;
+
       // ── 1. Check users table (staff: admin, rep, driver) ──────
       const { data: user } = await db.from('users')
-        .select('*').eq('email', email).maybeSingle();
+        .select('*').or(userFilter).maybeSingle();
 
       if (user) {
-        const validHash  = user.password_hash && user.password_hash === hash;
-        const adminPin   = user.role === 'admin' && password === '123456789'; // fallback PIN
+        const validHash = user.password_hash && user.password_hash === hash;
+        const adminPin  = user.role === 'admin' && password === '123456789';
         if (!validHash && !adminPin) {
           showError('Incorrect password. Please try again.');
           btn.disabled = false; btn.textContent = 'Sign In →'; return;
         }
         if (!user.is_active) {
-          showError('Your account is inactive. Contact your admin.');
+          showError('Your account is not active yet. Your admin will contact you.');
           btn.disabled = false; btn.textContent = 'Sign In →'; return;
         }
         const session = { ...user, table: 'users' };
@@ -220,8 +234,8 @@
 
       // ── 2. Check influencers table (partners) ─────────────────
       const { data: inf } = await db.from('influencers')
-        .select('id,name,email,status,password_hash,instagram_handle,city,discount_ceiling,total_orders,total_revenue,total_commission_earned')
-        .eq('email', email).maybeSingle();
+        .select('id,name,email,phone,status,password_hash,instagram_handle,city,discount_ceiling,total_orders,total_revenue,total_commission_earned')
+        .or(infFilter).maybeSingle();
 
       if (inf) {
         if (!inf.password_hash || inf.password_hash !== hash) {
@@ -234,14 +248,13 @@
         }
         const session = { ...inf, role: 'influencer', table: 'influencers' };
         sessionStorage.setItem('aff_session', JSON.stringify(session));
-        // also set legacy key for existing dashboard.html
         localStorage.setItem('influencer', JSON.stringify(inf));
         routeUser(session);
         return;
       }
 
       // ── 3. Not found ──────────────────────────────────────────
-      showError('No account found with this email. Want to join? Sign up below.');
+      showError('No account found. Check your number or sign up below.');
 
     } catch (ex) {
       showError('Login failed. Check your connection and try again.');
