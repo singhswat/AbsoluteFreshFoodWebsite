@@ -684,7 +684,13 @@
         </select>
       </div>
     </div>
-    <div class="slbl" style="margin-bottom:8px;margin-top:4px">Tier Prices (₹ per unit)</div>
+    <div class="slbl" style="margin-bottom:8px;margin-top:4px">Pricing (₹ per unit)</div>
+    <!-- MRP row -->
+    <div class="sfield" style="background:#0A1A2A;border:1px solid #0C2A3E;border-radius:8px;padding:10px;margin-bottom:8px">
+      <label class="slbl" style="color:#F472B6;font-size:.8rem">MRP / D2C — Consumer Price (Influencers sell at this)</label>
+      <input id="product-price-0" type="number" class="sinp" placeholder="0" min="0" step="0.5"/>
+    </div>
+    <div class="slbl" style="margin-bottom:6px;color:#475569;font-size:.7rem">B2B TRADE PRICES</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <div class="sfield">
         <label class="slbl" style="color:#A78BFA">T1 — Enterprise / Chain</label>
@@ -1795,8 +1801,8 @@
 
   // ── Products ─────────────────────────────────────────────────
   let allProducts = [];
-  const TIER_LABELS = ['','Enterprise','Mega Store','Supermarket','Retail'];
-  const TIER_COLORS = ['','#A78BFA','#60A5FA','#34D399','#FBBF24'];
+  const TIER_LABELS = ['MRP/D2C','Enterprise','Mega Store','Supermarket','Retail'];
+  const TIER_COLORS = ['#F472B6','#A78BFA','#60A5FA','#34D399','#FBBF24'];
 
   async function loadProducts() {
     const tbody = document.getElementById('products-body');
@@ -1819,16 +1825,14 @@
 
     // Update thead
     const thead = tbody.closest('table').querySelector('thead tr');
-    if (thead && thead.children.length < 7) {
-      thead.innerHTML = '<th>Product</th><th>Unit</th><th style="color:#A78BFA">T1 Enterprise</th><th style="color:#60A5FA">T2 Mega</th><th style="color:#34D399">T3 Super</th><th style="color:#FBBF24">T4 Retail</th><th>Actions</th>';
-    }
+    thead.innerHTML = `<th>Product</th><th>Unit</th><th style="color:#F472B6">MRP/D2C</th><th style="color:#A78BFA">T1 Enterprise</th><th style="color:#60A5FA">T2 Mega</th><th style="color:#34D399">T3 Super</th><th style="color:#FBBF24">T4 Retail</th><th>Actions</th>`;
 
     tbody.innerHTML = allProducts.map(p => {
       const tp = priceMap[p.id] || {};
       return `<tr>
         <td style="font-weight:600;color:#F1F5F9">${p.name} <span style="font-size:.7rem;color:${p.is_active?'#4ADE80':'#78716C'}">${p.is_active?'●':'○'}</span></td>
         <td style="color:#94A3B8">${p.unit||'kg'}</td>
-        ${[1,2,3,4].map(t=>`<td style="color:${TIER_COLORS[t]}">₹${(+(tp[t]||0)).toFixed(2)}</td>`).join('')}
+        ${[0,1,2,3,4].map(t=>`<td style="color:${TIER_COLORS[t]}">₹${(+(tp[t]||0)).toFixed(2)}</td>`).join('')}
         <td style="white-space:nowrap">
           <button onclick="openEditProduct('${p.id}')" style="background:#1E2A3A;border:none;color:#7DD3FC;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:.75rem;margin-right:4px">Edit</button>
           <button onclick="toggleProduct('${p.id}',${!p.is_active})" style="background:#1A1A1A;border:none;color:${p.is_active?'#F87171':'#4ADE80'};border-radius:6px;padding:4px 10px;cursor:pointer;font-size:.75rem">${p.is_active?'Deactivate':'Activate'}</button>
@@ -1842,7 +1846,7 @@
     document.getElementById('product-id').value = '';
     document.getElementById('product-name').value = '';
     document.getElementById('product-unit').value = 'kg';
-    [1,2,3,4].forEach(t => { document.getElementById(`product-price-${t}`).value = ''; });
+    [0,1,2,3,4].forEach(t => { document.getElementById(`product-price-${t}`).value = ''; });
     document.getElementById('product-err').style.display = 'none';
     openModal('modal-product');
     document.getElementById('product-name').focus();
@@ -1856,9 +1860,8 @@
     document.getElementById('product-name').value = p.name;
     document.getElementById('product-unit').value = p.unit || 'kg';
     document.getElementById('product-err').style.display = 'none';
-    // Load existing tier prices
     const { data: prices } = await db.from('product_prices').select('tier,price').eq('product_id', id);
-    [1,2,3,4].forEach(t => {
+    [0,1,2,3,4].forEach(t => {
       const match = (prices||[]).find(x => x.tier === t);
       document.getElementById(`product-price-${t}`).value = match ? match.price : '';
     });
@@ -1870,7 +1873,7 @@
     const name = document.getElementById('product-name').value.trim();
     const unit = document.getElementById('product-unit').value;
     const errEl = document.getElementById('product-err');
-    const tierPrices = [1,2,3,4].map(t => ({
+    const tierPrices = [0,1,2,3,4].map(t => ({
       tier: t,
       price: parseFloat(document.getElementById(`product-price-${t}`).value) || 0
     }));
@@ -1878,18 +1881,18 @@
 
     let productId = id;
     let error;
-    const base_price = tierPrices[3].price; // T4 retail = base
+    const base_price = tierPrices[4].price; // T4 retail = base
+    const mrp        = tierPrices[0].price; // T0 = MRP
 
     if (id) {
-      ({ error } = await db.from('products').update({ name, unit, base_price }).eq('id', id));
+      ({ error } = await db.from('products').update({ name, unit, base_price, mrp }).eq('id', id));
     } else {
-      const { data: inserted, error: e } = await db.from('products').insert({ name, unit, base_price, is_active: true }).select('id').single();
+      const { data: inserted, error: e } = await db.from('products').insert({ name, unit, base_price, mrp, is_active: true }).select('id').single();
       error = e;
       if (inserted) productId = inserted.id;
     }
     if (error) { errEl.textContent = 'Error: ' + error.message; errEl.style.display='block'; return; }
 
-    // Upsert tier prices
     const upserts = tierPrices.map(tp => ({ product_id: productId, tier: tp.tier, price: tp.price }));
     await db.from('product_prices').upsert(upserts, { onConflict: 'product_id,tier' });
 
