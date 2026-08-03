@@ -683,9 +683,24 @@
           <option value="gm">gm</option>
         </select>
       </div>
+    </div>
+    <div class="slbl" style="margin-bottom:8px;margin-top:4px">Tier Prices (₹ per unit)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <div class="sfield">
-        <label class="slbl">Base Price (₹ per unit) *</label>
-        <input id="product-price" type="number" class="sinp" placeholder="65" min="0" step="0.5"/>
+        <label class="slbl" style="color:#A78BFA">T1 — Enterprise / Chain</label>
+        <input id="product-price-1" type="number" class="sinp" placeholder="0" min="0" step="0.5"/>
+      </div>
+      <div class="sfield">
+        <label class="slbl" style="color:#60A5FA">T2 — Mega Store</label>
+        <input id="product-price-2" type="number" class="sinp" placeholder="0" min="0" step="0.5"/>
+      </div>
+      <div class="sfield">
+        <label class="slbl" style="color:#34D399">T3 — Supermarket</label>
+        <input id="product-price-3" type="number" class="sinp" placeholder="0" min="0" step="0.5"/>
+      </div>
+      <div class="sfield">
+        <label class="slbl" style="color:#FBBF24">T4 — Retail (default)</label>
+        <input id="product-price-4" type="number" class="sinp" placeholder="0" min="0" step="0.5"/>
       </div>
     </div>
     <div class="m-actions">
@@ -1780,34 +1795,46 @@
 
   // ── Products ─────────────────────────────────────────────────
   let allProducts = [];
+  const TIER_LABELS = ['','Enterprise','Mega Store','Supermarket','Retail'];
+  const TIER_COLORS = ['','#A78BFA','#60A5FA','#34D399','#FBBF24'];
+
   async function loadProducts() {
     const tbody = document.getElementById('products-body');
     if (!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:#475569">Loading…</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:#475569">Loading…</td></tr>';
     const { data, error } = await db.from('products').select('*').order('name');
     allProducts = data || [];
     if (error || !allProducts.length) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:#475569">No products yet. Add one above.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:#475569">No products yet. Add one above.</td></tr>';
       return;
     }
-    tbody.innerHTML = allProducts.map(p => `
-      <tr>
-        <td style="font-weight:600;color:#F1F5F9">${p.name}</td>
+    // Fetch all tier prices
+    const ids = allProducts.map(p => p.id);
+    const { data: prices } = await db.from('product_prices').select('*').in('product_id', ids);
+    const priceMap = {};
+    (prices||[]).forEach(pp => {
+      if (!priceMap[pp.product_id]) priceMap[pp.product_id] = {};
+      priceMap[pp.product_id][pp.tier] = pp.price;
+    });
+
+    // Update thead
+    const thead = tbody.closest('table').querySelector('thead tr');
+    if (thead && thead.children.length < 7) {
+      thead.innerHTML = '<th>Product</th><th>Unit</th><th style="color:#A78BFA">T1 Enterprise</th><th style="color:#60A5FA">T2 Mega</th><th style="color:#34D399">T3 Super</th><th style="color:#FBBF24">T4 Retail</th><th>Actions</th>';
+    }
+
+    tbody.innerHTML = allProducts.map(p => {
+      const tp = priceMap[p.id] || {};
+      return `<tr>
+        <td style="font-weight:600;color:#F1F5F9">${p.name} <span style="font-size:.7rem;color:${p.is_active?'#4ADE80':'#78716C'}">${p.is_active?'●':'○'}</span></td>
         <td style="color:#94A3B8">${p.unit||'kg'}</td>
-        <td style="color:#F1F5F9">₹${(+p.base_price||0).toFixed(2)}</td>
-        <td><span style="padding:2px 8px;border-radius:5px;font-size:.72rem;font-weight:600;
-          background:${p.is_active?'#052e16':'#1c1917'};
-          color:${p.is_active?'#4ADE80':'#78716C'};
-          border:1px solid ${p.is_active?'#166534':'#292524'}">
-          ${p.is_active?'Active':'Inactive'}
-        </span></td>
-        <td style="color:#475569;font-size:.8rem">${p.created_at?new Date(p.created_at).toLocaleDateString('en-IN'):'-'}</td>
-        <td>
+        ${[1,2,3,4].map(t=>`<td style="color:${TIER_COLORS[t]}">₹${(+(tp[t]||0)).toFixed(2)}</td>`).join('')}
+        <td style="white-space:nowrap">
           <button onclick="openEditProduct('${p.id}')" style="background:#1E2A3A;border:none;color:#7DD3FC;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:.75rem;margin-right:4px">Edit</button>
-          <button onclick="toggleProduct('${p.id}',${!p.is_active})" style="background:#1E2A1A;border:none;color:${p.is_active?'#F87171':'#4ADE80'};border-radius:6px;padding:4px 10px;cursor:pointer;font-size:.75rem">${p.is_active?'Deactivate':'Activate'}</button>
+          <button onclick="toggleProduct('${p.id}',${!p.is_active})" style="background:#1A1A1A;border:none;color:${p.is_active?'#F87171':'#4ADE80'};border-radius:6px;padding:4px 10px;cursor:pointer;font-size:.75rem">${p.is_active?'Deactivate':'Activate'}</button>
         </td>
-      </tr>
-    `).join('');
+      </tr>`;
+    }).join('');
   }
 
   function openAddProduct() {
@@ -1815,38 +1842,57 @@
     document.getElementById('product-id').value = '';
     document.getElementById('product-name').value = '';
     document.getElementById('product-unit').value = 'kg';
-    document.getElementById('product-price').value = '';
+    [1,2,3,4].forEach(t => { document.getElementById(`product-price-${t}`).value = ''; });
     document.getElementById('product-err').style.display = 'none';
     openModal('modal-product');
     document.getElementById('product-name').focus();
   }
 
-  function openEditProduct(id) {
+  async function openEditProduct(id) {
     const p = allProducts.find(x => x.id === id);
     if (!p) return;
     document.getElementById('product-modal-title').textContent = 'Edit Product';
     document.getElementById('product-id').value = p.id;
     document.getElementById('product-name').value = p.name;
     document.getElementById('product-unit').value = p.unit || 'kg';
-    document.getElementById('product-price').value = p.base_price || '';
     document.getElementById('product-err').style.display = 'none';
+    // Load existing tier prices
+    const { data: prices } = await db.from('product_prices').select('tier,price').eq('product_id', id);
+    [1,2,3,4].forEach(t => {
+      const match = (prices||[]).find(x => x.tier === t);
+      document.getElementById(`product-price-${t}`).value = match ? match.price : '';
+    });
     openModal('modal-product');
   }
 
   async function saveProduct() {
-    const id    = document.getElementById('product-id').value;
-    const name  = document.getElementById('product-name').value.trim();
-    const unit  = document.getElementById('product-unit').value;
-    const price = parseFloat(document.getElementById('product-price').value) || 0;
+    const id   = document.getElementById('product-id').value;
+    const name = document.getElementById('product-name').value.trim();
+    const unit = document.getElementById('product-unit').value;
     const errEl = document.getElementById('product-err');
+    const tierPrices = [1,2,3,4].map(t => ({
+      tier: t,
+      price: parseFloat(document.getElementById(`product-price-${t}`).value) || 0
+    }));
     if (!name) { errEl.textContent = 'Product name is required.'; errEl.style.display='block'; return; }
+
+    let productId = id;
     let error;
+    const base_price = tierPrices[3].price; // T4 retail = base
+
     if (id) {
-      ({ error } = await db.from('products').update({ name, unit, base_price: price }).eq('id', id));
+      ({ error } = await db.from('products').update({ name, unit, base_price }).eq('id', id));
     } else {
-      ({ error } = await db.from('products').insert({ name, unit, base_price: price, is_active: true }));
+      const { data: inserted, error: e } = await db.from('products').insert({ name, unit, base_price, is_active: true }).select('id').single();
+      error = e;
+      if (inserted) productId = inserted.id;
     }
     if (error) { errEl.textContent = 'Error: ' + error.message; errEl.style.display='block'; return; }
+
+    // Upsert tier prices
+    const upserts = tierPrices.map(tp => ({ product_id: productId, tier: tp.tier, price: tp.price }));
+    await db.from('product_prices').upsert(upserts, { onConflict: 'product_id,tier' });
+
     closeModal('modal-product');
     loadProducts();
   }

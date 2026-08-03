@@ -219,6 +219,17 @@
         <input id="o-phone" type="tel" class="finp" placeholder="9876543210"/>
       </div>
     </div>
+    <div class="form-row" style="margin-top:8px">
+      <div class="form-grp" style="margin:0;flex:1">
+        <label class="flbl">Price Tier</label>
+        <select id="o-tier" class="finp">
+          <option value="4">T4 — Retail (default)</option>
+          <option value="3">T3 — Supermarket</option>
+          <option value="2">T2 — Mega Store</option>
+          <option value="1">T1 — Enterprise / Chain</option>
+        </select>
+      </div>
+    </div>
     <div class="m-actions" style="margin-top:14px">
       <button class="m-cancel" onclick="closeOutletModal()">Cancel</button>
       <button class="m-submit blue" id="o-submit" onclick="submitOutlet()">Submit</button>
@@ -249,19 +260,37 @@
     await loadDay();
   })();
 
+  let tierPrices = {}; // { product_id: { 1: price, 2: price, ... } }
+
   async function loadProducts(){
     const{data}=await db.from('products').select('*').eq('is_active',true).order('name');
     products=data||[];
-    const opts = products.map(p=>`<option value="${p.id}" data-price="${p.base_price}">${p.name} — &#8377;${p.base_price}/kg</option>`).join('');
+    // Load tier prices for all products
+    if (products.length) {
+      const ids = products.map(p=>p.id);
+      const{data:tp}=await db.from('product_prices').select('product_id,tier,price').in('product_id',ids);
+      tierPrices={};
+      (tp||[]).forEach(r=>{
+        if(!tierPrices[r.product_id]) tierPrices[r.product_id]={};
+        tierPrices[r.product_id][r.tier]=parseFloat(r.price);
+      });
+    }
+    const opts = products.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
     document.getElementById('m-product').innerHTML = opts;
   }
 
   async function loadOutlets(){
-    const{data}=await db.from('outlets').select('id,name,area')
+    const{data}=await db.from('outlets').select('id,name,area,price_tier')
       .eq('rep_id',currentUser.id).eq('status','active').order('name');
     myOutlets=data||[];
     document.getElementById('m-outlet').innerHTML =
-      myOutlets.map(o=>`<option value="${o.id}">${o.name} — ${o.area}</option>`).join('');
+      myOutlets.map(o=>`<option value="${o.id}" data-tier="${o.price_tier||4}">${o.name} — ${o.area} (T${o.price_tier||4})</option>`).join('');
+  }
+
+  function getOutletTier(outletId) {
+    const sel = document.getElementById('m-outlet');
+    const opt = [...sel.options].find(o=>o.value===outletId);
+    return parseInt(opt?.dataset.tier||4);
   }
 
   function changeDate(d){
@@ -439,9 +468,14 @@
 
   function calcInv(){
     const sel=document.getElementById('m-product');
+    const productId=sel.value;
     const kg=parseFloat(document.getElementById('m-kg').value)||0;
-    const price=parseFloat(sel.selectedOptions[0]?.dataset.price)||0;
-    document.getElementById('m-inv').textContent=kg>0?fmt.inr(kg*price):'₹ —';
+    const outletId=document.getElementById('m-outlet').value;
+    const tier=getOutletTier(outletId);
+    const price=(tierPrices[productId]&&tierPrices[productId][tier])||0;
+    // Show tier label in invoice line
+    const TIER_NAMES=['','Enterprise','Mega','Super','Retail'];
+    document.getElementById('m-inv').textContent=kg>0?`${fmt.inr(kg*price)} @ ₹${price}/${TIER_NAMES[tier]}`:'₹ —';
   }
 
   async function submitOrder(){
@@ -501,6 +535,7 @@
   // ── Add Outlet modal ───────────────────────────────────────
   function openAddOutlet(){
     ['o-name','o-area','o-owner','o-phone'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('o-tier').value='4';
     document.getElementById('outlet-err').classList.remove('show');
     document.getElementById('outlet-modal').classList.add('show');
   }
@@ -508,6 +543,7 @@
   async function submitOutlet(){
     const name=document.getElementById('o-name').value.trim();
     const area=document.getElementById('o-area').value.trim();
+    const tier=parseInt(document.getElementById('o-tier').value)||4;
     const err=document.getElementById('outlet-err');
     const btn=document.getElementById('o-submit');
     if(!name||!area){err.textContent='Name and area required';err.classList.add('show');return;}
@@ -516,10 +552,12 @@
       name,area,
       owner_name:document.getElementById('o-owner').value.trim()||null,
       phone:document.getElementById('o-phone').value.trim()||null,
-      rep_id:currentUser.id,status:'prospect'
+      rep_id:currentUser.id,
+      status:'active',
+      price_tier:tier
     });
     closeOutletModal();
-    showToast('Outlet submitted - admin will activate it');
+    showToast('Outlet added ✅');
     btn.disabled=false;btn.textContent='Submit';
     await loadOutlets();
   }
