@@ -180,6 +180,7 @@
     <button class="tab-btn" onclick="switchTab('payouts',this)">💰 Payouts</button>
     <button class="tab-btn" onclick="switchTab('analytics',this)">📊 Analytics</button>
     <button class="tab-btn" onclick="switchTab('weborders',this)">🛒 Web Orders</button>
+    <button class="tab-btn" onclick="switchTab('products',this)">🥬 Products</button>
     <button class="tab-btn" onclick="switchTab('salesreps',this)">👷 Sales Reps</button>
     <button class="tab-btn" onclick="switchTab('beatplans',this)">🗺️ Beat Plans</button>
     <button class="tab-btn" onclick="switchTab('salesdash',this)">📊 Sales Ops</button>
@@ -512,11 +513,56 @@
     </div>
 
 
+    <!-- ═══════════ PRODUCTS ═══════════ -->
+    <div id="tab-products" style="display:none">
+      <div class="toolbar">
+        <button class="add-btn" onclick="openAddProduct()">+ Add Product</button>
+      </div>
+      <div class="grid-wrap">
+        <table>
+          <thead><tr>
+            <th>Product Name</th>
+            <th>Unit</th>
+            <th>Base Price</th>
+            <th>Status</th>
+            <th>Added</th>
+            <th>Actions</th>
+          </tr></thead>
+          <tbody id="products-body"><tr class="empty-row"><td colspan="6">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- ═══════════ SALES REPS ═══════════ -->
     <div id="tab-salesreps" style="display:none">
-      <div class="toolbar">
-        <button class="add-btn" onclick="openAddRepModal()">+ Add Rep</button>
+
+      <!-- ── Pending Signup Requests ── -->
+      <div id="pending-requests-section" style="margin-bottom:20px">
+        <div class="section-head" style="display:flex;align-items:center;gap:10px">
+          ⏳ Pending Signup Requests
+          <span id="pending-count-badge" style="background:#7C2D12;color:#FCA5A5;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:20px;display:none">0</span>
+        </div>
+        <div class="grid-wrap">
+          <table>
+            <thead><tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Role</th>
+              <th>Area</th>
+              <th>Requested</th>
+              <th>Actions</th>
+            </tr></thead>
+            <tbody id="requests-body"><tr class="empty-row"><td colspan="7">Loading…</td></tr></tbody>
+          </table>
+        </div>
       </div>
+
+      <!-- ── Active Reps ── -->
+      <div class="toolbar">
+        <button class="add-btn" onclick="openAddRepModal()">+ Add Rep Manually</button>
+      </div>
+      <div class="section-head">Active Staff</div>
       <div class="grid-wrap">
         <table>
           <thead><tr>
@@ -611,6 +657,41 @@
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- ════ MODAL: Add / Edit Product ════ -->
+<div class="modal-overlay" id="modal-product">
+  <div class="sheet">
+    <div class="handle"></div>
+    <h3 id="product-modal-title">Add Product</h3>
+    <div class="sheet-sub">Products appear in beat plans and orders</div>
+    <input type="hidden" id="product-id"/>
+    <div id="product-err" style="background:#450a0a;border:1px solid #7f1d1d;color:#FCA5A5;border-radius:8px;padding:10px;font-size:.8rem;margin-bottom:10px;display:none"></div>
+    <div class="sfield">
+      <label class="slbl">Product Name *</label>
+      <input id="product-name" class="sinp" placeholder="Idli &amp; Dosa Batter 1kg"/>
+    </div>
+    <div class="srow">
+      <div class="sfield">
+        <label class="slbl">Unit</label>
+        <select id="product-unit" class="sinp">
+          <option value="kg">kg</option>
+          <option value="litre">litre</option>
+          <option value="pcs">pcs</option>
+          <option value="pack">pack</option>
+          <option value="gm">gm</option>
+        </select>
+      </div>
+      <div class="sfield">
+        <label class="slbl">Base Price (₹ per unit) *</label>
+        <input id="product-price" type="number" class="sinp" placeholder="65" min="0" step="0.5"/>
+      </div>
+    </div>
+    <div class="m-actions">
+      <button class="m-cancel" onclick="closeModal('modal-product')">Cancel</button>
+      <button class="m-save" onclick="saveProduct()">Save Product ✅</button>
+    </div>
   </div>
 </div>
 
@@ -924,6 +1005,11 @@
     loadAdminApp();
   });
 
+  async function sha256(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
   function loadAdminApp() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
@@ -940,7 +1026,7 @@
 
   // ── Tab switching ────────────────────────────────────────────
   function switchTab(name, btn) {
-    ['home','influencers','coupons','campaigns','samples','reviews','payouts','analytics','weborders','salesreps','beatplans','salesdash'].forEach(t => {
+    ['home','influencers','coupons','campaigns','samples','reviews','payouts','analytics','weborders','products','salesreps','beatplans','salesdash'].forEach(t => {
       document.getElementById('tab-' + t).style.display = t === name ? 'block' : 'none';
     });
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -952,7 +1038,8 @@
     if (name === 'payouts') loadPayouts();
     if (name === 'analytics') loadAnalytics();
     if (name === 'weborders') loadWebOrders('today');
-    if (name === 'salesreps') loadSalesReps();
+    if (name === 'products') loadProducts();
+    if (name === 'salesreps') { loadPendingRequests(); loadSalesReps(); }
     if (name === 'beatplans') { loadSalesReps(); document.getElementById('bp-month-select').value = new Date().toISOString().slice(0,7); }
     if (name === 'salesdash') loadSalesDash();
     if (name === 'home') loadHomeStats();
@@ -1563,8 +1650,10 @@
   function openModal(id) { document.getElementById(id).classList.add('show'); }
   function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 
+  // modal-product uses the same closeModal pattern (class-based)
+
   // Close modals on backdrop click
-  ['ceiling-modal','campaign-modal','review-modal','payout-modal','sample-modal','modal-edit-weborder','modal-set-password','modal-add-rep','modal-add-outlet-bp'].forEach(id => {
+  ['ceiling-modal','campaign-modal','review-modal','payout-modal','sample-modal','modal-edit-weborder','modal-set-password','modal-add-rep','modal-add-outlet-bp','modal-product'].forEach(id => {
     document.getElementById(id).addEventListener('click', e => {
       if (e.target.id === id) closeModal(id);
     });
@@ -1688,6 +1777,143 @@
   // Init cutoff display from localStorage
   const _storedHour = localStorage.getItem('aff_cutoff_hour');
   if (_storedHour) document.getElementById('cutoff-time-input').value = _storedHour.padStart(2,'0') + ':00';
+
+  // ── Products ─────────────────────────────────────────────────
+  let allProducts = [];
+  async function loadProducts() {
+    const tbody = document.getElementById('products-body');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:#475569">Loading…</td></tr>';
+    const { data, error } = await db.from('products').select('*').order('name');
+    allProducts = data || [];
+    if (error || !allProducts.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:#475569">No products yet. Add one above.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = allProducts.map(p => `
+      <tr>
+        <td style="font-weight:600;color:#F1F5F9">${p.name}</td>
+        <td style="color:#94A3B8">${p.unit||'kg'}</td>
+        <td style="color:#F1F5F9">₹${(+p.base_price||0).toFixed(2)}</td>
+        <td><span style="padding:2px 8px;border-radius:5px;font-size:.72rem;font-weight:600;
+          background:${p.is_active?'#052e16':'#1c1917'};
+          color:${p.is_active?'#4ADE80':'#78716C'};
+          border:1px solid ${p.is_active?'#166534':'#292524'}">
+          ${p.is_active?'Active':'Inactive'}
+        </span></td>
+        <td style="color:#475569;font-size:.8rem">${p.created_at?new Date(p.created_at).toLocaleDateString('en-IN'):'-'}</td>
+        <td>
+          <button onclick="openEditProduct('${p.id}')" style="background:#1E2A3A;border:none;color:#7DD3FC;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:.75rem;margin-right:4px">Edit</button>
+          <button onclick="toggleProduct('${p.id}',${!p.is_active})" style="background:#1E2A1A;border:none;color:${p.is_active?'#F87171':'#4ADE80'};border-radius:6px;padding:4px 10px;cursor:pointer;font-size:.75rem">${p.is_active?'Deactivate':'Activate'}</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function openAddProduct() {
+    document.getElementById('product-modal-title').textContent = 'Add Product';
+    document.getElementById('product-id').value = '';
+    document.getElementById('product-name').value = '';
+    document.getElementById('product-unit').value = 'kg';
+    document.getElementById('product-price').value = '';
+    document.getElementById('product-err').style.display = 'none';
+    openModal('modal-product');
+    document.getElementById('product-name').focus();
+  }
+
+  function openEditProduct(id) {
+    const p = allProducts.find(x => x.id === id);
+    if (!p) return;
+    document.getElementById('product-modal-title').textContent = 'Edit Product';
+    document.getElementById('product-id').value = p.id;
+    document.getElementById('product-name').value = p.name;
+    document.getElementById('product-unit').value = p.unit || 'kg';
+    document.getElementById('product-price').value = p.base_price || '';
+    document.getElementById('product-err').style.display = 'none';
+    openModal('modal-product');
+  }
+
+  async function saveProduct() {
+    const id    = document.getElementById('product-id').value;
+    const name  = document.getElementById('product-name').value.trim();
+    const unit  = document.getElementById('product-unit').value;
+    const price = parseFloat(document.getElementById('product-price').value) || 0;
+    const errEl = document.getElementById('product-err');
+    if (!name) { errEl.textContent = 'Product name is required.'; errEl.style.display='block'; return; }
+    let error;
+    if (id) {
+      ({ error } = await db.from('products').update({ name, unit, base_price: price }).eq('id', id));
+    } else {
+      ({ error } = await db.from('products').insert({ name, unit, base_price: price, is_active: true }));
+    }
+    if (error) { errEl.textContent = 'Error: ' + error.message; errEl.style.display='block'; return; }
+    closeModal('modal-product');
+    loadProducts();
+  }
+
+  async function toggleProduct(id, newState) {
+    await db.from('products').update({ is_active: newState }).eq('id', id);
+    loadProducts();
+  }
+
+  // ── Pending Signup Requests ──────────────────────────────────
+  async function loadPendingRequests() {
+    const tbody = document.getElementById('requests-body');
+    const badge = document.getElementById('pending-count-badge');
+    if (!tbody) return;
+    const { data } = await db.from('staff_requests').select('*').eq('status','pending').order('created_at');
+    const rows = data || [];
+    if (badge) {
+      badge.textContent = rows.length;
+      badge.style.display = rows.length ? 'inline' : 'none';
+    }
+    if (!rows.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="7">No pending requests 🎉</td></tr>';
+      return;
+    }
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td style="font-weight:600;color:#F1F5F9">${r.name}</td>
+        <td style="color:#94A3B8">${r.email||'—'}</td>
+        <td style="color:#94A3B8">${r.phone||'—'}</td>
+        <td><span style="background:#0A1929;color:#7DD3FC;border:1px solid #0C2A3E;border-radius:5px;padding:2px 8px;font-size:.72rem;font-weight:600">${r.role_requested||'rep'}</span></td>
+        <td style="color:#94A3B8">${r.area||'—'}</td>
+        <td style="color:#475569;font-size:.78rem">${r.created_at?new Date(r.created_at).toLocaleDateString('en-IN'):'-'}</td>
+        <td style="display:flex;gap:6px">
+          <button onclick="approveRequest('${r.id}','${esc(r.name)}','${r.email||''}','${r.phone||''}','${r.role_requested||'rep'}','${r.area||''}')"
+            style="background:#052e16;border:1px solid #166534;color:#4ADE80;border-radius:6px;padding:5px 12px;cursor:pointer;font-size:.75rem;font-weight:600">✅ Approve</button>
+          <button onclick="rejectRequest('${r.id}')"
+            style="background:#1A0000;border:1px solid #3A0000;color:#F87171;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:.75rem">✗</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  async function approveRequest(reqId, name, email, phone, role, area) {
+    if (!confirm(`Approve ${name} as ${role}?`)) return;
+    const pw = prompt(`Set a temporary password for ${name}:`);
+    if (!pw) return;
+    const hash = await sha256(pw);
+    // Insert into users table
+    const { error } = await db.from('users').insert({
+      name, email: email||null, phone: phone||null,
+      role, area: area||null,
+      password_hash: hash,
+      is_active: true
+    });
+    if (error) { alert('Error creating user: ' + error.message); return; }
+    // Mark request as approved
+    await db.from('staff_requests').update({ status: 'approved' }).eq('id', reqId);
+    alert(`✅ ${name} approved! Temporary password: ${pw}\nPlease share this with them.`);
+    loadPendingRequests();
+    loadSalesReps();
+  }
+
+  async function rejectRequest(reqId) {
+    if (!confirm('Reject and remove this request?')) return;
+    await db.from('staff_requests').update({ status: 'rejected' }).eq('id', reqId);
+    loadPendingRequests();
+  }
 
   // ── Sales Reps ───────────────────────────────────────────────
   let allReps = [];

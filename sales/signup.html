@@ -336,6 +336,21 @@
       errEl.classList.add('show'); btn.disabled=false; btn.textContent='Request Access →'; return;
     }
 
+    // Notify admin by email via Web3Forms (free, no backend)
+    const WEB3FORMS_KEY = 'e15ea46f-4d94-4d42-8677-36642692d1e1';
+    if (WEB3FORMS_KEY !== 'YOUR_WEB3FORMS_KEY') {
+      fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          access_key: WEB3FORMS_KEY,
+          subject: `New ${role} signup request — ${name}`,
+          from_name: 'Absolute Fresh Portal',
+          message: `New access request received:\n\nName: ${name}\nRole: ${role}\nEmail: ${email}\nPhone: ${phone}\nArea: ${area||'—'}\n\nReview in admin panel → sales.absolutefreshfood.com/marketing/admin.html`
+        })
+      }).catch(() => {}); // fire and forget
+    }
+
     showDone('📋', 'Access Request Sent!',
       `Your request has been submitted, ${name}. The admin will review it, assign your area and activate your account. You'll be contacted on ${phone}.`);
   }
