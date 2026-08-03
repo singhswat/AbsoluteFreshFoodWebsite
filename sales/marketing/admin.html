@@ -1959,7 +1959,8 @@
     });
     if (error) { alert('Error creating account: ' + error.message); return; }
 
-    // Mark request approved
+    // Mark ALL requests for this email as approved (handles duplicate signups)
+    await db.from('staff_requests').update({ status: 'approved' }).eq('email', email||'__none__');
     await db.from('staff_requests').update({ status: 'approved' }).eq('id', reqId);
 
     const loginId = email || phone;
