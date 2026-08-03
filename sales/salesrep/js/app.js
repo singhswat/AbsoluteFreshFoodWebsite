@@ -19,41 +19,7 @@ const ACTIVE_ENV = 'dev';
 const SUPABASE_URL  = ENV[ACTIVE_ENV].url;
 const SUPABASE_ANON = ENV[ACTIVE_ENV].anon;
 
-// Apply theme based on environment
-document.addEventListener('DOMContentLoaded', () => {
-  if (ACTIVE_ENV === 'dev') {
-    // Green theme for DEV — instantly obvious this is not production
-    const style = document.createElement('style');
-    style.textContent = `
-      :root {
-        --blue:    #22C55E !important;
-        --blue-bg: #052e16 !important;
-      }
-      .sidebar-brand { border-bottom: 2px solid #22C55E !important; }
-      .top-bar, .sidebar { border-color: #166534 !important; }
-      .btn-primary { background: #16A34A !important; color: #fff !important; }
-      .btn-primary:hover { background: #15803D !important; }
-      .nav-link.active, .nav-link:hover { background: #052e16 !important; color: #22C55E !important; }
-      .nav-btn.active { background: #052e16 !important; }
-      .nav-btn.active .label { color: #22C55E !important; }
-      .order-btn { background: #16A34A !important; }
-    `;
-    document.head.appendChild(style);
-
-    // DEV banner at top
-    const banner = document.createElement('div');
-    banner.textContent = '🟢 TEST / DEV ENVIRONMENT — Not live data';
-    banner.style.cssText = `
-      position:fixed; top:0; left:0; right:0; z-index:99999;
-      background:#14532D; color:#86EFAC; font-size:11px; font-weight:700;
-      text-align:center; padding:4px; letter-spacing:0.05em;
-      border-bottom:1px solid #166534; pointer-events:none;
-    `;
-    document.body.appendChild(banner);
-    // Push content down so banner doesn't cover top bar
-    document.body.style.paddingTop = '26px';
-  }
-});
+// No dev/prod theming needed — single environment
 
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON);
