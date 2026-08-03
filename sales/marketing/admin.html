@@ -1913,21 +1913,30 @@
     // Mark request approved
     await db.from('staff_requests').update({ status: 'approved' }).eq('id', reqId);
 
-    // Email the rep their credentials
     const loginId = email || phone;
+
+    // 1. Notify admin
     fetch('https://api.web3forms.com/submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         access_key: 'e15ea46f-4d94-4d42-8677-36642692d1e1',
-        to: email || 'proxybon@gmail.com',
-        subject: `Welcome to Absolute Fresh — Your login details`,
-        from_name: 'Absolute Fresh Admin',
-        message: `Hi ${name},\n\nYour account has been approved! Here are your login details:\n\nPortal: https://sales.absolutefreshfood.com/login.html\nLogin ID: ${loginId}\nTemp Password: ${tempPw}\n\nPlease log in and change your password.\n\nRole: ${role}\nArea: ${area||'—'}\n\n— Absolute Fresh Team`
+        subject: `✅ Approved: ${name} (${role}) — Absolute Fresh`,
+        from_name: 'Absolute Fresh Portal',
+        message: `You approved ${name} as ${role}.\n\nLogin: ${loginId}\nTemp Password: ${tempPw}\nArea: ${area||'—'}`
       })
     }).catch(()=>{});
 
-    alert(`✅ ${name} approved!\n\nTemp password: ${tempPw}\n\nEmail sent to: ${email||'(no email — share password manually)'}`);
+    // 2. Open pre-filled email to rep (one-click send)
+    if (email) {
+      const repSubject = encodeURIComponent('Welcome to Absolute Fresh — Your login details');
+      const repBody = encodeURIComponent(
+        `Hi ${name},\n\nYour account has been approved! Here are your login details:\n\nPortal: https://sales.absolutefreshfood.com/login.html\nLogin ID: ${loginId}\nTemporary Password: ${tempPw}\n\nPlease log in with the above password.\nRole: ${role} | Area: ${area||'—'}\n\nWelcome to the team!\n— Absolute Fresh`
+      );
+      window.open(`mailto:${email}?subject=${repSubject}&body=${repBody}`, '_blank');
+    }
+
+    alert(`✅ ${name} approved!\nTemp password: ${tempPw}\n\n${email ? 'Your email app opened — just hit Send to notify them.' : 'No email on file — share the password via phone: ' + phone}`);
     loadPendingRequests();
     loadSalesReps();
   }
