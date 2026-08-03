@@ -1889,22 +1889,45 @@
     `).join('');
   }
 
+  function genTempPassword() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+    return Array.from(crypto.getRandomValues(new Uint8Array(8)))
+      .map(b => chars[b % chars.length]).join('');
+  }
+
   async function approveRequest(reqId, name, email, phone, role, area) {
-    if (!confirm(`Approve ${name} as ${role}?`)) return;
-    const pw = prompt(`Set a temporary password for ${name}:`);
-    if (!pw) return;
-    const hash = await sha256(pw);
-    // Insert into users table
+    if (!confirm(`Approve ${name} as ${role}?\nA temporary password will be auto-generated and emailed to them.`)) return;
+
+    const tempPw = genTempPassword();
+    const hash   = await sha256(tempPw);
+
+    // Create user account
     const { error } = await db.from('users').insert({
       name, email: email||null, phone: phone||null,
       role, area: area||null,
       password_hash: hash,
       is_active: true
     });
-    if (error) { alert('Error creating user: ' + error.message); return; }
-    // Mark request as approved
+    if (error) { alert('Error creating account: ' + error.message); return; }
+
+    // Mark request approved
     await db.from('staff_requests').update({ status: 'approved' }).eq('id', reqId);
-    alert(`✅ ${name} approved! Temporary password: ${pw}\nPlease share this with them.`);
+
+    // Email the rep their credentials
+    const loginId = email || phone;
+    fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        access_key: 'e15ea46f-4d94-4d42-8677-36642692d1e1',
+        to: email || 'proxybon@gmail.com',
+        subject: `Welcome to Absolute Fresh — Your login details`,
+        from_name: 'Absolute Fresh Admin',
+        message: `Hi ${name},\n\nYour account has been approved! Here are your login details:\n\nPortal: https://sales.absolutefreshfood.com/login.html\nLogin ID: ${loginId}\nTemp Password: ${tempPw}\n\nPlease log in and change your password.\n\nRole: ${role}\nArea: ${area||'—'}\n\n— Absolute Fresh Team`
+      })
+    }).catch(()=>{});
+
+    alert(`✅ ${name} approved!\n\nTemp password: ${tempPw}\n\nEmail sent to: ${email||'(no email — share password manually)'}`);
     loadPendingRequests();
     loadSalesReps();
   }
