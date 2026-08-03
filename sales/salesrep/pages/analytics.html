@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FL4T5WHM8W"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FL4T5WHM8W');
+  </script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Analytics — AFF</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    .action-bar{display:flex;gap:8px;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap}
+    .action-bar select,.action-bar input[type=month]{background:#0F172A;border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 10px;font-size:.85rem}
+    .analytics-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem}
+    .analytics-grid.full{grid-template-columns:1fr}
+    .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem}
+    .chart-title{font-size:.85rem;font-weight:600;color:#CBD5E1;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center}
+    .chart-wrap{position:relative;height:220px}
+    /* Scorecard table */
+    .score-table{width:100%;border-collapse:collapse;font-size:.85rem}
+    .score-table th{background:#1E293B;color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;padding:.6rem .75rem;text-align:left;border-bottom:1px solid var(--border)}
+    .score-table td{padding:.6rem .75rem;border-bottom:1px solid #1E293B;color:#CBD5E1;vertical-align:middle}
+    .score-table tr:last-child td{border-bottom:none}
+    .score-table tr:hover td{background:#1E293B55}
+    .progress-bar{height:6px;background:#1E293B;border-radius:3px;overflow:hidden;min-width:80px}
+    .progress-fill{height:100%;border-radius:3px;transition:width .4s}
+    /* Heatmap */
+    .heatmap-wrap{overflow-x:auto}
+    .heatmap{border-collapse:collapse;font-size:.78rem;min-width:600px}
+    .heatmap th{padding:.5rem .6rem;color:var(--muted);font-weight:500;text-align:center;white-space:nowrap}
+    .heatmap td{padding:.4rem .6rem;text-align:center;border-radius:4px;cursor:default;transition:opacity .15s;white-space:nowrap}
+    .heatmap td:hover{opacity:.8}
+    .heatmap .row-label{text-align:left;font-weight:500;color:#CBD5E1;white-space:nowrap;padding-right:1rem}
+    /* SKU cards */
+    .sku-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.75rem}
+    .sku-card{background:#0F172A;border:1px solid var(--border);border-radius:10px;padding:.85rem;text-align:center}
+    .sku-name{font-size:.82rem;font-weight:600;color:#F1F5F9;margin-bottom:6px}
+    .sku-kg{font-size:1.5rem;font-weight:700;font-family:monospace;color:var(--blue)}
+    .sku-pct{font-size:.75rem;color:var(--muted);margin-top:2px}
+    .sku-trend{font-size:.72rem;margin-top:4px}
+    /* Rep scorecard */
+    .rank-badge{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:.75rem;font-weight:700}
+    .rank-1{background:#F59E0B;color:#000}
+    .rank-2{background:#94A3B8;color:#000}
+    .rank-3{background:#CD7C40;color:#000}
+    .rank-other{background:#1E293B;color:var(--muted)}
+    /* Production recommendation */
+    .prod-rec{background:linear-gradient(135deg,#0c2340,#052e16);border:1px solid #1D4ED8;border-radius:12px;padding:1.25rem;margin-bottom:1.5rem}
+    .prod-rec-title{font-size:.85rem;font-weight:600;color:var(--blue);margin-bottom:.75rem}
+    .prod-rec-row{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.06)}
+    .prod-rec-row:last-child{border-bottom:none}
+  </style>
+</head>
+<body>
+<div class="admin-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand"><span class="brand-icon">🥬</span><span class="brand-name">AFF Sales</span></div>
+    <nav class="sidebar-nav">
+      <a class="nav-link" href="dashboard.html">📊 Dashboard</a>
+      <a class="nav-link" href="beatplan.html">📋 Beat Plans</a>
+      <a class="nav-link" href="outlets.html">🏪 Outlets</a>
+      <a class="nav-link" href="orders.html">📦 Orders</a>
+      <a class="nav-link" href="deliveries-admin.html">🚚 Deliveries</a>
+      <a class="nav-link" href="collections.html">💰 Collections</a>
+      <a class="nav-link active" href="analytics.html">📈 Analytics</a>
+      <a class="nav-link" href="ledger.html">📒 Ledger</a>
+      <a class="nav-link" href="team.html">👥 Team</a>
+      <a class="nav-link" href="settings.html">⚙️ Settings</a>
+    </nav>
+    <div class="sidebar-footer"><button class="btn btn-ghost btn-sm btn-full" onclick="signOut()">Sign Out</button></div>
+  </aside>
+
+  <main class="admin-main">
+    <div class="topbar">
+      <strong>Analytics & Production Planning</strong>
+    </div>
+    <div class="content">
+
+      <!-- Filters -->
+      <div class="action-bar">
+        <input type="month" id="f-month"/>
+        <select id="f-rep"><option value="">All Reps</option></select>
+        <select id="f-area"><option value="">All Areas</option></select>
+        <button class="btn btn-primary btn-sm" onclick="loadAll()">Apply</button>
+        <button class="btn btn-ghost btn-sm" onclick="exportReport()">⬇ Export Report</button>
+      </div>
+
+      <!-- Production Recommendation -->
+      <div class="prod-rec" id="prod-rec" style="display:none">
+        <div class="prod-rec-title">🏭 Production Recommendation — Based on this month's orders</div>
+        <div id="prod-rec-rows"></div>
+        <div style="font-size:.75rem;color:var(--muted);margin-top:.75rem">
+          Based on avg daily demand × 1.1 buffer. Adjust for holidays and promotions.
+        </div>
+      </div>
+
+      <!-- SKU breakdown -->
+      <div class="chart-card" style="margin-bottom:1rem">
+        <div class="chart-title">
+          SKU Performance — Which products are selling
+          <span id="sku-total" style="font-family:monospace;color:var(--green)"></span>
+        </div>
+        <div class="sku-grid" id="sku-grid">
+          <div style="color:var(--muted);font-size:.85rem">Loading...</div>
+        </div>
+      </div>
+
+      <!-- Charts row -->
+      <div class="analytics-grid">
+        <div class="chart-card">
+          <div class="chart-title">Daily Orders (kg)</div>
+          <div class="chart-wrap"><canvas id="daily-chart"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">SKU Mix (%)</div>
+          <div class="chart-wrap"><canvas id="sku-chart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Area heatmap -->
+      <div class="chart-card" style="margin-bottom:1rem">
+        <div class="chart-title">Area × Day Heatmap — Where orders come from each day</div>
+        <div class="heatmap-wrap" id="heatmap-wrap">
+          <div style="color:var(--muted);font-size:.85rem">Loading...</div>
+        </div>
+      </div>
+
+      <!-- Rep Scorecard -->
+      <div class="chart-card" style="margin-bottom:1rem">
+        <div class="chart-title">Rep Scorecard</div>
+        <div style="overflow-x:auto">
+          <table class="score-table" id="rep-scorecard">
+            <thead>
+              <tr>
+                <th>#</th><th>Rep</th><th>Area</th>
+                <th>Orders</th><th>Kg</th><th>Revenue ₹</th>
+                <th>Fill Rate</th><th>Outlets</th><th>Avg kg/order</th>
+                <th>vs Target</th>
+              </tr>
+            </thead>
+            <tbody id="scorecard-body">
+              <tr><td colspan="10" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Outlet scorecard -->
+      <div class="chart-card" style="margin-bottom:1rem">
+        <div class="chart-title">Top Outlets by Volume</div>
+        <div style="overflow-x:auto">
+          <table class="score-table" id="outlet-scorecard">
+            <thead>
+              <tr>
+                <th>#</th><th>Outlet</th><th>Area</th><th>Rep</th>
+                <th>Orders</th><th>Total kg</th><th>Revenue ₹</th><th>Avg kg/order</th>
+              </tr>
+            </thead>
+            <tbody id="outlet-body">
+              <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/app.js"></script>
+<script>
+  let dailyChart, skuChart;
+  const now = new Date();
+  document.getElementById('f-month').value =
+    `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+
+  (async () => {
+    const user = await getUser();
+    if (!user || user.role !== 'admin') { location.href='dashboard.html'; return; }
+
+    // Load rep filter
+    const { data: reps } = await db.from('users').select('id,name').eq('role','rep').eq('is_active',true);
+    const repSel = document.getElementById('f-rep');
+    repSel.innerHTML = '<option value="">All Reps</option>' +
+      (reps||[]).map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
+
+    // Load area filter
+    const { data: areas } = await db.from('outlets').select('area').eq('status','active');
+    const uniqueAreas = [...new Set((areas||[]).map(a=>a.area))].sort();
+    const areaSel = document.getElementById('f-area');
+    areaSel.innerHTML = '<option value="">All Areas</option>' +
+      uniqueAreas.map(a=>`<option value="${a}">${a}</option>`).join('');
+
+    await loadAll();
+  })();
+
+  async function loadAll() {
+    const month  = document.getElementById('f-month').value;
+    const repId  = document.getElementById('f-rep').value;
+    const area   = document.getElementById('f-area').value;
+    const from   = month + '-01';
+    const toDate = new Date(month + '-01');
+    toDate.setMonth(toDate.getMonth()+1);
+    toDate.setDate(0);
+    const to = toDate.toISOString().split('T')[0];
+
+    let q = db.from('orders')
+      .select('id,date,status,rep_id,outlet_id,outlets(name,area),users(name)')
+      .gte('date',from).lte('date',to).order('date');
+
+    if (repId) q = q.eq('rep_id', repId);
+
+    const { data: rawOrders, error } = await q;
+    if (error) { console.error(error); return; }
+
+    const orderIds = (rawOrders||[]).map(o=>o.id);
+    let orderItems=[], deliveries=[];
+    if(orderIds.length>0){
+      const{data:oi}=await db.from('order_items')
+        .select('order_id,kg_ordered,unit_price,discount_amount,products(name)')
+        .in('order_id',orderIds);
+      orderItems=oi||[];
+      const{data:dl}=await db.from('deliveries')
+        .select('order_id,cash_collected,delivery_items(kg_delivered)')
+        .in('order_id',orderIds);
+      deliveries=dl||[];
+    }
+    const im={},dm={};
+    orderItems.forEach(i=>{if(!im[i.order_id])im[i.order_id]=[];im[i.order_id].push(i);});
+    deliveries.forEach(d=>dm[d.order_id]=d);
+    const orders=(rawOrders||[]).map(o=>({...o,order_items:im[o.id]||[],deliveries:dm[o.id]?[dm[o.id]]:[]}));
+
+    let filtered = orders;
+    if (area) filtered = filtered.filter(o => o.outlets?.area === area);
+
+    renderSKU(filtered);
+    renderDailyChart(filtered, from, to);
+    renderSKUChart(filtered);
+    renderHeatmap(filtered);
+    renderRepScorecard(filtered);
+    renderOutletScorecard(filtered);
+    renderProductionRec(filtered);
+  }
+
+  // ── SKU Performance ────────────────────────────────────────
+  function renderSKU(orders) {
+    const skuMap = {};
+    let total = 0;
+    orders.forEach(o => {
+      o.order_items.forEach(i => {
+        const name = i.products?.name || 'Unknown';
+        const kg   = Number(i.kg_ordered);
+        const rev  = (kg * Number(i.unit_price)) - Number(i.discount_amount);
+        if (!skuMap[name]) skuMap[name] = { kg:0, rev:0, orders:0 };
+        skuMap[name].kg     += kg;
+        skuMap[name].rev    += rev;
+        skuMap[name].orders += 1;
+        total += kg;
+      });
+    });
+
+    document.getElementById('sku-total').textContent = `Total: ${total.toFixed(1)} kg`;
+
+    const sorted = Object.entries(skuMap).sort((a,b)=>b[1].kg-a[1].kg);
+    const colors = ['var(--blue)','var(--green)','var(--amber)','var(--red)','#A78BFA'];
+
+    document.getElementById('sku-grid').innerHTML = sorted.length
+      ? sorted.map(([name, d], i) => `
+        <div class="sku-card">
+          <div class="sku-name">${name}</div>
+          <div class="sku-kg">${d.kg.toFixed(1)}<span style="font-size:.75rem;font-weight:400"> kg</span></div>
+          <div class="sku-pct" style="color:${colors[i%colors.length]}">${total>0?(d.kg/total*100).toFixed(1):0}% of total</div>
+          <div class="sku-trend" style="color:var(--muted)">${d.orders} orders · ${fmt.inr(d.rev)}</div>
+          <div class="progress-bar" style="margin-top:8px">
+            <div class="progress-fill" style="width:${total>0?d.kg/total*100:0}%;background:${colors[i%colors.length]}"></div>
+          </div>
+        </div>`)
+        .join('')
+      : '<div style="color:var(--muted);font-size:.85rem">No data for this period.</div>';
+  }
+
+  // ── Daily chart ────────────────────────────────────────────
+  function renderDailyChart(orders, from, to) {
+    const days = {};
+    let d = new Date(from);
+    const end = new Date(to);
+    while (d <= end) {
+      days[d.toISOString().split('T')[0]] = 0;
+      d.setDate(d.getDate()+1);
+    }
+    orders.forEach(o => {
+      const kg = o.order_items.reduce((s,i)=>s+Number(i.kg_ordered),0);
+      if (days[o.date] !== undefined) days[o.date] += kg;
+    });
+
+    const labels = Object.keys(days).map(d => d.slice(5));
+    const data   = Object.values(days);
+
+    if (dailyChart) dailyChart.destroy();
+    dailyChart = new Chart(document.getElementById('daily-chart'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'kg ordered',
+          data,
+          backgroundColor: 'rgba(96,165,250,0.6)',
+          borderColor: 'rgba(96,165,250,1)',
+          borderWidth: 1,
+          borderRadius: 3
+        }]
+      },
+      options: {
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{display:false} },
+        scales:{
+          x:{ ticks:{ color:'#64748B', font:{size:10} }, grid:{color:'#1E293B'} },
+          y:{ ticks:{ color:'#64748B' }, grid:{color:'#1E293B'}, beginAtZero:true }
+        }
+      }
+    });
+  }
+
+  // ── SKU Pie chart ──────────────────────────────────────────
+  function renderSKUChart(orders) {
+    const skuMap = {};
+    orders.forEach(o => o.order_items.forEach(i => {
+      const name = i.products?.name || 'Unknown';
+      skuMap[name] = (skuMap[name]||0) + Number(i.kg_ordered);
+    }));
+
+    if (skuChart) skuChart.destroy();
+    const entries = Object.entries(skuMap);
+    if (!entries.length) return;
+
+    skuChart = new Chart(document.getElementById('sku-chart'), {
+      type: 'doughnut',
+      data: {
+        labels: entries.map(e=>e[0]),
+        datasets: [{
+          data: entries.map(e=>e[1]),
+          backgroundColor: ['#60A5FA','#4ADE80','#FBBF24','#F87171','#A78BFA'],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{ position:'right', labels:{ color:'#94A3B8', font:{size:11} } } }
+      }
+    });
+  }
+
+  // ── Area × Day Heatmap ─────────────────────────────────────
+  function renderHeatmap(orders) {
+    const days  = ['Mon','Tue','Wed','Thu','Fri','Sat'];
+    const dayMap = {'Monday':0,'Tuesday':1,'Wednesday':2,'Thursday':3,'Friday':4,'Saturday':5};
+    const areaMap = {};
+
+    orders.forEach(o => {
+      const area = o.outlets?.area || 'Unknown';
+      const day  = new Date(o.date).toLocaleDateString('en-US',{weekday:'long'});
+      const idx  = dayMap[day];
+      if (idx === undefined) return;
+      const kg   = o.order_items.reduce((s,i)=>s+Number(i.kg_ordered),0);
+      if (!areaMap[area]) areaMap[area] = Array(6).fill(0);
+      areaMap[area][idx] += kg;
+    });
+
+    const areas  = Object.keys(areaMap).sort();
+    const allVals = areas.flatMap(a=>areaMap[a]);
+    const maxVal  = Math.max(...allVals, 1);
+
+    function heatColor(val) {
+      if (val === 0) return '#0F172A';
+      const intensity = val / maxVal;
+      if (intensity < 0.25) return '#0c2340';
+      if (intensity < 0.50) return '#1D4ED8';
+      if (intensity < 0.75) return '#2563EB';
+      return '#60A5FA';
+    }
+
+    if (!areas.length) {
+      document.getElementById('heatmap-wrap').innerHTML =
+        '<div style="color:var(--muted);font-size:.85rem">No data for this period.</div>';
+      return;
+    }
+
+    document.getElementById('heatmap-wrap').innerHTML = `
+      <table class="heatmap">
+        <thead><tr>
+          <th style="text-align:left">Area</th>
+          ${days.map(d=>`<th>${d}</th>`).join('')}
+          <th>Total</th>
+        </tr></thead>
+        <tbody>
+          ${areas.map(area => {
+            const vals = areaMap[area];
+            const total = vals.reduce((s,v)=>s+v,0);
+            return `<tr>
+              <td class="row-label">${area}</td>
+              ${vals.map(v=>`<td style="background:${heatColor(v)};color:${v>0?'#F1F5F9':'#334155'}">${v>0?v.toFixed(0):''}</td>`).join('')}
+              <td style="font-family:monospace;font-weight:600;color:var(--blue)">${total.toFixed(1)}</td>
+            </tr>`;
+          }).join('')}
+          <tr style="border-top:1px solid var(--border)">
+            <td class="row-label" style="color:var(--muted);font-size:.72rem;text-transform:uppercase">Total</td>
+            ${days.map((_,di)=>{
+              const t = areas.reduce((s,a)=>s+areaMap[a][di],0);
+              return `<td style="font-family:monospace;font-weight:600;color:var(--muted)">${t>0?t.toFixed(0):''}</td>`;
+            }).join('')}
+            <td style="font-family:monospace;font-weight:700;color:var(--green)">${allVals.reduce((s,v)=>s+v,0).toFixed(1)}</td>
+          </tr>
+        </tbody>
+      </table>`;
+  }
+
+  // ── Rep Scorecard ──────────────────────────────────────────
+  function renderRepScorecard(orders) {
+    const repMap = {};
+    orders.forEach(o => {
+      const id   = o.rep_id;
+      const name = o.users?.name || '—';
+      if (!repMap[id]) repMap[id] = { name, area:'', orders:0, kg:0, rev:0, outlets:new Set(), kgDel:0 };
+      const kg  = o.order_items.reduce((s,i)=>s+Number(i.kg_ordered),0);
+      const rev = o.order_items.reduce((s,i)=>s+(Number(i.kg_ordered)*Number(i.unit_price))-Number(i.discount_amount),0);
+      const del = o.deliveries?.reduce((s,d)=>s+(d.delivery_items||[]).reduce((ss,di)=>ss+Number(di.kg_delivered),0),0)||0;
+      repMap[id].orders++;
+      repMap[id].kg     += kg;
+      repMap[id].rev    += rev;
+      repMap[id].kgDel  += del;
+      repMap[id].outlets.add(o.outlets?.name);
+    });
+
+    const sorted = Object.values(repMap).sort((a,b)=>b.kg-a.kg);
+    const maxKg  = sorted[0]?.kg || 1;
+
+    const tbody = document.getElementById('scorecard-body');
+    if (!sorted.length) {
+      tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:2rem">No data</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = sorted.map((r,i) => {
+      const fr   = r.kg>0 ? Math.round(r.kgDel/r.kg*100) : 0;
+      const frCls= fr>=95?'var(--green)':fr>=90?'var(--amber)':'var(--red)';
+      const rankCls = i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-other';
+      const pct = r.kg/maxKg*100;
+      return `<tr>
+        <td><span class="rank-badge ${rankCls}">${i+1}</span></td>
+        <td style="font-weight:600;color:#F1F5F9">${r.name}</td>
+        <td style="color:var(--muted)">${r.area||'—'}</td>
+        <td>${r.orders}</td>
+        <td style="font-family:monospace;font-weight:600">${r.kg.toFixed(1)}</td>
+        <td style="font-family:monospace;color:var(--green)">${fmt.inr(r.rev)}</td>
+        <td><span style="font-family:monospace;font-weight:600;color:${frCls}">${fr}%</span></td>
+        <td>${r.outlets.size}</td>
+        <td style="font-family:monospace">${r.orders>0?(r.kg/r.orders).toFixed(1):0}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="progress-bar" style="flex:1">
+              <div class="progress-fill" style="width:${pct}%;background:var(--blue)"></div>
+            </div>
+            <span style="font-size:.72rem;color:var(--muted);white-space:nowrap">${pct.toFixed(0)}%</span>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ── Outlet Scorecard ───────────────────────────────────────
+  function renderOutletScorecard(orders) {
+    const outMap = {};
+    orders.forEach(o => {
+      const name = o.outlets?.name || '—';
+      const area = o.outlets?.area || '—';
+      const rep  = o.users?.name   || '—';
+      if (!outMap[name]) outMap[name] = { name, area, rep, orders:0, kg:0, rev:0 };
+      const kg  = o.order_items.reduce((s,i)=>s+Number(i.kg_ordered),0);
+      const rev = o.order_items.reduce((s,i)=>s+(Number(i.kg_ordered)*Number(i.unit_price))-Number(i.discount_amount),0);
+      outMap[name].orders++;
+      outMap[name].kg  += kg;
+      outMap[name].rev += rev;
+    });
+
+    const sorted = Object.values(outMap).sort((a,b)=>b.kg-a.kg).slice(0,20);
+    const tbody  = document.getElementById('outlet-body');
+
+    if (!sorted.length) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem">No data</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = sorted.map((o,i) => `
+      <tr>
+        <td><span class="rank-badge ${i<3?`rank-${i+1}`:'rank-other'}">${i+1}</span></td>
+        <td style="font-weight:600;color:#F1F5F9">${o.name}</td>
+        <td>${o.area}</td>
+        <td style="color:var(--muted)">${o.rep}</td>
+        <td>${o.orders}</td>
+        <td style="font-family:monospace;font-weight:600">${o.kg.toFixed(1)} kg</td>
+        <td style="font-family:monospace;color:var(--green)">${fmt.inr(o.rev)}</td>
+        <td style="font-family:monospace">${o.orders>0?(o.kg/o.orders).toFixed(1):0} kg</td>
+      </tr>`).join('');
+  }
+
+  // ── Production Recommendation ──────────────────────────────
+  function renderProductionRec(orders) {
+    const month   = document.getElementById('f-month').value;
+    const daysInMonth = new Date(month.split('-')[0], month.split('-')[1], 0).getDate();
+    const orderDays   = new Set(orders.map(o=>o.date)).size || 1;
+
+    const skuMap = {};
+    orders.forEach(o => {
+      o.order_items.forEach(i => {
+        const name = i.products?.name || 'Unknown';
+        skuMap[name] = (skuMap[name]||0) + Number(i.kg_ordered);
+      });
+    });
+
+    const entries = Object.entries(skuMap).sort((a,b)=>b[1]-a[1]);
+    if (!entries.length) { document.getElementById('prod-rec').style.display='none'; return; }
+
+    document.getElementById('prod-rec').style.display = 'block';
+    document.getElementById('prod-rec-rows').innerHTML = entries.map(([name, totalKg]) => {
+      const avgDaily     = totalKg / orderDays;
+      const recommended  = Math.ceil(avgDaily * 1.1 * 10) / 10;
+      const monthTotal   = Math.ceil(recommended * daysInMonth);
+      return `<div class="prod-rec-row">
+        <div style="font-weight:600;color:#F1F5F9">${name}</div>
+        <div style="display:flex;gap:2rem;font-size:.85rem">
+          <div style="text-align:center">
+            <div style="color:var(--muted);font-size:.7rem">Avg/day (actual)</div>
+            <div style="font-family:monospace;color:var(--blue)">${avgDaily.toFixed(1)} kg</div>
+          </div>
+          <div style="text-align:center">
+            <div style="color:var(--muted);font-size:.7rem">Recommended/day</div>
+            <div style="font-family:monospace;font-weight:700;color:var(--green)">${recommended.toFixed(1)} kg</div>
+          </div>
+          <div style="text-align:center">
+            <div style="color:var(--muted);font-size:.7rem">Month est.</div>
+            <div style="font-family:monospace;color:var(--amber)">${monthTotal} kg</div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function exportReport() {
+    window.print();
+  }
+</script>
+</body>
+</html>

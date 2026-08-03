@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FL4T5WHM8W"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FL4T5WHM8W');
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deliveries — AFF</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css" />
+  <style>
+    .dataTables_wrapper{color:var(--text)}
+    .dataTables_wrapper .dataTables_length select,
+    .dataTables_wrapper .dataTables_filter input{background:#0F172A;border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 8px}
+    .dataTables_wrapper .dataTables_info,.dataTables_wrapper .dataTables_paginate{color:var(--muted);font-size:.82rem}
+    .dataTables_wrapper .dataTables_paginate .paginate_button{color:var(--muted)!important;border-radius:6px!important}
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover{background:var(--blue-bg)!important;color:var(--blue)!important;border:1px solid var(--blue)!important}
+    table.dataTable thead th{background:#1E293B;color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)!important}
+    table.dataTable tbody tr{background:var(--bg)!important}
+    table.dataTable tbody tr:hover td{background:#1E293B!important}
+    table.dataTable tbody td{border-bottom:1px solid #1E293B!important;color:#CBD5E1;vertical-align:middle;padding:.6rem .75rem}
+    .summary-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:.75rem;margin-bottom:1rem}
+    .sum-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.75rem 1rem}
+    .sum-label{font-size:.72rem;color:var(--muted);margin-bottom:4px}
+    .sum-val{font-size:1.3rem;font-weight:700;font-family:monospace}
+    .action-bar{display:flex;gap:8px;align-items:center;margin-bottom:1rem;flex-wrap:wrap}
+    .action-bar select,.action-bar input[type=date]{background:#0F172A;border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 10px;font-size:.85rem}
+  </style>
+</head>
+<body>
+<div class="admin-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand"><span class="brand-icon">🥬</span><span class="brand-name">AFF Sales</span></div>
+    <nav class="sidebar-nav">
+      <a class="nav-link" href="dashboard.html">📊 Dashboard</a>
+      <a class="nav-link" href="beatplan.html">📋 Beat Plans</a>
+      <a class="nav-link" href="outlets.html">🏪 Outlets</a>
+      <a class="nav-link" href="orders.html">📦 Orders</a>
+      <a class="nav-link active" href="deliveries-admin.html">🚚 Deliveries</a>
+      <a class="nav-link" href="collections.html">💰 Collections</a>
+      <a class="nav-link" href="analytics.html">📈 Analytics</a>
+      <a class="nav-link" href="sales-intel.html">🎯 Sales Intel</a>
+      <a class="nav-link" href="ledger.html">📒 Ledger</a>
+      <a class="nav-link" href="team.html">👥 Team</a>
+      <a class="nav-link" href="settings.html">⚙️ Settings</a>
+    </nav>
+    <div class="sidebar-footer"><button class="btn btn-ghost btn-sm btn-full" onclick="signOut()">Sign Out</button></div>
+  </aside>
+  <main class="admin-main">
+    <div class="topbar"><strong>Deliveries</strong><div style="font-size:.82rem;color:var(--muted)" id="last-refresh"></div></div>
+    <div class="content">
+      <div class="summary-bar">
+        <div class="sum-card"><div class="sum-label">Total Deliveries</div><div class="sum-val blue" id="s-del">—</div></div>
+        <div class="sum-card"><div class="sum-label">Kg Delivered</div><div class="sum-val green" id="s-kg">—</div></div>
+        <div class="sum-card"><div class="sum-label">Cash Collected</div><div class="sum-val green" id="s-cash">—</div></div>
+        <div class="sum-card"><div class="sum-label">Fill Rate</div><div class="sum-val" id="s-fill">—</div></div>
+        <div class="sum-card"><div class="sum-label">Short Deliveries</div><div class="sum-val amber" id="s-short">—</div></div>
+      </div>
+      <div class="action-bar">
+        <input type="date" id="f-from" />
+        <input type="date" id="f-to" />
+        <select id="f-driver"><option value="">All Drivers</option></select>
+        <button class="btn btn-primary btn-sm" onclick="loadDeliveries()">Apply</button>
+        <button class="btn btn-ghost btn-sm" onclick="resetFilters()">Reset</button>
+        <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="exportCSV()">⬇ Export CSV</button>
+      </div>
+      <div class="table-wrap">
+        <table id="del-grid" style="width:100%">
+          <thead><tr>
+            <th>Date</th><th>Time</th><th>Outlet</th><th>Area</th>
+            <th>Rep</th><th>Product</th><th>Ordered kg</th><th>Delivered kg</th>
+            <th>Fill %</th><th>Payment</th><th>Collected ₹</th><th>Short Reason</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/app.js"></script>
+<script>
+  let dt;
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('f-from').value = today;
+  document.getElementById('f-to').value   = today;
+
+  (async () => {
+    const user = await getUser();
+    if (!user || user.role !== 'admin') { location.href='dashboard.html'; return; }
+    const { data: drivers } = await db.from('users').select('id,name').eq('role','driver').eq('is_active',true);
+    const sel = document.getElementById('f-driver');
+    sel.innerHTML = '<option value="">All Drivers</option>' +
+      (drivers||[]).map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+    initTable();
+    await loadDeliveries();
+    setInterval(loadDeliveries, 60000);
+  })();
+
+  function initTable() {
+    dt = $('#del-grid').DataTable({
+      data:[], columns:[
+        {title:'Date',data:'date'},
+        {title:'Time',data:'time'},
+        {title:'Outlet',data:'outlet_name',className:'td-bold'},
+        {title:'Area',data:'outlet_area'},
+        {title:'Rep',data:'rep_name'},
+        {title:'Product',data:'product_name'},
+        {title:'Ordered',data:'kg_ordered',render:v=>`<span style="font-family:monospace">${v} kg</span>`},
+        {title:'Delivered',data:'kg_delivered',render:v=>`<span style="font-family:monospace;font-weight:600">${v} kg</span>`},
+        {title:'Fill %',data:'fill_rate',render:v=>{
+          const cls=v>=95?'badge-green':v>=90?'badge-amber':'badge-red';
+          return `<span class="badge ${cls}">${v}%</span>`}},
+        {title:'Payment',data:'payment_mode',render:v=>`<span class="badge badge-blue">${v}</span>`},
+        {title:'Collected ₹',data:'cash_collected',render:v=>`<span style="font-family:monospace;font-weight:600;color:var(--green)">₹${Number(v).toLocaleString('en-IN')}</span>`},
+        {title:'Short Reason',data:'short_reason',render:v=>v?`<span style="color:var(--amber);font-size:.8rem">${v}</span>`:''}
+      ],
+      pageLength:50, order:[[0,'desc'],[1,'desc']],
+      language:{emptyTable:'No deliveries found.'},
+      dom:'<"top"lf>rt<"bottom"ip>'
+    });
+  }
+
+  async function loadDeliveries() {
+    const from     = document.getElementById('f-from').value;
+    const to       = document.getElementById('f-to').value;
+    const driverId = document.getElementById('f-driver').value;
+
+    let q = db.from('deliveries')
+      .select('id, delivered_at, cash_collected, payment_mode, order_id, driver_id, orders(date, rep_id, outlets(name,area), users(name)), delivery_items(kg_delivered, short_reason)')
+      .order('delivered_at',{ascending:false});
+
+    // date filter applied via orders join
+    if (driverId) q = q.eq('driver_id', driverId);
+
+    const { data, error } = await q;
+    if (error) { console.error(error); return; }
+
+    const rows = [];
+    let totalKg=0, totalOrdered=0, totalCash=0, shorts=0;
+
+    (data||[]).forEach(d => {
+      (d.delivery_items||[]).forEach(di => {
+        const kgDel = Number(di.kg_delivered);
+        const kgOrd = Number(di.order_items?.kg_ordered||0);
+        const fr    = kgOrd>0 ? Math.round(kgDel/kgOrd*100) : 100;
+        totalKg     += kgDel;
+        totalOrdered+= kgOrd;
+        totalCash   += Number(d.cash_collected);
+        if (kgDel < kgOrd) shorts++;
+        rows.push({
+          date:         d.orders?.date,
+          time:         new Date(d.delivered_at).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}),
+          outlet_name:  d.orders?.outlets?.name||'—',
+          outlet_area:  d.orders?.outlets?.area||'—',
+          rep_name:     d.orders?.users?.name||'—',
+          product_name: di.order_items?.products?.name||'—',
+          kg_ordered:   kgOrd,
+          kg_delivered: kgDel,
+          fill_rate:    fr,
+          payment_mode: d.payment_mode,
+          cash_collected: d.cash_collected,
+          short_reason: di.short_reason||''
+        });
+      });
+    });
+
+    dt.clear().rows.add(rows).draw();
+    const overallFill = totalOrdered>0 ? Math.round(totalKg/totalOrdered*100) : 0;
+    document.getElementById('s-del').textContent  = data?.length||0;
+    document.getElementById('s-kg').textContent   = fmt.kg(totalKg);
+    document.getElementById('s-cash').textContent = fmt.inr(totalCash);
+    document.getElementById('s-fill').textContent = fmt.pct(overallFill);
+    document.getElementById('s-fill').className   = `sum-val ${fillClass(overallFill)}`;
+    document.getElementById('s-short').textContent= shorts;
+    document.getElementById('last-refresh').textContent = 'Updated '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  }
+
+  function resetFilters() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('f-from').value   = today;
+    document.getElementById('f-to').value     = today;
+    document.getElementById('f-driver').value = '';
+    loadDeliveries();
+  }
+
+  function exportCSV() {
+    const rows = dt.rows({search:'applied'}).data().toArray();
+    const hdr  = ['Date','Time','Outlet','Area','Rep','Product','Ordered kg','Delivered kg','Fill %','Payment','Collected','Short Reason'];
+    const csv  = [hdr.join(','), ...rows.map(r=>[r.date,r.time,`"${r.outlet_name}"`,`"${r.outlet_area}"`,`"${r.rep_name}"`,`"${r.product_name}"`,r.kg_ordered,r.kg_delivered,r.fill_rate,r.payment_mode,r.cash_collected,`"${r.short_reason}"`].join(','))].join('\n');
+    const a = document.createElement('a');
+    a.href = 'data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+    a.download = `deliveries_${document.getElementById('f-from').value}.csv`;
+    a.click();
+  }
+</script>
+</body>
+</html>

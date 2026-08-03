@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FL4T5WHM8W"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FL4T5WHM8W');
+  </script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Beat — AFF</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <link rel="manifest" href="../manifest.json"/>
+  <meta name="theme-color" content="#1E293B"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <style>
+    body{background:#0F172A}
+    .top-bar{background:#1E293B;border-bottom:1px solid #334155;padding:10px 14px;
+             display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:50}
+    .chip{background:#0c2340;color:#60A5FA;border-radius:6px;padding:2px 8px;font-size:.72rem;font-weight:600}
+    .icon-btn{background:#1E293B;border:1px solid #334155;color:#94A3B8;border-radius:6px;
+              padding:5px 10px;font-size:.8rem;cursor:pointer;white-space:nowrap}
+    .icon-btn:hover{border-color:#60A5FA;color:#60A5FA}
+    .page-wrap{padding:10px 12px 80px}
+
+    /* Stats row */
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+    .s-card{background:#1E293B;border:1px solid #334155;border-radius:8px;padding:8px;text-align:center}
+    .s-lbl{font-size:.6rem;color:#94A3B8;text-transform:uppercase;letter-spacing:.04em}
+    .s-val{font-size:1.1rem;font-weight:700;font-family:monospace}
+
+    /* Toolbar */
+    .toolbar{display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+    .toolbar input[type=date]{background:#1E293B;border:1px solid #334155;color:#F1F5F9;
+      padding:6px 10px;border-radius:8px;font-size:.82rem;outline:none;font-family:inherit}
+
+    /* Grid table */
+    .grid-wrap{background:#1E293B;border:1px solid #334155;border-radius:12px;overflow:hidden}
+    table{width:100%;border-collapse:collapse;font-size:.82rem}
+    thead th{background:#0F172A;color:#64748B;font-size:.68rem;text-transform:uppercase;
+             letter-spacing:.05em;padding:8px 10px;text-align:left;white-space:nowrap;
+             border-bottom:1px solid #334155}
+    tbody tr{border-bottom:1px solid #0F172A;cursor:pointer;transition:background .1s}
+    tbody tr:last-child{border-bottom:none}
+    tbody tr:hover{background:#0F172A}
+    tbody tr.done-row td:first-child{border-left:3px solid #16A34A}
+    tbody tr.pending-row td:first-child{border-left:3px solid #1D4ED8}
+    td{padding:9px 10px;color:#CBD5E1;vertical-align:middle}
+    td.bold{font-weight:600;color:#F1F5F9}
+    td.mono{font-family:monospace;font-weight:600}
+    .action-btns{display:flex;gap:4px}
+    .act-btn{background:none;border:1px solid #334155;color:#94A3B8;border-radius:5px;
+             padding:3px 8px;font-size:.72rem;cursor:pointer;white-space:nowrap}
+    .act-btn:hover{border-color:#60A5FA;color:#60A5FA}
+    .act-btn.green:hover{border-color:#16A34A;color:#4ADE80}
+    .act-btn.red:hover{border-color:#991b1b;color:#F87171}
+
+    /* Status pill */
+    .pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.68rem;font-weight:600}
+    .pill-done{background:#052e16;color:#4ADE80}
+    .pill-pending{background:#0c2340;color:#60A5FA}
+    .pill-miss{background:#2d0a0a;color:#F87171}
+
+    /* Modal */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;
+             align-items:flex-end;z-index:100}
+    .overlay.show{display:flex}
+    .sheet{background:#1E293B;border-radius:20px 20px 0 0;padding:18px 18px 36px;
+           width:100%;max-height:90vh;overflow-y:auto}
+    .handle{width:32px;height:4px;background:#334155;border-radius:2px;margin:0 auto 14px}
+    .sheet h3{font-size:.95rem;font-weight:600;color:#F1F5F9;margin-bottom:12px}
+    .flbl{font-size:.7rem;color:#94A3B8;display:block;margin-bottom:4px;text-transform:uppercase}
+    .finp{width:100%;background:#0F172A;border:1px solid #334155;color:#F1F5F9;
+          border-radius:8px;padding:10px 12px;font-size:.9rem;font-family:inherit;outline:none}
+    .finp:focus{border-color:#60A5FA}
+    .kg-finp{font-size:1.6rem;font-family:monospace;font-weight:700;text-align:center}
+    .inv-bar{background:#0F172A;border:1px solid #166534;border-radius:8px;padding:10px 14px;
+             display:flex;justify-content:space-between;align-items:center;margin:10px 0}
+    .inv-lbl{font-size:.72rem;color:#94A3B8}
+    .inv-amt{font-size:1.3rem;font-weight:700;font-family:monospace;color:#4ADE80}
+    .err{background:#2d0a0a;color:#F87171;border-radius:6px;padding:8px 10px;
+         font-size:.8rem;margin-bottom:8px;display:none}
+    .err.show{display:block}
+    .m-actions{display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-top:10px}
+    .m-cancel{background:none;border:1px solid #334155;color:#94A3B8;border-radius:10px;
+              padding:12px;font-size:.88rem;cursor:pointer}
+    .m-submit{background:#16A34A;color:#fff;border:none;border-radius:10px;
+              padding:12px;font-size:.88rem;font-weight:600;cursor:pointer}
+    .m-submit:disabled{opacity:.4}
+    .m-submit.blue{background:#1D4ED8}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+    .form-grp{margin-bottom:10px}
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <span style="font-size:1.2rem">🥬</span>
+  <div style="font-weight:600;color:#F1F5F9;font-size:.85rem;flex:1" id="greeting">Good morning</div>
+  <button class="icon-btn" onclick="openAddOutlet()">🆕 Add Outlet</button>
+  <button class="icon-btn" onclick="refreshBeat()">↻</button>
+  <span class="chip" id="user-badge">Rep</span>
+  <button class="icon-btn" onclick="signOut()" style="color:#F87171;border-color:#991b1b">Sign Out</button>
+</div>
+
+<div class="page-wrap">
+  <!-- Stats -->
+  <div class="stats">
+    <div class="s-card"><div class="s-lbl">Outlets</div><div class="s-val" style="color:#60A5FA" id="s-total">—</div></div>
+    <div class="s-card"><div class="s-lbl">Done</div><div class="s-val" style="color:#4ADE80" id="s-done">0</div></div>
+    <div class="s-card"><div class="s-lbl">Pending</div><div class="s-val" style="color:#FBBF24" id="s-pending">—</div></div>
+    <div class="s-card"><div class="s-lbl">Kg Today</div><div class="s-val" style="color:#4ADE80;font-size:.95rem" id="s-kg">0</div></div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <button class="icon-btn" onclick="changeDate(-1)">‹</button>
+    <input type="date" id="date-picker" onchange="loadDay()"/>
+    <button class="icon-btn" onclick="changeDate(1)">›</button>
+    <button class="icon-btn" onclick="openNewOrder()" style="margin-left:auto;background:#1D4ED8;border-color:#1D4ED8;color:#fff">
+      + New Order
+    </button>
+  </div>
+
+  <!-- Grid -->
+  <div class="grid-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Outlet</th>
+          <th>Area</th>
+          <th>Target</th>
+          <th>Product</th>
+          <th>Kg</th>
+          <th>Invoice</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="grid-body">
+        <tr><td colspan="9" style="text-align:center;color:#94A3B8;padding:2rem">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Order modal -->
+<div class="overlay" id="order-modal">
+  <div class="sheet">
+    <div class="handle"></div>
+    <h3 id="modal-title">New Order</h3>
+    <div id="modal-outlet" style="font-size:.8rem;color:#60A5FA;margin-bottom:12px"></div>
+    <div id="order-err" class="err"></div>
+    <div class="form-row">
+      <div>
+        <label class="flbl">Outlet</label>
+        <select id="m-outlet" class="finp" id="m-outlet-sel"></select>
+      </div>
+      <div>
+        <label class="flbl">Product</label>
+        <select id="m-product" class="finp" onchange="calcInv()"></select>
+      </div>
+    </div>
+    <div class="form-grp">
+      <label class="flbl">Kg ordered</label>
+      <input id="m-kg" type="number" class="finp kg-finp"
+             placeholder="0" min="0.5" step="0.5" oninput="calcInv()"/>
+    </div>
+    <div class="inv-bar">
+      <span class="inv-lbl">Invoice amount</span>
+      <span class="inv-amt" id="m-inv">₹ —</span>
+    </div>
+    <div class="form-row">
+      <div class="form-grp" style="margin:0">
+        <label class="flbl">Delivery date</label>
+        <select id="m-delivery-date" class="finp">
+        </select>
+      </div>
+      <div class="form-grp" style="margin:0">
+        <label class="flbl">Notes (optional)</label>
+        <input id="m-notes" class="finp" placeholder="Special instructions..."/>
+      </div>
+    </div>
+    <div class="m-actions">
+      <button class="m-cancel" onclick="closeModal()">Cancel</button>
+      <button class="m-submit" id="m-submit" onclick="submitOrder()">Submit Order →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Outlet modal -->
+<div class="overlay" id="outlet-modal">
+  <div class="sheet">
+    <div class="handle"></div>
+    <h3>Add New Outlet</h3>
+    <p style="font-size:.75rem;color:#94A3B8;margin-bottom:12px">Admin will review and activate it.</p>
+    <div id="outlet-err" class="err"></div>
+    <div class="form-row">
+      <div class="form-grp" style="margin:0">
+        <label class="flbl">Business name *</label>
+        <input id="o-name" class="finp" placeholder="Hotel Saravana Bhavan"/>
+      </div>
+      <div class="form-grp" style="margin:0">
+        <label class="flbl">Area *</label>
+        <input id="o-area" class="finp" placeholder="Tambaram"/>
+      </div>
+    </div>
+    <div class="form-row" style="margin-top:8px">
+      <div class="form-grp" style="margin:0">
+        <label class="flbl">Owner name</label>
+        <input id="o-owner" class="finp" placeholder="Rajan"/>
+      </div>
+      <div class="form-grp" style="margin:0">
+        <label class="flbl">Phone</label>
+        <input id="o-phone" type="tel" class="finp" placeholder="9876543210"/>
+      </div>
+    </div>
+    <div class="m-actions" style="margin-top:14px">
+      <button class="m-cancel" onclick="closeOutletModal()">Cancel</button>
+      <button class="m-submit blue" id="o-submit" onclick="submitOutlet()">Submit</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/app.js"></script>
+<script>
+  let currentUser, products=[], myOutlets=[], rows=[], editOrderId=null;
+  const todayStr = new Date().toISOString().split('T')[0];
+  let viewDate = todayStr;
+
+  const hour = new Date().getHours();
+  document.getElementById('greeting').textContent =
+    (hour<12?'Good morning':hour<17?'Good afternoon':'Good evening') + ' 👋';
+  document.getElementById('date-picker').value = todayStr;
+  document.getElementById('date-picker').max   = todayStr;
+
+  (async()=>{
+    currentUser = await getUser();
+    if(!currentUser){location.href='../index.html';return;}
+    if(currentUser.role==='admin'){location.href='dashboard.html';return;}
+    if(currentUser.role==='driver'){location.href='deliveries.html';return;}
+    document.getElementById('user-badge').textContent = currentUser.name.split(' ')[0];
+    await Promise.all([loadProducts(), loadOutlets()]);
+    await loadDay();
+  })();
+
+  async function loadProducts(){
+    const{data}=await db.from('products').select('*').eq('is_active',true).order('name');
+    products=data||[];
+    const opts = products.map(p=>`<option value="${p.id}" data-price="${p.base_price}">${p.name} — &#8377;${p.base_price}/kg</option>`).join('');
+    document.getElementById('m-product').innerHTML = opts;
+  }
+
+  async function loadOutlets(){
+    const{data}=await db.from('outlets').select('id,name,area')
+      .eq('rep_id',currentUser.id).eq('status','active').order('name');
+    myOutlets=data||[];
+    document.getElementById('m-outlet').innerHTML =
+      myOutlets.map(o=>`<option value="${o.id}">${o.name} — ${o.area}</option>`).join('');
+  }
+
+  function changeDate(d){
+    const dt=new Date(viewDate); dt.setDate(dt.getDate()+d);
+    const nd=dt.toISOString().split('T')[0];
+    if(nd<=todayStr){viewDate=nd;document.getElementById('date-picker').value=nd;loadDay();}
+  }
+
+  async function refreshBeat(){
+    await db.from('daily_beat_logs').delete()
+      .eq('rep_id',currentUser.id).eq('date',viewDate);
+    loadDay();
+  }
+
+  async function loadDay(){
+    viewDate=document.getElementById('date-picker').value;
+    const tbody=document.getElementById('grid-body');
+    tbody.innerHTML='<tr><td colspan="9" style="text-align:center;color:#94A3B8;padding:2rem">Loading...</td></tr>';
+
+    const dayName=new Date(viewDate+'T12:00:00').toLocaleDateString('en-US',{weekday:'long'});
+    const isToday=viewDate===todayStr;
+
+    // Get beat logs
+    let{data:logs}=await db.from('daily_beat_logs')
+      .select('*,outlets(id,name,area,owner_name,phone)')
+      .eq('rep_id',currentUser.id).eq('date',viewDate).order('visit_sequence');
+
+    if(!logs?.length && isToday){
+      const monthStart=viewDate.slice(0,7)+'-01';
+      const{data:plan}=await db.from('monthly_beat_plans')
+        .select('id').eq('rep_id',currentUser.id).eq('month',monthStart)
+        .eq('status','published').maybeSingle();
+      if(plan){
+        const{data:items}=await db.from('monthly_beat_items')
+          .select('*,outlets(id,name,area,owner_name,phone)')
+          .eq('monthly_plan_id',plan.id).order('visit_sequence');
+        if(items?.length){
+          const toShow=items.filter(i=>{
+            let d=i.preferred_days||[];
+            if(typeof d==='string') d=d.replace(/[{}]/g,'').split(',').filter(Boolean);
+            return d.length===0||d.includes(dayName);
+          });
+          const ins=(toShow.length?toShow:items).map(i=>({
+            rep_id:currentUser.id,date:viewDate,outlet_id:i.outlet_id,
+            visit_sequence:i.visit_sequence,target_kg:i.target_kg,status:'planned'
+          }));
+          await db.from('daily_beat_logs').upsert(ins,{onConflict:'rep_id,date,outlet_id'});
+          const{data:nl}=await db.from('daily_beat_logs')
+            .select('*,outlets(id,name,area,owner_name,phone)')
+            .eq('rep_id',currentUser.id).eq('date',viewDate).order('visit_sequence');
+          logs=nl;
+        }
+      }
+      if(!logs?.length){
+        logs=myOutlets.map((o,i)=>({
+          id:null,outlet_id:o.id,outlets:o,visit_sequence:i+1,
+          target_kg:0,status:'planned',order_id:null
+        }));
+      }
+    }
+
+    // Get orders for this day
+    const outletIds=(logs||[]).map(l=>l.outlet_id);
+    let ordersMap={};
+    if(outletIds.length>0){
+      const{data:orders}=await db.from('orders')
+        .select('id,outlet_id,status').in('outlet_id',outletIds).eq('date',viewDate);
+      const orderIds=(orders||[]).map(o=>o.id);
+      if(orderIds.length>0){
+        const{data:items}=await db.from('order_items')
+          .select('id,order_id,kg_ordered,unit_price,discount_amount,products(name)')
+          .in('order_id',orderIds);
+        (orders||[]).forEach(o=>{
+          ordersMap[o.outlet_id]={...o,items:(items||[]).filter(i=>i.order_id===o.id)};
+        });
+      }
+    }
+
+    renderGrid(logs||[],ordersMap);
+  }
+
+  function renderGrid(logs,ordersMap){
+    const done=logs.filter(l=>ordersMap[l.outlet_id]).length;
+    const pend=logs.filter(l=>!ordersMap[l.outlet_id]).length;
+    const kg=Object.values(ordersMap).reduce((s,o)=>s+o.items.reduce((ss,i)=>ss+Number(i.kg_ordered),0),0);
+
+    document.getElementById('s-total').textContent=logs.length;
+    document.getElementById('s-done').textContent=done;
+    document.getElementById('s-pending').textContent=pend;
+    document.getElementById('s-kg').textContent=kg.toFixed(1);
+
+    const tbody=document.getElementById('grid-body');
+    if(!logs.length){
+      tbody.innerHTML='<tr><td colspan="9" style="text-align:center;color:#94A3B8;padding:2rem">No outlets for this date</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML=logs.map(log=>{
+      const o=log.outlets||{};
+      const ord=ordersMap[log.outlet_id];
+      const isDone=!!ord;
+      const rowKg=ord?ord.items.reduce((s,i)=>s+Number(i.kg_ordered),0):0;
+      const inv=ord?ord.items.reduce((s,i)=>s+(Number(i.kg_ordered)*Number(i.unit_price))-Number(i.discount_amount||0),0):0;
+      const prodName=ord?ord.items.map(i=>i.products?.name||'—').join(', '):'—';
+      const statusPill=isDone
+        ?'<span class="pill pill-done">Done</span>'
+        :'<span class="pill pill-pending">Pending</span>';
+      const actions=isDone
+        ?`<div class="action-btns">
+            <button class="act-btn green" onclick="editOrder('${ord.id}','${log.outlet_id}','${(o.name||'').replace(/'/g,'')}')">Edit</button>
+          </div>`
+        :`<div class="action-btns">
+            <button class="act-btn" onclick="placeOrder('${log.outlet_id}','${(o.name||'').replace(/'/g,'')}')">Order</button>
+          </div>`;
+
+      return`<tr class="${isDone?'done-row':'pending-row'}">
+        <td>${log.visit_sequence}</td>
+        <td class="bold">${o.name||'—'}</td>
+        <td style="color:#94A3B8">${o.area||'—'}</td>
+        <td class="mono" style="color:#64748B">${log.target_kg||0}</td>
+        <td style="color:#94A3B8;font-size:.78rem">${prodName}</td>
+        <td class="mono">${rowKg>0?rowKg.toFixed(1):'—'}</td>
+        <td class="mono" style="color:#4ADE80">${inv>0?fmt.inr(inv):'—'}</td>
+        <td>${statusPill}</td>
+        <td>${actions}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ── Order modal ────────────────────────────────────────────
+  function placeOrder(outletId, outletName){
+    editOrderId=null;
+    document.getElementById('modal-title').textContent='New Order';
+    document.getElementById('modal-outlet').textContent=outletName;
+    document.getElementById('m-outlet').value=outletId;
+    document.getElementById('m-kg').value='';
+    document.getElementById('m-notes').value='';
+    document.getElementById('m-inv').textContent='₹ —';
+    document.getElementById('order-err').classList.remove('show');
+    document.getElementById('m-submit').textContent='Submit Order →';
+    document.getElementById('m-submit').className='m-submit';
+    // Populate delivery dates - today + next 3 days
+    const dsel = document.getElementById('m-delivery-date');
+    dsel.innerHTML = '';
+    for(let i=0;i<=3;i++){
+      const d = new Date(); d.setDate(d.getDate()+i);
+      const val = d.toISOString().split('T')[0];
+      const lbl = i===0?'Today':i===1?'Tomorrow':d.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+      const opt = document.createElement('option');
+      opt.value=val; opt.textContent=lbl; if(i===1) opt.selected=true;
+      dsel.appendChild(opt);
+    }
+    document.getElementById('order-modal').classList.add('show');
+  }
+
+  function openNewOrder(){
+    placeOrder(myOutlets[0]?.id||'', myOutlets[0]?.name||'Select outlet');
+  }
+
+  function editOrder(orderId, outletId, outletName){
+    editOrderId=orderId;
+    document.getElementById('modal-title').textContent='Edit Order';
+    document.getElementById('modal-outlet').textContent=outletName;
+    document.getElementById('m-outlet').value=outletId;
+    document.getElementById('m-kg').value='';
+    document.getElementById('m-notes').value='';
+    document.getElementById('m-inv').textContent='₹ —';
+    document.getElementById('order-err').classList.remove('show');
+    document.getElementById('m-submit').textContent='Save Changes';
+    document.getElementById('m-submit').className='m-submit blue';
+    document.getElementById('order-modal').classList.add('show');
+  }
+
+  function closeModal(){ document.getElementById('order-modal').classList.remove('show'); }
+
+  function calcInv(){
+    const sel=document.getElementById('m-product');
+    const kg=parseFloat(document.getElementById('m-kg').value)||0;
+    const price=parseFloat(sel.selectedOptions[0]?.dataset.price)||0;
+    document.getElementById('m-inv').textContent=kg>0?fmt.inr(kg*price):'₹ —';
+  }
+
+  async function submitOrder(){
+    const outletId=document.getElementById('m-outlet').value;
+    const sel=document.getElementById('m-product');
+    const kg=parseFloat(document.getElementById('m-kg').value);
+    const notes=document.getElementById('m-notes').value;
+    const btn=document.getElementById('m-submit');
+    const err=document.getElementById('order-err');
+
+    if(!outletId||!sel.value||!kg||kg<0.5){
+      err.textContent='Select outlet, product and enter kg (min 0.5)';
+      err.classList.add('show');return;
+    }
+    if(kg>500){err.textContent='Max 500 kg per order';err.classList.add('show');return;}
+
+    const price=parseFloat(sel.selectedOptions[0]?.dataset.price)||0;
+    btn.disabled=true;btn.textContent='Saving...';err.classList.remove('show');
+
+    if(editOrderId){
+      // Update existing order items
+      await db.from('order_items').delete().eq('order_id',editOrderId);
+      await db.from('order_items').insert({
+        order_id:editOrderId,product_id:sel.value,
+        kg_ordered:kg,unit_price:price,discount_amount:0
+      });
+      await db.from('orders').update({notes}).eq('id',editOrderId);
+      showToast('Order updated');
+    } else {
+      const dsel = document.getElementById('m-delivery-date');
+      const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+      const tomorrowStr = tomorrow.toISOString().split('T')[0];
+      const deliveryDate = dsel?.value || tomorrowStr;
+      const{data:order,error:oErr}=await db.from('orders').insert({
+        outlet_id:outletId,rep_id:currentUser.id,
+        date:viewDate,delivery_date:deliveryDate,status:'pending',notes
+      }).select().single();
+      if(oErr){
+        err.textContent=oErr.message.includes('unique')?'Order already exists for this outlet today':oErr.message;
+        err.classList.add('show');btn.disabled=false;btn.textContent='Submit Order →';return;
+      }
+      await db.from('order_items').insert({
+        order_id:order.id,product_id:sel.value,
+        kg_ordered:kg,unit_price:price,discount_amount:0
+      });
+      await db.from('daily_beat_logs')
+        .update({status:'completed',order_id:order.id,visited_at:new Date().toISOString()})
+        .eq('rep_id',currentUser.id).eq('date',viewDate).eq('outlet_id',outletId);
+      showToast(kg+' kg submitted');
+    }
+
+    closeModal();
+    btn.disabled=false;
+    await loadDay();
+  }
+
+  // ── Add Outlet modal ───────────────────────────────────────
+  function openAddOutlet(){
+    ['o-name','o-area','o-owner','o-phone'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('outlet-err').classList.remove('show');
+    document.getElementById('outlet-modal').classList.add('show');
+  }
+  function closeOutletModal(){ document.getElementById('outlet-modal').classList.remove('show'); }
+  async function submitOutlet(){
+    const name=document.getElementById('o-name').value.trim();
+    const area=document.getElementById('o-area').value.trim();
+    const err=document.getElementById('outlet-err');
+    const btn=document.getElementById('o-submit');
+    if(!name||!area){err.textContent='Name and area required';err.classList.add('show');return;}
+    btn.disabled=true;btn.textContent='Saving...';
+    await db.from('outlets').insert({
+      name,area,
+      owner_name:document.getElementById('o-owner').value.trim()||null,
+      phone:document.getElementById('o-phone').value.trim()||null,
+      rep_id:currentUser.id,status:'prospect'
+    });
+    closeOutletModal();
+    showToast('Outlet submitted - admin will activate it');
+    btn.disabled=false;btn.textContent='Submit';
+    await loadOutlets();
+  }
+
+  // Close modals on backdrop tap
+  ['order-modal','outlet-modal'].forEach(id=>{
+    document.getElementById(id).addEventListener('click',e=>{
+      if(e.target===document.getElementById(id)) document.getElementById(id).classList.remove('show');
+    });
+  });
+</script>
+</body>
+</html>

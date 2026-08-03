@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FL4T5WHM8W"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FL4T5WHM8W');
+  </script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Deliveries Done — AFF</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <link rel="manifest" href="../manifest.json"/>
+  <meta name="theme-color" content="#1E293B"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css"/>
+  <style>
+    .dataTables_wrapper{color:var(--text)}
+    .dataTables_wrapper .dataTables_length select,
+    .dataTables_wrapper .dataTables_filter input{background:#0F172A;border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 8px}
+    .dataTables_wrapper .dataTables_info,.dataTables_wrapper .dataTables_paginate{color:var(--muted);font-size:.82rem}
+    .dataTables_wrapper .dataTables_paginate .paginate_button{color:var(--muted)!important;border-radius:6px!important}
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover{background:var(--blue-bg)!important;color:var(--blue)!important;border:1px solid var(--blue)!important}
+    table.dataTable thead th{background:#1E293B;color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)!important}
+    table.dataTable tbody tr{background:var(--bg)!important}
+    table.dataTable tbody tr:hover td{background:#1E293B!important}
+    table.dataTable tbody td{border-bottom:1px solid #1E293B!important;color:#CBD5E1;vertical-align:middle;padding:.55rem .75rem}
+    body{background:#0F172A}
+    .top-bar{background:#1E293B;border-bottom:1px solid #334155;padding:12px 16px;
+             display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50}
+    .page-content{padding:12px 16px 100px}
+    .bottom-nav{background:#1E293B;border-top:1px solid #334155;padding:8px 0;
+                display:flex;justify-content:space-around;position:fixed;
+                bottom:0;left:0;right:0;z-index:50}
+    .nav-btn{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;
+             align-items:center;gap:3px;padding:6px 12px;border-radius:10px;min-width:60px}
+    .nav-btn.active{background:#0c2340}
+    .nav-btn .icon{font-size:20px}
+    .nav-btn .label{font-size:.65rem;color:#94A3B8;font-weight:500}
+    .nav-btn.active .label{color:#60A5FA}
+    .date-bar{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+    .date-bar input[type=date]{background:#1E293B;border:1px solid #334155;color:#F1F5F9;
+      font-size:.88rem;font-family:inherit;outline:none;padding:8px 12px;border-radius:8px;flex:1}
+    .date-nav{background:#1E293B;border:1px solid #334155;color:#94A3B8;border-radius:8px;
+              padding:8px 14px;cursor:pointer;font-size:.85rem;font-weight:500}
+    .date-nav:hover{border-color:#60A5FA;color:#60A5FA}
+    .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+    .stat-card{background:#1E293B;border-radius:10px;padding:10px;text-align:center;border:1px solid #334155}
+    .stat-label{font-size:.65rem;color:#94A3B8;margin-bottom:3px;text-transform:uppercase}
+    .stat-val{font-size:1.2rem;font-weight:700;font-family:monospace}
+    .table-wrap{border-radius:12px;border:1px solid var(--border);overflow-x:auto}
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <span style="font-size:1.3rem">🥬</span>
+  <div style="flex:1;font-weight:600;color:#F1F5F9;font-size:.9rem">Deliveries Done</div>
+  <span style="background:#2d1a00;color:#FBBF24;border-radius:8px;
+               padding:3px 10px;font-size:.75rem;font-weight:600" id="user-badge">Driver</span>
+</div>
+
+<div class="page-content">
+
+  <!-- Date bar -->
+  <div class="date-bar">
+    <button class="date-nav" onclick="changeDate(-1)">‹</button>
+    <input type="date" id="date-picker" onchange="loadDeliveries()"/>
+    <button class="date-nav" onclick="changeDate(1)">›</button>
+    <button class="btn btn-ghost btn-sm" onclick="loadDeliveries()">↻</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stat-row">
+    <div class="stat-card">
+      <div class="stat-label">Delivered</div>
+      <div class="stat-val" style="color:#4ADE80" id="stat-count">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total kg</div>
+      <div class="stat-val" style="color:#60A5FA" id="stat-kg">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Collected</div>
+      <div class="stat-val" style="color:#4ADE80;font-size:.95rem" id="stat-cash">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Fill rate</div>
+      <div class="stat-val" id="stat-fill">—</div>
+    </div>
+  </div>
+
+  <!-- Grid -->
+  <div class="table-wrap">
+    <table id="del-grid" style="width:100%">
+      <thead><tr>
+        <th>Time</th><th>Outlet</th><th>Area</th>
+        <th>Product</th><th>Ordered</th><th>Delivered</th>
+        <th>Fill %</th><th>Invoice ₹</th><th>Collected ₹</th><th>Mode</th><th>Note</th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+</div>
+
+<div class="bottom-nav">
+  <button class="nav-btn" onclick="location.href='deliveries.html'">
+    <span class="icon">⏳</span><span class="label">Pending</span>
+  </button>
+  <button class="nav-btn active">
+    <span class="icon">✅</span><span class="label">Done</span>
+  </button>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/app.js"></script>
+<script>
+  let dt, currentUser;
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('date-picker').value = today;
+  document.getElementById('date-picker').max   = today;
+
+  (async () => {
+    currentUser = await getUser();
+    if (!currentUser) { location.href = '../index.html'; return; }
+    if (currentUser.role === 'admin') { location.href = 'dashboard.html'; return; }
+    if (currentUser.role === 'rep')   { location.href = 'beat.html'; return; }
+    document.getElementById('user-badge').textContent = currentUser.name.split(' ')[0];
+    initTable();
+    await loadDeliveries();
+  })();
+
+  function initTable() {
+    dt = $('#del-grid').DataTable({
+      data: [], columns: [
+        { title:'Time',    data:'time' },
+        { title:'Outlet',  data:'outlet',  className:'td-bold' },
+        { title:'Area',    data:'area' },
+        { title:'Product', data:'product' },
+        { title:'Ordered', data:'kg_ordered',   render:v=>`<span style="font-family:monospace">${v} kg</span>` },
+        { title:'Delivered',data:'kg_delivered',render:v=>`<span style="font-family:monospace;font-weight:600">${v} kg</span>` },
+        { title:'Fill %',  data:'fill_rate', render:v=>{
+            const cls=v>=100?'badge-green':v>=90?'badge-amber':'badge-red';
+            return `<span class="badge ${cls}">${v}%</span>`}},
+        { title:'Invoice ₹',  data:'invoice',   render:v=>`<span style="font-family:monospace">${fmt.inr(v)}</span>` },
+        { title:'Collected ₹',data:'collected', render:v=>`<span style="font-family:monospace;font-weight:600;color:var(--green)">${fmt.inr(v)}</span>` },
+        { title:'Mode',    data:'mode',     render:v=>`<span class="badge badge-blue">${v}</span>` },
+        { title:'Note',    data:'note',     render:v=>v?`<span style="color:var(--amber);font-size:.75rem">⚠ ${v}</span>`:'' }
+      ],
+      pageLength: 25,
+      order: [[0,'asc']],
+      language: { emptyTable: 'No deliveries for this date.' },
+      dom: '<"top"lf>rt<"bottom"ip>'
+    });
+  }
+
+  function changeDate(days) {
+    const d = new Date(document.getElementById('date-picker').value);
+    d.setDate(d.getDate() + days);
+    const nd = d.toISOString().split('T')[0];
+    if (nd <= today) { document.getElementById('date-picker').value = nd; loadDeliveries(); }
+  }
+
+  async function loadDeliveries() {
+    const date = document.getElementById('date-picker').value;
+    if (!dt) return;
+
+    // Get delivered orders for this date
+    const { data: orders } = await db.from('orders')
+      .select('id, outlets(name,area)').eq('date', date).eq('status','delivered');
+
+    if (!orders?.length) {
+      dt.clear().draw();
+      ['stat-count','stat-kg','stat-cash','stat-fill'].forEach(id => {
+        document.getElementById(id).textContent = '0';
+      });
+      return;
+    }
+
+    const orderIds = orders.map(o => o.id);
+    const outletMap = {};
+    orders.forEach(o => outletMap[o.id] = o.outlets);
+
+    // Get order items
+    const { data: items } = await db.from('order_items')
+      .select('id,order_id,kg_ordered,unit_price,discount_amount,products(name)')
+      .in('order_id', orderIds);
+
+    // Get deliveries
+    const { data: dels } = await db.from('deliveries')
+      .select('id,order_id,cash_collected,payment_mode,delivered_at,delivery_items(order_item_id,kg_delivered,short_reason)')
+      .in('order_id', orderIds);
+
+    // Build rows
+    const rows = [];
+    let totalOrd=0, totalDel=0, totalCash=0;
+
+    (dels||[]).forEach(d => {
+      const outlet = outletMap[d.order_id] || {};
+      const orderItemsForOrder = (items||[]).filter(i => i.order_id === d.order_id);
+      const time = new Date(d.delivered_at).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+
+      orderItemsForOrder.forEach(item => {
+        const di = (d.delivery_items||[]).find(x => x.order_item_id === item.id);
+        const kgOrd = Number(item.kg_ordered);
+        const kgDel = di ? Number(di.kg_delivered) : 0;
+        const inv   = (kgOrd * Number(item.unit_price)) - Number(item.discount_amount);
+        const fr    = kgOrd > 0 ? Math.round(kgDel/kgOrd*100) : 100;
+
+        totalOrd  += kgOrd;
+        totalDel  += kgDel;
+        totalCash += Number(d.cash_collected) / orderItemsForOrder.length;
+
+        rows.push({
+          time, outlet: outlet.name||'—', area: outlet.area||'—',
+          product: item.products?.name||'—',
+          kg_ordered: kgOrd, kg_delivered: kgDel, fill_rate: fr,
+          invoice: inv, collected: Number(d.cash_collected) / orderItemsForOrder.length,
+          mode: d.payment_mode||'—', note: di?.short_reason||''
+        });
+      });
+    });
+
+    dt.clear().rows.add(rows).draw();
+
+    const overallFill = totalOrd > 0 ? Math.round(totalDel/totalOrd*100) : 0;
+    document.getElementById('stat-count').textContent = dels?.length || 0;
+    document.getElementById('stat-kg').textContent    = totalDel.toFixed(1) + ' kg';
+    document.getElementById('stat-cash').textContent  = fmt.inr(totalCash);
+    document.getElementById('stat-fill').textContent  = overallFill + '%';
+    document.getElementById('stat-fill').style.color  =
+      overallFill >= 95 ? 'var(--green)' : overallFill >= 90 ? 'var(--amber)' : 'var(--red)';
+  }
+</script>
+</body>
+</html>

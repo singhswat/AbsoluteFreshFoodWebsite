@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FL4T5WHM8W"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FL4T5WHM8W');
+  </script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ledger — AFF</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <style>
+    .action-bar{display:flex;gap:8px;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap}
+    .action-bar select,.action-bar input[type=month]{background:#0F172A;border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 10px;font-size:.85rem}
+    .ledger-tabs{display:flex;gap:4px;margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:0}
+    .ledger-tab{padding:8px 20px;font-size:.88rem;font-weight:500;cursor:pointer;border:none;background:none;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+    .ledger-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+    .ledger-tab:hover{color:#E2E8F0}
+    .pillar{display:none}
+    .pillar.active{display:block}
+    .summary-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1.5rem}
+    .sum-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem}
+    .sum-label{font-size:.72rem;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+    .sum-val{font-size:1.5rem;font-weight:700;font-family:monospace}
+    .si-table{width:100%;border-collapse:collapse;font-size:.85rem}
+    .si-table th{background:#1E293B;color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;padding:.6rem .75rem;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+    .si-table td{padding:.65rem .75rem;border-bottom:1px solid #1E293B;color:#CBD5E1;vertical-align:middle}
+    .si-table tr:last-child td{border-bottom:none}
+    .si-table tr:hover td{background:#1E293B55}
+    .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+    .chart-title{font-size:.85rem;font-weight:600;color:#CBD5E1;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center}
+    .tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:600}
+    .tag-green{background:#052e16;color:var(--green)}
+    .tag-red{background:#2d0a0a;color:var(--red)}
+    .tag-amber{background:#2d1a00;color:var(--amber)}
+    .tag-gray{background:#1E293B;color:var(--muted)}
+    .outstanding-row{background:#2d0a0a!important}
+    .outstanding-row td{color:#F87171!important}
+    .bar-bg{flex:1;height:6px;background:#1E293B;border-radius:3px;overflow:hidden}
+    .bar-fill{height:100%;border-radius:3px}
+    /* Rep payout card */
+    .payout-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:.75rem}
+    .payout-header{display:flex;align-items:center;gap:.75rem;margin-bottom:1rem}
+    .payout-avatar{width:36px;height:36px;border-radius:50%;background:var(--blue-bg);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0}
+    .payout-rows{display:flex;flex-direction:column;gap:4px}
+    .payout-row{display:flex;justify-content:space-between;align-items:center;font-size:.85rem;padding:4px 0;border-bottom:1px solid #1E293B}
+    .payout-row:last-child{border-bottom:none;font-weight:700;font-size:.95rem;padding-top:8px}
+    .payout-row .lbl{color:var(--muted)}
+    .payout-row .val{font-family:monospace}
+  </style>
+</head>
+<body>
+<div class="admin-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand"><span class="brand-icon">🥬</span><span class="brand-name">AFF Sales</span></div>
+    <nav class="sidebar-nav">
+      <a class="nav-link" href="dashboard.html">📊 Dashboard</a>
+      <a class="nav-link" href="beatplan.html">📋 Beat Plans</a>
+      <a class="nav-link" href="outlets.html">🏪 Outlets</a>
+      <a class="nav-link" href="orders.html">📦 Orders</a>
+      <a class="nav-link" href="deliveries-admin.html">🚚 Deliveries</a>
+      <a class="nav-link" href="collections.html">💰 Collections</a>
+      <a class="nav-link" href="analytics.html">📈 Analytics</a>
+      <a class="nav-link" href="sales-intel.html">🎯 Sales Intel</a>
+      <a class="nav-link active" href="ledger.html">📒 Ledger</a>
+      <a class="nav-link" href="team.html">👥 Team</a>
+      <a class="nav-link" href="settings.html">⚙️ Settings</a>
+    </nav>
+    <div class="sidebar-footer"><button class="btn btn-ghost btn-sm btn-full" onclick="signOut()">Sign Out</button></div>
+  </aside>
+
+  <main class="admin-main">
+    <div class="topbar">
+      <strong>📒 Ledger</strong>
+      <div style="font-size:.8rem;color:var(--muted)">Who owes us · What we owe</div>
+    </div>
+    <div class="content">
+
+      <div class="action-bar">
+        <input type="month" id="f-month"/>
+        <button class="btn btn-primary btn-sm" onclick="loadAll()">Apply</button>
+        <button class="btn btn-ghost btn-sm" onclick="exportAll()">⬇ Export</button>
+      </div>
+
+      <div class="ledger-tabs">
+        <button class="ledger-tab active" onclick="switchTab('outlets')">🏪 Outlet Receivables</button>
+        <button class="ledger-tab" onclick="switchTab('reps')">👤 Rep Payouts</button>
+        <button class="ledger-tab" onclick="switchTab('statement')">📋 Full Statement</button>
+      </div>
+
+      <!-- ══ TAB 1: OUTLET RECEIVABLES ═══════════════════ -->
+      <div class="pillar active" id="pillar-outlets">
+        <div class="summary-bar">
+          <div class="sum-card"><div class="sum-label">Total Invoiced</div><div class="sum-val blue" id="inv-total">—</div></div>
+          <div class="sum-card"><div class="sum-label">Total Collected</div><div class="sum-val green" id="col-total">—</div></div>
+          <div class="sum-card"><div class="sum-label">Outstanding</div><div class="sum-val red" id="out-total">—</div></div>
+          <div class="sum-card"><div class="sum-label">Overdue (>7 days)</div><div class="sum-val red" id="overdue-total">—</div></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title">
+            Every outlet — what they owe us
+            <input type="text" id="outlet-search" placeholder="Search outlet..."
+                   oninput="filterOutletTable()"
+                   style="background:#0F172A;border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px 10px;font-size:.82rem;width:200px"/>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="si-table" id="outlet-ledger">
+              <thead>
+                <tr>
+                  <th>Outlet</th><th>Area</th><th>Rep</th>
+                  <th>Invoiced ₹</th><th>Collected ₹</th>
+                  <th>Outstanding ₹</th><th>Payment Mode</th>
+                  <th>Last Order</th><th>Days</th><th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="outlet-ledger-body">
+                <tr><td colspan="10" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div style="font-size:.78rem;color:var(--muted);padding:.5rem 0;text-align:right" id="outlet-footer"></div>
+        </div>
+      </div>
+
+      <!-- ══ TAB 2: REP PAYOUTS ════════════════════════════ -->
+      <div class="pillar" id="pillar-reps">
+        <div class="summary-bar">
+          <div class="sum-card"><div class="sum-label">Total Payable</div><div class="sum-val amber" id="pay-total">—</div></div>
+          <div class="sum-card"><div class="sum-label">Commission Base</div><div class="sum-val blue" id="comm-base">—</div></div>
+          <div class="sum-card"><div class="sum-label">Reps on Payroll</div><div class="sum-val green" id="rep-count">—</div></div>
+          <div class="sum-card"><div class="sum-label">Avg Payout</div><div class="sum-val" id="avg-pay">—</div></div>
+        </div>
+
+        <!-- Commission rate setting -->
+        <div class="chart-card" style="margin-bottom:1rem">
+          <div class="chart-title">Commission Settings</div>
+          <div style="display:flex;gap:1rem;align-items:flex-end;flex-wrap:wrap">
+            <div class="form-group" style="margin:0">
+              <label style="font-size:.75rem;color:var(--muted);display:block;margin-bottom:4px">Commission rate (₹ per kg delivered)</label>
+              <input type="number" id="comm-rate" value="2" step="0.5" min="0"
+                     class="form-input" style="width:120px" oninput="recalcPayouts()"/>
+            </div>
+            <div class="form-group" style="margin:0">
+              <label style="font-size:.75rem;color:var(--muted);display:block;margin-bottom:4px">Base salary (₹/month)</label>
+              <input type="number" id="base-salary" value="0" step="500" min="0"
+                     class="form-input" style="width:140px" oninput="recalcPayouts()"/>
+            </div>
+            <div class="form-group" style="margin:0">
+              <label style="font-size:.75rem;color:var(--muted);display:block;margin-bottom:4px">Fill rate bonus (if ≥95%)</label>
+              <input type="number" id="fill-bonus" value="1000" step="100" min="0"
+                     class="form-input" style="width:140px" oninput="recalcPayouts()"/>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="recalcPayouts()">Recalculate</button>
+          </div>
+        </div>
+
+        <div id="payout-cards">
+          <div style="color:var(--muted);text-align:center;padding:2rem">Loading...</div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title">Payout Summary Table</div>
+          <table class="si-table">
+            <thead>
+              <tr>
+                <th>Rep</th><th>Kg Delivered</th><th>Fill Rate</th>
+                <th>Base Salary ₹</th><th>Commission ₹</th><th>Fill Bonus ₹</th>
+                <th>Total Payable ₹</th><th>Mark as Paid</th>
+              </tr>
+            </thead>
+            <tbody id="payout-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ TAB 3: FULL STATEMENT ═════════════════════════ -->
+      <div class="pillar" id="pillar-statement">
+        <div class="summary-bar">
+          <div class="sum-card"><div class="sum-label">Revenue (invoiced)</div><div class="sum-val blue" id="st-rev">—</div></div>
+          <div class="sum-card"><div class="sum-label">Cash in (collected)</div><div class="sum-val green" id="st-cash">—</div></div>
+          <div class="sum-card"><div class="sum-label">Staff cost (payroll)</div><div class="sum-val red" id="st-staff">—</div></div>
+          <div class="sum-card"><div class="sum-label">Net receivable</div><div class="sum-val" id="st-net">—</div></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title">Full Transaction Statement</div>
+          <div style="overflow-x:auto">
+            <table class="si-table">
+              <thead>
+                <tr>
+                  <th>Date</th><th>Type</th><th>Party</th><th>Description</th>
+                  <th>Debit ₹</th><th>Credit ₹</th><th>Balance ₹</th>
+                </tr>
+              </thead>
+              <tbody id="statement-body">
+                <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/app.js"></script>
+<script>
+  let outletRows = [], repData = [], allOrders = [];
+  const now = new Date();
+  document.getElementById('f-month').value =
+    `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+
+  function switchTab(tab) {
+    document.querySelectorAll('.ledger-tab').forEach((t,i)=>{
+      t.classList.toggle('active',['outlets','reps','statement'][i]===tab);
+    });
+    document.querySelectorAll('.pillar').forEach(p=>p.classList.remove('active'));
+    document.getElementById('pillar-'+tab).classList.add('active');
+  }
+
+  (async()=>{
+    const user = await getUser();
+    if(!user||user.role!=='admin'){location.href='dashboard.html';return;}
+    await loadAll();
+  })();
+
+  async function loadAll() {
+    const month = document.getElementById('f-month').value;
+    const from  = month+'-01';
+    const t     = new Date(month+'-01'); t.setMonth(t.getMonth()+1); t.setDate(0);
+    const to    = t.toISOString().split('T')[0];
+
+    // Fetch separately to avoid join issues
+    const {data:orders,error} = await db.from('orders')
+      .select('id,date,status,rep_id,outlet_id,outlets(name,area),users(name)')
+      .gte('date',from).lte('date',to).order('date');
+
+    if(error){console.error('Orders error:',error.message);return;}
+
+    const orderIds = (orders||[]).map(o=>o.id);
+    let orderItems=[], deliveries=[];
+
+    if(orderIds.length>0){
+      const {data:items} = await db.from('order_items')
+        .select('id,order_id,kg_ordered,unit_price,discount_amount')
+        .in('order_id',orderIds);
+      orderItems = items||[];
+
+      const {data:dels} = await db.from('deliveries')
+        .select('id,order_id,cash_collected,payment_mode,delivery_items(kg_delivered)')
+        .in('order_id',orderIds);
+      deliveries = dels||[];
+    }
+
+    // Merge into allOrders
+    const itemMap={}, delMap={};
+    orderItems.forEach(i=>{
+      if(!itemMap[i.order_id]) itemMap[i.order_id]=[];
+      itemMap[i.order_id].push(i);
+    });
+    deliveries.forEach(d=>delMap[d.order_id]=d);
+
+    allOrders = (orders||[]).map(o=>({
+      ...o,
+      order_items: itemMap[o.id]||[],
+      deliveries: delMap[o.id] ? [delMap[o.id]] : []
+    }));
+
+    console.log('Ledger loaded:',allOrders.length,'orders',deliveries.length,'deliveries');
+
+    renderOutletLedger();
+    renderRepPayouts();
+    renderStatement();
+  }
+
+  // ── Outlet Receivables ─────────────────────────────────────
+  function renderOutletLedger() {
+    const map={};
+    allOrders.forEach(o=>{
+      const id=o.outlet_id;
+      const inv=o.order_items.reduce((s,i)=>s+(Number(i.kg_ordered)*Number(i.unit_price))-Number(i.discount_amount),0);
+      const col=(o.deliveries||[]).reduce((s,d)=>s+Number(d.cash_collected),0);
+      const mode=(o.deliveries||[])[0]?.payment_mode||'—';
+      if(!map[id])map[id]={
+        name:o.outlets?.name||'—',area:o.outlets?.area||'—',
+        rep:o.users?.name||'—',inv:0,col:0,mode,lastDate:o.date
+      };
+      map[id].inv+=inv; map[id].col+=col;
+      if(o.date>map[id].lastDate){map[id].lastDate=o.date;map[id].mode=mode;}
+    });
+
+    outletRows = Object.values(map).sort((a,b)=>(b.inv-b.col)-(a.inv-a.col));
+
+    const totalInv  = outletRows.reduce((s,r)=>s+r.inv,0);
+    const totalCol  = outletRows.reduce((s,r)=>s+r.col,0);
+    const totalOut  = totalInv-totalCol;
+    const overdue   = outletRows.filter(r=>{
+      const d=Math.floor((new Date()-new Date(r.lastDate))/(1000*60*60*24));
+      return (r.inv-r.col)>0 && d>7;
+    }).reduce((s,r)=>s+(r.inv-r.col),0);
+
+    document.getElementById('inv-total').textContent   = fmt.inr(totalInv);
+    document.getElementById('col-total').textContent   = fmt.inr(totalCol);
+    document.getElementById('out-total').textContent   = fmt.inr(totalOut);
+    document.getElementById('overdue-total').textContent = fmt.inr(overdue);
+
+    renderOutletTable(outletRows);
+    document.getElementById('outlet-footer').textContent =
+      `${outletRows.length} outlets · ${outletRows.filter(r=>r.inv-r.col>0).length} with outstanding`;
+  }
+
+  function renderOutletTable(rows) {
+    document.getElementById('outlet-ledger-body').innerHTML = rows.map(r=>{
+      const out  = r.inv-r.col;
+      const days = Math.floor((new Date()-new Date(r.lastDate))/(1000*60*60*24));
+      const isOut = out>0;
+      const tag  = !isOut?'<span class="tag tag-green">Cleared</span>'
+        : days>14?'<span class="tag tag-red">Overdue 14d+</span>'
+        : days>7 ?'<span class="tag tag-red">Overdue</span>'
+        :          '<span class="tag tag-amber">Pending</span>';
+      return`<tr class="${isOut&&days>7?'outstanding-row':''}">
+        <td style="font-weight:600;color:#F1F5F9">${r.name}</td>
+        <td>${r.area}</td><td>${r.rep}</td>
+        <td style="font-family:monospace">${fmt.inr(r.inv)}</td>
+        <td style="font-family:monospace;color:var(--green)">${fmt.inr(r.col)}</td>
+        <td style="font-family:monospace;font-weight:700;color:${isOut?'var(--red)':'var(--green)'}">
+          ${fmt.inr(out)}</td>
+        <td><span class="tag ${r.mode==='credit'?'tag-amber':'tag-gray'}">${r.mode}</span></td>
+        <td style="font-size:.78rem;color:var(--muted)">${r.lastDate}</td>
+        <td style="color:${days>7?'var(--red)':'var(--muted)'}">${days}d</td>
+        <td>${tag}</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:2rem">No data</td></tr>';
+  }
+
+  function filterOutletTable() {
+    const q = document.getElementById('outlet-search').value.toLowerCase();
+    renderOutletTable(outletRows.filter(r=>
+      r.name.toLowerCase().includes(q)||r.area.toLowerCase().includes(q)||r.rep.toLowerCase().includes(q)));
+  }
+
+  // ── Rep Payouts ────────────────────────────────────────────
+  function renderRepPayouts() {
+    const repMap={};
+    allOrders.forEach(o=>{
+      const id=o.rep_id, name=o.users?.name||'—';
+      if(!repMap[id])repMap[id]={name,kg:0,kgDel:0,orders:0};
+      const kg =o.order_items.reduce((s,i)=>s+Number(i.kg_ordered),0);
+      const del=(o.deliveries||[]).reduce((s,d)=>s+(d.delivery_items||[]).reduce((ss,di)=>ss+Number(di.kg_delivered),0),0);
+      repMap[id].kg+=kg; repMap[id].kgDel+=del; repMap[id].orders++;
+    });
+    repData = Object.entries(repMap).map(([id,r])=>({id,...r}));
+    document.getElementById('rep-count').textContent = repData.length;
+    recalcPayouts();
+  }
+
+  function recalcPayouts() {
+    const commRate   = parseFloat(document.getElementById('comm-rate').value)   || 0;
+    const baseSalary = parseFloat(document.getElementById('base-salary').value) || 0;
+    const fillBonus  = parseFloat(document.getElementById('fill-bonus').value)  || 0;
+
+    const rows = repData.map(r=>{
+      const fr      = r.kg>0 ? Math.round(r.kgDel/r.kg*100) : 0;
+      const comm    = r.kgDel * commRate;
+      const bonus   = fr>=95 ? fillBonus : 0;
+      const total   = baseSalary + comm + bonus;
+      return{...r, fr, comm, bonus, baseSalary, total};
+    });
+
+    const totalPay  = rows.reduce((s,r)=>s+r.total,0);
+    const commBase  = rows.reduce((s,r)=>s+r.comm,0);
+    document.getElementById('pay-total').textContent  = fmt.inr(totalPay);
+    document.getElementById('comm-base').textContent  = fmt.inr(commBase);
+    document.getElementById('avg-pay').textContent    = rows.length ? fmt.inr(totalPay/rows.length) : '—';
+
+    // Payout cards
+    document.getElementById('payout-cards').innerHTML = rows.map(r=>`
+      <div class="payout-card">
+        <div class="payout-header">
+          <div class="payout-avatar">${r.name.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>
+          <div style="flex:1">
+            <div style="font-weight:600;color:#F1F5F9">${r.name}</div>
+            <div style="font-size:.75rem;color:var(--muted)">${r.orders} orders · ${r.kgDel.toFixed(1)} kg delivered · ${r.fr}% fill rate</div>
+          </div>
+          <div style="font-size:1.4rem;font-weight:700;font-family:monospace;color:var(--amber)">
+            ${fmt.inr(r.total)}
+          </div>
+        </div>
+        <div class="payout-rows">
+          <div class="payout-row"><span class="lbl">Base salary</span><span class="val">${fmt.inr(r.baseSalary)}</span></div>
+          <div class="payout-row"><span class="lbl">Commission (${r.kgDel.toFixed(1)} kg × ₹${commRate})</span><span class="val">${fmt.inr(r.comm)}</span></div>
+          <div class="payout-row"><span class="lbl">Fill rate bonus ${r.fr>=95?'✓':''}</span><span class="val" style="color:${r.bonus>0?'var(--green)':'var(--muted)'}">${fmt.inr(r.bonus)}</span></div>
+          <div class="payout-row" style="border-top:1px solid var(--border)">
+            <span class="lbl" style="color:#F1F5F9;font-weight:600">Total Payable</span>
+            <span class="val" style="color:var(--amber)">${fmt.inr(r.total)}</span>
+          </div>
+        </div>
+      </div>`).join('') || '<div style="color:var(--muted);text-align:center;padding:2rem">No rep data for this month</div>';
+
+    // Summary table
+    document.getElementById('payout-table-body').innerHTML = rows.map(r=>`
+      <tr>
+        <td style="font-weight:600;color:#F1F5F9">${r.name}</td>
+        <td style="font-family:monospace">${r.kgDel.toFixed(1)} kg</td>
+        <td style="color:${r.fr>=95?'var(--green)':r.fr>=90?'var(--amber)':'var(--red)'};font-weight:600">${r.fr}%</td>
+        <td style="font-family:monospace">${fmt.inr(r.baseSalary)}</td>
+        <td style="font-family:monospace;color:var(--blue)">${fmt.inr(r.comm)}</td>
+        <td style="font-family:monospace;color:${r.bonus>0?'var(--green)':'var(--muted)'}">${fmt.inr(r.bonus)}</td>
+        <td style="font-family:monospace;font-weight:700;color:var(--amber)">${fmt.inr(r.total)}</td>
+        <td>
+          <button class="btn btn-ghost btn-sm" style="font-size:.75rem"
+                  onclick="markPaid('${r.name}','${r.total}')">
+            Mark Paid
+          </button>
+        </td>
+      </tr>`).join('');
+  }
+
+  function markPaid(name, amount) {
+    if(confirm(`Mark ₹${Number(amount).toLocaleString('en-IN')} as paid to ${name}?`)) {
+      showToast(`Payment to ${name} recorded`);
+    }
+  }
+
+  // ── Full Statement ─────────────────────────────────────────
+  function renderStatement() {
+    const commRate   = parseFloat(document.getElementById('comm-rate').value)   || 0;
+    const baseSalary = parseFloat(document.getElementById('base-salary').value) || 0;
+
+    let balance = 0;
+    const entries = [];
+
+    // All invoices (credit — we are owed money)
+    allOrders.forEach(o=>{
+      const inv=o.order_items.reduce((s,i)=>s+(Number(i.kg_ordered)*Number(i.unit_price))-Number(i.discount_amount),0);
+      if(inv>0) entries.push({
+        date:o.date, type:'Invoice', party:o.outlets?.name||'—',
+        desc:`Order to ${o.outlets?.name} via ${o.users?.name}`,
+        debit:0, credit:inv
+      });
+    });
+
+    // All collections (debit — cash received)
+    allOrders.forEach(o=>{
+      (o.deliveries||[]).forEach(d=>{
+        if(d.cash_collected>0) entries.push({
+          date:d.delivered_at?.split('T')[0]||o.date, type:'Collection',
+          party:o.outlets?.name||'—',
+          desc:`Payment from ${o.outlets?.name} (${d.payment_mode})`,
+          debit:Number(d.cash_collected), credit:0
+        });
+      });
+    });
+
+    // Rep salaries (debit — we owe them)
+    const repMap={};
+    allOrders.forEach(o=>{
+      const id=o.rep_id,name=o.users?.name||'—';
+      if(!repMap[id])repMap[id]={name,kgDel:0};
+      const del=(o.deliveries||[]).reduce((s,d)=>s+(d.delivery_items||[]).reduce((ss,di)=>ss+Number(di.kg_delivered),0),0);
+      repMap[id].kgDel+=del;
+    });
+    Object.values(repMap).forEach(r=>{
+      const total=baseSalary+(r.kgDel*commRate);
+      const month=document.getElementById('f-month').value;
+      entries.push({
+        date:month+'-01', type:'Staff Cost', party:r.name,
+        desc:`Salary + commission for ${r.name}`,
+        debit:total, credit:0
+      });
+    });
+
+    // Sort by date
+    entries.sort((a,b)=>a.date.localeCompare(b.date));
+
+    // Calculate running balance
+    let running=0;
+    const rows=entries.map(e=>{
+      running += e.credit - e.debit;
+      return{...e,balance:running};
+    });
+
+    // Summary KPIs
+    const totalRev   = rows.filter(r=>r.type==='Invoice').reduce((s,r)=>s+r.credit,0);
+    const totalCash  = rows.filter(r=>r.type==='Collection').reduce((s,r)=>s+r.debit,0);
+    const totalStaff = rows.filter(r=>r.type==='Staff Cost').reduce((s,r)=>s+r.debit,0);
+    document.getElementById('st-rev').textContent   = fmt.inr(totalRev);
+    document.getElementById('st-cash').textContent  = fmt.inr(totalCash);
+    document.getElementById('st-staff').textContent = fmt.inr(totalStaff);
+    const net=totalRev-totalStaff;
+    document.getElementById('st-net').textContent   = fmt.inr(net);
+    document.getElementById('st-net').className     = `sum-val ${net>=0?'green':'red'}`;
+
+    document.getElementById('statement-body').innerHTML = rows.map(r=>`
+      <tr>
+        <td style="color:var(--muted);font-size:.78rem">${r.date}</td>
+        <td><span class="tag ${r.type==='Invoice'?'tag-green':r.type==='Collection'?'':'tag-red'}" style="${r.type==='Collection'?'background:var(--blue-bg);color:var(--blue)':''}">${r.type}</span></td>
+        <td style="font-weight:500">${r.party}</td>
+        <td style="font-size:.8rem;color:var(--muted)">${r.desc}</td>
+        <td style="font-family:monospace;color:var(--red)">${r.debit>0?fmt.inr(r.debit):''}</td>
+        <td style="font-family:monospace;color:var(--green)">${r.credit>0?fmt.inr(r.credit):''}</td>
+        <td style="font-family:monospace;font-weight:600;color:${r.balance>=0?'var(--green)':'var(--red)'}">${fmt.inr(Math.abs(r.balance))}</td>
+      </tr>`).join('');
+  }
+
+  function exportAll() {
+    // Export current tab as CSV
+    const activeTab = document.querySelector('.pillar.active').id;
+    let csv='', filename='';
+    if(activeTab==='pillar-outlets'){
+      csv='Outlet,Area,Rep,Invoiced,Collected,Outstanding,Mode,Last Order,Days\n'+
+        outletRows.map(r=>[`"${r.name}"`,`"${r.area}"`,`"${r.rep}"`,r.inv.toFixed(2),r.col.toFixed(2),(r.inv-r.col).toFixed(2),r.mode,r.lastDate,Math.floor((new Date()-new Date(r.lastDate))/(1000*60*60*24))].join(',')).join('\n');
+      filename='outlet_receivables.csv';
+    } else {
+      csv='Statement export';
+      filename='statement.csv';
+    }
+    const a=document.createElement('a');
+    a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+    a.download=filename; a.click();
+  }
+</script>
+</body>
+</html>

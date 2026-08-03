@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FL4T5WHM8W"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FL4T5WHM8W');
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Outlets — AFF</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+<div class="admin-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon">🥬</span>
+      <span class="brand-name">AFF Sales</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-link" href="dashboard.html">📊 Dashboard</a>
+      <a class="nav-link" href="beatplan.html">📋 Beat Plans</a>
+      <a class="nav-link active" href="outlets.html">🏪 Outlets</a>
+      <a class="nav-link" href="orders.html">📦 Orders</a>
+      <a class="nav-link" href="deliveries-admin.html">🚚 Deliveries</a>
+      <a class="nav-link" href="collections.html">💰 Collections</a>
+      <a class="nav-link" href="analytics.html">📈 Analytics</a>
+      <a class="nav-link" href="sales-intel.html">🎯 Sales Intel</a>
+      <a class="nav-link" href="ledger.html">📒 Ledger</a>
+      <a class="nav-link" href="team.html">👥 Team</a>
+      <a class="nav-link" href="settings.html">⚙️ Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn btn-ghost btn-sm btn-full" onclick="signOut()">Sign Out</button>
+    </div>
+  </aside>
+
+  <main class="admin-main">
+    <div class="topbar">
+      <strong>Outlets</strong>
+      <div style="display:flex;gap:8px">
+        <input id="search" type="text" class="form-input"
+               placeholder="Search outlets..." style="width:200px"
+               oninput="filterOutlets()" />
+        <button class="btn btn-primary btn-sm" onclick="openAdd()">+ Add Outlet</button>
+      </div>
+    </div>
+    <div class="content">
+      <div id="msg" class="alert" style="display:none"></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Outlet</th><th>Area</th><th>Owner</th>
+              <th>Phone</th><th>Rep</th><th>Avg kg/day</th>
+              <th>Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="outlets-table">
+            <tr><td colspan="8" class="loading">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="table-footer" style="font-size:0.78rem;color:var(--muted);
+           padding:0.5rem 0;text-align:right"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Add/Edit modal -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <h3 id="modal-title">Add Outlet</h3>
+    <div id="add-error" class="alert alert-red"></div>
+    <div class="form-group">
+      <label>Business name *</label>
+      <input id="f-name" type="text" class="form-input"
+             placeholder="e.g. Hotel Saravana Bhavan" />
+    </div>
+    <div class="form-row-2">
+      <div class="form-group">
+        <label>Area *</label>
+        <input id="f-area" type="text" class="form-input" placeholder="e.g. Tambaram" />
+      </div>
+      <div class="form-group">
+        <label>Avg kg/day</label>
+        <input id="f-kg" type="number" class="form-input" placeholder="e.g. 20" min="0" step="0.5" />
+      </div>
+    </div>
+    <div class="form-row-2">
+      <div class="form-group">
+        <label>Owner name</label>
+        <input id="f-owner" type="text" class="form-input" placeholder="e.g. Rajan" />
+      </div>
+      <div class="form-group">
+        <label>Phone</label>
+        <input id="f-phone" type="tel" class="form-input" placeholder="9876543210" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Assign to rep</label>
+      <select id="f-rep" class="form-input">
+        <option value="">Unassigned</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <input id="f-notes" type="text" class="form-input"
+             placeholder="Any useful notes..." />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeAdd()">Cancel</button>
+      <button class="btn btn-primary" id="save-btn" onclick="saveOutlet()">Save Outlet</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/app.js"></script>
+<script>
+  let outlets = [], reps = [], editingId = null;
+
+  (async () => {
+    const user = await getUser();
+    if (!user || user.role !== 'admin') { location.href='dashboard.html'; return; }
+    await loadReps();
+    await loadOutlets();
+  })();
+
+  async function loadReps() {
+    const { data } = await db.from('users')
+      .select('id, name, area').eq('role', 'rep').eq('is_active', true).order('name');
+    reps = data || [];
+    const sel = document.getElementById('f-rep');
+    sel.innerHTML = '<option value="">Unassigned</option>' +
+      reps.map(r => `<option value="${r.id}">${r.name} (${r.area || '—'})</option>`).join('');
+  }
+
+  async function loadOutlets() {
+    // Fetch outlets
+    const { data, error } = await db.from('outlets')
+      .select('*').order('name');
+    if (error) { console.error('Outlets error:', error); }
+    outlets = data || [];
+    
+    // Fetch rep names separately and merge
+    if (outlets.length > 0) {
+      const repIds = [...new Set(outlets.filter(o=>o.rep_id).map(o=>o.rep_id))];
+      if (repIds.length > 0) {
+        const { data: repData } = await db.from('users')
+          .select('id, name').in('id', repIds);
+        const repMap = {};
+        (repData||[]).forEach(r => repMap[r.id] = r);
+        outlets = outlets.map(o => ({ ...o, users: repMap[o.rep_id] || null }));
+      }
+    }
+    renderOutlets(outlets);
+  }
+
+  function filterOutlets() {
+    const q = document.getElementById('search').value.toLowerCase();
+    const filtered = outlets.filter(o =>
+      o.name.toLowerCase().includes(q) ||
+      o.area.toLowerCase().includes(q) ||
+      (o.owner_name || '').toLowerCase().includes(q));
+    renderOutlets(filtered);
+  }
+
+  function renderOutlets(list) {
+    const tbody = document.getElementById('outlets-table');
+    document.getElementById('table-footer').textContent =
+      `${list.length} of ${outlets.length} outlets`;
+
+    if (!list.length) {
+      tbody.innerHTML = `<tr><td colspan="8" class="loading">
+        ${outlets.length ? 'No results' : 'No outlets yet — add your first outlet'}
+      </td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = list.map(o => `
+      <tr>
+        <td class="td-bold">${o.name}</td>
+        <td>${o.area}</td>
+        <td>${o.owner_name || '—'}</td>
+        <td>${o.phone ? `<a href="tel:${o.phone}" style="color:var(--blue)">${o.phone}</a>` : '—'}</td>
+        <td>${o.users?.name || '<span style="color:var(--muted)">Unassigned</span>'}</td>
+        <td class="td-mono">${o.avg_kg_day || 0}</td>
+        <td>
+          <span class="badge ${o.status === 'active' ? 'badge-green' :
+            o.status === 'prospect' ? 'badge-amber' : 'badge-gray'}">
+            ${o.status}
+          </span>
+        </td>
+        <td>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-ghost btn-sm" onclick="editOutlet('${o.id}')">Edit</button>
+            <button class="btn btn-ghost btn-sm"
+                    onclick="toggleStatus('${o.id}','${o.status}')">
+              ${o.status === 'active' ? 'Deactivate' : 'Activate'}
+            </button>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  function openAdd() {
+    editingId = null;
+    document.getElementById('modal-title').textContent = 'Add Outlet';
+    document.getElementById('save-btn').textContent = 'Save Outlet';
+    ['f-name','f-area','f-owner','f-phone','f-notes'].forEach(id =>
+      document.getElementById(id).value = '');
+    document.getElementById('f-kg').value = '';
+    document.getElementById('f-rep').value = '';
+    document.getElementById('add-error').classList.remove('show');
+    document.getElementById('add-modal').classList.add('show');
+  }
+
+  function editOutlet(id) {
+    const o = outlets.find(x => x.id === id);
+    if (!o) return;
+    editingId = id;
+    document.getElementById('modal-title').textContent = 'Edit Outlet';
+    document.getElementById('save-btn').textContent = 'Save Changes';
+    document.getElementById('f-name').value  = o.name;
+    document.getElementById('f-area').value  = o.area;
+    document.getElementById('f-owner').value = o.owner_name || '';
+    document.getElementById('f-phone').value = o.phone || '';
+    document.getElementById('f-kg').value    = o.avg_kg_day || '';
+    document.getElementById('f-rep').value   = o.rep_id || '';
+    document.getElementById('f-notes').value = o.notes || '';
+    document.getElementById('add-error').classList.remove('show');
+    document.getElementById('add-modal').classList.add('show');
+  }
+
+  function closeAdd() {
+    document.getElementById('add-modal').classList.remove('show');
+  }
+
+  async function saveOutlet() {
+    const name  = document.getElementById('f-name').value.trim();
+    const area  = document.getElementById('f-area').value.trim();
+    const owner = document.getElementById('f-owner').value.trim();
+    const phone = document.getElementById('f-phone').value.trim();
+    const kg    = parseFloat(document.getElementById('f-kg').value) || 0;
+    const repId = document.getElementById('f-rep').value || null;
+    const notes = document.getElementById('f-notes').value.trim();
+    const btn   = document.getElementById('save-btn');
+    const err   = document.getElementById('add-error');
+
+    if (!name || !area) {
+      err.textContent = 'Name and area are required';
+      err.classList.add('show'); return;
+    }
+
+    loading(btn, true);
+
+    const payload = {
+      name, area,
+      owner_name: owner || null,
+      phone: phone || null,
+      avg_kg_day: kg,
+      rep_id: repId,
+      notes: notes || null,
+      status: 'active'
+    };
+
+    let error;
+    if (editingId) {
+      ({ error } = await db.from('outlets').update(payload).eq('id', editingId));
+    } else {
+      ({ error } = await db.from('outlets').insert(payload));
+    }
+
+    if (error) {
+      err.textContent = error.message;
+      err.classList.add('show');
+    } else {
+      closeAdd();
+      showToast(editingId ? 'Outlet updated' : 'Outlet added');
+      await loadOutlets();
+    }
+    loading(btn, false, 'Save Outlet');
+  }
+
+  async function toggleStatus(id, currentStatus) {
+    const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+    await db.from('outlets').update({ status: newStatus }).eq('id', id);
+    await loadOutlets();
+  }
+</script>
+</body>
+</html>

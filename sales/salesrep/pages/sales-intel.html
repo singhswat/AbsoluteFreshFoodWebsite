@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FL4T5WHM8W"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FL4T5WHM8W');
+  </script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sales Intelligence — AFF</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    /* Layout */
+    .action-bar{display:flex;gap:8px;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap}
+    .action-bar select,.action-bar input[type=month]{background:#0F172A;border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 10px;font-size:.85rem}
+    .pillar-tabs{display:flex;gap:4px;margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:0}
+    .pillar-tab{padding:8px 20px;font-size:.88rem;font-weight:500;cursor:pointer;border:none;background:none;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+    .pillar-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+    .pillar-tab:hover{color:#E2E8F0}
+    .pillar{display:none}
+    .pillar.active{display:block}
+    /* Cards */
+    .intel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.75rem;margin-bottom:1.5rem}
+    .intel-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem}
+    .intel-label{font-size:.72rem;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+    .intel-val{font-size:1.6rem;font-weight:700;font-family:monospace}
+    .intel-sub{font-size:.75rem;color:var(--muted);margin-top:4px}
+    .intel-trend{font-size:.78rem;margin-top:6px;font-weight:500}
+    .trend-up{color:var(--green)}
+    .trend-dn{color:var(--red)}
+    /* Tables */
+    .si-table{width:100%;border-collapse:collapse;font-size:.85rem}
+    .si-table th{background:#1E293B;color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;padding:.6rem .75rem;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+    .si-table td{padding:.65rem .75rem;border-bottom:1px solid #1E293B;color:#CBD5E1;vertical-align:middle}
+    .si-table tr:last-child td{border-bottom:none}
+    .si-table tr:hover td{background:#1E293B55}
+    /* Chart cards */
+    .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+    .chart-title{font-size:.85rem;font-weight:600;color:#CBD5E1;margin-bottom:1rem}
+    .chart-wrap{position:relative;height:200px}
+    /* Progress */
+    .bar-wrap{display:flex;align-items:center;gap:8px;min-width:120px}
+    .bar-bg{flex:1;height:6px;background:#1E293B;border-radius:3px;overflow:hidden}
+    .bar-fill{height:100%;border-radius:3px}
+    /* Heat */
+    .heat-table{border-collapse:collapse;font-size:.78rem;width:100%}
+    .heat-table th{padding:.4rem .6rem;color:var(--muted);font-weight:500;text-align:center;white-space:nowrap;font-size:.7rem;text-transform:uppercase}
+    .heat-table td{padding:.45rem .6rem;text-align:center;border-radius:3px;cursor:default;white-space:nowrap;min-width:40px}
+    .heat-table .rl{text-align:left;font-weight:500;color:#CBD5E1;padding-right:1rem;white-space:nowrap}
+    /* Badges */
+    .tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:600}
+    .tag-hunt{background:#2d1a00;color:var(--amber)}
+    .tag-grow{background:#052e16;color:var(--green)}
+    .tag-risk{background:#2d0a0a;color:var(--red)}
+    .tag-dead{background:#1E293B;color:var(--muted)}
+    /* Cash floor */
+    .cf-row{display:flex;justify-content:space-between;align-items:center;padding:.6rem 0;border-bottom:1px solid var(--border)}
+    .cf-row:last-child{border-bottom:none}
+    /* Section labels */
+    .sec-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:1.25rem 0 .5rem}
+    /* Rank */
+    .r1{background:#F59E0B;color:#000;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700}
+    .r2{background:#94A3B8;color:#000;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700}
+    .r3{background:#CD7C40;color:#000;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700}
+    .rn{background:#1E293B;color:var(--muted);border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700}
+  </style>
+</head>
+<body>
+<div class="admin-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand"><span class="brand-icon">🥬</span><span class="brand-name">AFF Sales</span></div>
+    <nav class="sidebar-nav">
+      <a class="nav-link" href="dashboard.html">📊 Dashboard</a>
+      <a class="nav-link" href="beatplan.html">📋 Beat Plans</a>
+      <a class="nav-link" href="outlets.html">🏪 Outlets</a>
+      <a class="nav-link" href="orders.html">📦 Orders</a>
+      <a class="nav-link" href="deliveries-admin.html">🚚 Deliveries</a>
+      <a class="nav-link" href="collections.html">💰 Collections</a>
+      <a class="nav-link" href="analytics.html">📈 Analytics</a>
+      <a class="nav-link active" href="sales-intel.html">🎯 Sales Intel</a>
+      <a class="nav-link" href="ledger.html">📒 Ledger</a>
+      <a class="nav-link" href="team.html">👥 Team</a>
+      <a class="nav-link" href="settings.html">⚙️ Settings</a>
+    </nav>
+    <div class="sidebar-footer"><button class="btn btn-ghost btn-sm btn-full" onclick="signOut()">Sign Out</button></div>
+  </aside>
+
+  <main class="admin-main">
+    <div class="topbar">
+      <strong>🎯 Sales Intelligence</strong>
+      <div style="font-size:.8rem;color:var(--muted)">Pipeline · Penetration · Direction</div>
+    </div>
+    <div class="content">
+
+      <!-- Filters -->
+      <div class="action-bar">
+        <input type="month" id="f-month"/>
+        <input type="month" id="f-prev-month" style="opacity:.6" title="Comparison month"/>
+        <select id="f-rep"><option value="">All Reps</option></select>
+        <button class="btn btn-primary btn-sm" onclick="loadAll()">Apply</button>
+        <span style="font-size:.75rem;color:var(--muted)">← current vs comparison</span>
+      </div>
+
+      <!-- Pillar tabs -->
+      <div class="pillar-tabs">
+        <button class="pillar-tab active" onclick="switchTab('repeat')">🔁 Repeat Rate</button>
+        <button class="pillar-tab" onclick="switchTab('rep')">👤 Rep Performance</button>
+        <button class="pillar-tab" onclick="switchTab('channel')">📡 Channel & Penetration</button>
+        <button class="pillar-tab" onclick="switchTab('cash')">💵 Cash Floor</button>
+      </div>
+
+      <!-- ══ PILLAR 1: REPEAT RATE ══════════════════════════ -->
+      <div class="pillar active" id="pillar-repeat">
+        <div class="intel-grid" id="rr-kpis"></div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+          <div class="chart-card">
+            <div class="chart-title">Weekly Repeat Rate Trend</div>
+            <div class="chart-wrap"><canvas id="rr-trend-chart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Orders per Outlet — Distribution</div>
+            <div class="chart-wrap"><canvas id="rr-dist-chart"></canvas></div>
+          </div>
+        </div>
+
+        <div class="sec-label">Outlet Cohort Analysis — Tag outlets by behaviour</div>
+        <div class="chart-card">
+          <div style="display:flex;gap:12px;margin-bottom:1rem;flex-wrap:wrap">
+            <span><span class="tag tag-grow">🟢 Growing</span> ordered more vs last month</span>
+            <span><span class="tag tag-hunt">🟡 Hunt</span> ordered last month, not this month yet</span>
+            <span><span class="tag tag-risk">🔴 At Risk</span> dropped >30% vs last month</span>
+            <span><span class="tag tag-dead">⚪ Inactive</span> no order in 30+ days</span>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="si-table" id="cohort-table">
+              <thead><tr><th>Outlet</th><th>Area</th><th>Rep</th><th>This Month kg</th><th>Last Month kg</th><th>Change</th><th>Last Order</th><th>Tag</th></tr></thead>
+              <tbody id="cohort-body"><tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ PILLAR 2: REP PERFORMANCE ═════════════════════ -->
+      <div class="pillar" id="pillar-rep">
+        <div class="intel-grid" id="rep-kpis"></div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+          <div class="chart-card">
+            <div class="chart-title">Rep Volume This Month</div>
+            <div class="chart-wrap"><canvas id="rep-vol-chart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Fill Rate by Rep</div>
+            <div class="chart-wrap"><canvas id="rep-fill-chart"></canvas></div>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title">Rep Leaderboard — Full Scorecard</div>
+          <div style="overflow-x:auto">
+            <table class="si-table">
+              <thead><tr>
+                <th>#</th><th>Rep</th><th>Area</th>
+                <th>Active Outlets</th><th>Total kg</th><th>vs Last Month</th>
+                <th>Fill Rate</th><th>Avg kg/outlet</th><th>New Outlets</th><th>Revenue ₹</th>
+              </tr></thead>
+              <tbody id="rep-leaderboard"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="sec-label">Where is each rep spending time? — Visits vs Orders</div>
+        <div class="chart-card">
+          <table class="si-table" id="rep-efficiency">
+            <thead><tr><th>Rep</th><th>Outlets Visited</th><th>Orders Placed</th><th>Conversion %</th><th>Missed Visits</th><th>Avg Order Size</th><th>Direction</th></tr></thead>
+            <tbody id="rep-eff-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ PILLAR 3: CHANNEL & PENETRATION ═══════════════ -->
+      <div class="pillar" id="pillar-channel">
+        <div class="intel-grid" id="ch-kpis"></div>
+
+        <div class="sec-label">Area Penetration — How deep are we in each territory</div>
+        <div class="chart-card">
+          <div style="overflow-x:auto">
+            <table class="si-table">
+              <thead><tr><th>Area</th><th>Active Outlets</th><th>Ordering Outlets</th><th>Penetration %</th><th>Total kg</th><th>Avg kg/outlet</th><th>Opportunity</th></tr></thead>
+              <tbody id="area-pen-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+          <div class="chart-card">
+            <div class="chart-title">Volume by Area</div>
+            <div class="chart-wrap"><canvas id="area-vol-chart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Day × Area Heatmap (kg)</div>
+            <div style="overflow-x:auto;margin-top:.5rem" id="area-heat"></div>
+          </div>
+        </div>
+
+        <div class="sec-label">Hunt List — Outlets assigned but not ordering</div>
+        <div class="chart-card">
+          <table class="si-table">
+            <thead><tr><th>Outlet</th><th>Area</th><th>Rep</th><th>Avg kg/day (target)</th><th>Last Order</th><th>Days Silent</th><th>Action</th></tr></thead>
+            <tbody id="hunt-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ PILLAR 4: CASH FLOOR ═══════════════════════════ -->
+      <div class="pillar" id="pillar-cash">
+        <div class="intel-grid" id="cf-kpis"></div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+          <div class="chart-card">
+            <div class="chart-title">Daily Cash Collection Trend</div>
+            <div class="chart-wrap"><canvas id="cf-trend-chart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Payment Mode Mix</div>
+            <div class="chart-wrap"><canvas id="cf-mode-chart"></canvas></div>
+          </div>
+        </div>
+
+        <div class="sec-label">Outstanding by Outlet — Who owes us money</div>
+        <div class="chart-card">
+          <table class="si-table">
+            <thead><tr><th>Outlet</th><th>Area</th><th>Rep</th><th>Invoiced ₹</th><th>Collected ₹</th><th>Outstanding ₹</th><th>Days Outstanding</th><th>Risk</th></tr></thead>
+            <tbody id="outstanding-body"></tbody>
+          </table>
+        </div>
+
+        <div class="sec-label">Credit vs Cash ratio by Rep</div>
+        <div class="chart-card">
+          <table class="si-table">
+            <thead><tr><th>Rep</th><th>Cash ₹</th><th>UPI ₹</th><th>Credit ₹</th><th>Cheque ₹</th><th>Credit %</th><th>Risk Flag</th></tr></thead>
+            <tbody id="credit-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/app.js"></script>
+<script>
+  let charts = {};
+  const now = new Date();
+  const curMonthStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const prevDate = new Date(now); prevDate.setMonth(prevDate.getMonth()-1);
+  const prevMonthStr = `${prevDate.getFullYear()}-${String(prevDate.getMonth()+1).padStart(2,'0')}`;
+
+  document.getElementById('f-month').value      = curMonthStr;
+  document.getElementById('f-prev-month').value = prevMonthStr;
+
+  function switchTab(tab) {
+    document.querySelectorAll('.pillar-tab').forEach((t,i)=>{
+      const tabs=['repeat','rep','channel','cash'];
+      t.classList.toggle('active', tabs[i]===tab);
+    });
+    document.querySelectorAll('.pillar').forEach(p=>p.classList.remove('active'));
+    document.getElementById('pillar-'+tab).classList.add('active');
+  }
+
+  (async()=>{
+    const user = await getUser();
+    if(!user||user.role!=='admin'){location.href='dashboard.html';return;}
+    const {data:reps} = await db.from('users').select('id,name').eq('role','rep').eq('is_active',true);
+    const sel = document.getElementById('f-rep');
+    sel.innerHTML='<option value="">All Reps</option>'+(reps||[]).map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
+    await loadAll();
+  })();
+
+  function monthRange(m){
+    const from=m+'-01';
+    const t=new Date(m+'-01');t.setMonth(t.getMonth()+1);t.setDate(0);
+    return{from,to:t.toISOString().split('T')[0]};
+  }
+
+  async function fetchOrders(from,to,repId){
+    let q=db.from('orders')
+      .select('id,date,status,rep_id,outlet_id,outlets(name,area),users(name)')
+      .gte('date',from).lte('date',to).order('date');
+    if(repId) q=q.eq('rep_id',repId);
+    const{data:rawOrders,error}=await q;
+    const orderIds=(rawOrders||[]).map(o=>o.id);
+    let _items=[],_dels=[];
+    if(orderIds.length>0){
+      const{data:oi}=await db.from('order_items')
+        .select('order_id,kg_ordered,unit_price,discount_amount,products(name)')
+        .in('order_id',orderIds);
+      _items=oi||[];
+      const{data:dl}=await db.from('deliveries')
+        .select('order_id,cash_collected,payment_mode,delivery_items(kg_delivered)')
+        .in('order_id',orderIds);
+      _dels=dl||[];
+    }
+    const _imap={},_dmap={};
+    _items.forEach(i=>{if(!_imap[i.order_id])_imap[i.order_id]=[];_imap[i.order_id].push(i);});
+    _dels.forEach(d=>{if(!_dmap[d.order_id])_dmap[d.order_id]=[];_dmap[d.order_id].push(d);});
+    const data=(rawOrders||[]).map(o=>({...o,order_items:_imap[o.id]||[],deliveries:_dmap[o.id]||[]}));
+    if(error)console.error(error);
+    return data||[];
+  }
+
+  async function loadAll(){
+    const cur  = monthRange(document.getElementById('f-month').value);
+    const prev = monthRange(document.getElementById('f-prev-month').value);
+    const repId= document.getElementById('f-rep').value;
+    const [curOrders,prevOrders,allOutlets] = await Promise.all([
+      fetchOrders(cur.from,cur.to,repId),
+      fetchOrders(prev.from,prev.to,repId),
+      db.from('outlets').select('id,name,area,avg_kg_day,rep_id,users(name)').eq('status','active').then(r=>r.data||[])
+    ]);
+    renderRepeatRate(curOrders,prevOrders,cur,allOutlets);
+    renderRepPerf(curOrders,prevOrders,allOutlets);
+    renderChannel(curOrders,allOutlets);
+    renderCashFloor(curOrders,cur);
+  }
+
+  // ── PILLAR 1: REPEAT RATE ──────────────────────────────────
+  function renderRepeatRate(cur,prev,range,allOutlets){
+    const curOutlets  = new Set(cur.map(o=>o.outlet_id));
+    const prevOutlets = new Set(prev.map(o=>o.outlet_id));
+    const repeated    = [...curOutlets].filter(id=>prevOutlets.has(id)).length;
+    const repeatRate  = prevOutlets.size>0 ? Math.round(repeated/prevOutlets.size*100) : 0;
+    const newOutlets  = [...curOutlets].filter(id=>!prevOutlets.has(id)).length;
+    const churned     = [...prevOutlets].filter(id=>!curOutlets.has(id)).length;
+
+    document.getElementById('rr-kpis').innerHTML=`
+      <div class="intel-card"><div class="intel-label">Repeat Rate</div>
+        <div class="intel-val ${repeatRate>=70?'green':repeatRate>=50?'amber':'red'}">${repeatRate}%</div>
+        <div class="intel-sub">${repeated} of ${prevOutlets.size} prev outlets re-ordered</div></div>
+      <div class="intel-card"><div class="intel-label">Active Outlets</div>
+        <div class="intel-val blue">${curOutlets.size}</div>
+        <div class="intel-sub">placed at least 1 order this month</div></div>
+      <div class="intel-card"><div class="intel-label">New Outlets</div>
+        <div class="intel-val green">${newOutlets}</div>
+        <div class="intel-sub">first order this month</div></div>
+      <div class="intel-card"><div class="intel-label">Churned Outlets</div>
+        <div class="intel-val red">${churned}</div>
+        <div class="intel-sub">ordered last month, not this month</div></div>`;
+
+    // Weekly trend - orders per week
+    const weeks={};
+    cur.forEach(o=>{
+      const d=new Date(o.date);
+      const wk=`W${Math.ceil(d.getDate()/7)}`;
+      if(!weeks[wk])weeks[wk]=new Set();
+      weeks[wk].add(o.outlet_id);
+    });
+    const wkLabels=Object.keys(weeks).sort();
+    const wkData=wkLabels.map(w=>weeks[w].size);
+    mkChart('rr-trend-chart','line',wkLabels,wkData,'Active Outlets','var(--blue)');
+
+    // Distribution - how many orders per outlet
+    const ordCounts={};
+    cur.forEach(o=>{
+      ordCounts[o.outlet_id]=(ordCounts[o.outlet_id]||0)+1;
+    });
+    const dist={'1':0,'2-3':0,'4-6':0,'7+':0};
+    Object.values(ordCounts).forEach(n=>{
+      if(n===1)dist['1']++;
+      else if(n<=3)dist['2-3']++;
+      else if(n<=6)dist['4-6']++;
+      else dist['7+']++;
+    });
+    mkChart('rr-dist-chart','doughnut',Object.keys(dist),Object.values(dist),'Orders/Outlet',['#60A5FA','#4ADE80','#FBBF24','#F87171']);
+
+    // Cohort table
+    const outletMap={};
+    cur.forEach(o=>{
+      const id=o.outlet_id;
+      if(!outletMap[id])outletMap[id]={name:o.outlets?.name||'—',area:o.outlets?.area||'—',rep:o.users?.name||'—',curKg:0,lastOrder:o.date};
+      const kg=o.order_items.reduce((s,i)=>s+Number(i.kg_ordered),0);
+      outletMap[id].curKg+=kg;
+      if(o.date>outletMap[id].lastOrder)outletMap[id].lastOrder=o.date;
+    });
+    const prevOutletKg={};
+    prev.forEach(o=>{
+      const kg=o.order_items.reduce((s,i)=>s+Number(i.kg_ordered),0);
+      prevOutletKg[o.outlet_id]=(prevOutletKg[o.outlet_id]||0)+kg;
+    });
+
+    // Add churned outlets
+    prev.forEach(o=>{
+      if(!outletMap[o.outlet_id]){
+        outletMap[o.outlet_id]={name:o.outlets?.name||'—',area:o.outlets?.area||'—',rep:o.users?.name||'—',curKg:0,lastOrder:o.date};
+      }
+    });
+
+    const rows=Object.entries(outletMap).map(([id,d])=>{
+      const prevKg=prevOutletKg[id]||0;
+      const chg=prevKg>0?((d.curKg-prevKg)/prevKg*100):null;
+      const daysSince=Math.floor((new Date()-new Date(d.lastOrder))/(1000*60*60*24));
+      let tag,tagClass;
+      if(d.curKg===0&&prevKg>0){tag='Hunt';tagClass='tag-hunt';}
+      else if(d.curKg===0){tag='Inactive';tagClass='tag-dead';}
+      else if(chg!==null&&chg<-30){tag='At Risk';tagClass='tag-risk';}
+      else{tag='Growing';tagClass='tag-grow';}
+      return{...d,id,prevKg,chg,daysSince,tag,tagClass};
+    }).sort((a,b)=>b.curKg-a.curKg);
+
+    document.getElementById('cohort-body').innerHTML=rows.map(r=>`
+      <tr>
+        <td style="font-weight:600;color:#F1F5F9">${r.name}</td>
+        <td>${r.area}</td><td>${r.rep}</td>
+        <td style="font-family:monospace;font-weight:600">${r.curKg.toFixed(1)} kg</td>
+        <td style="font-family:monospace;color:var(--muted)">${r.prevKg.toFixed(1)} kg</td>
+        <td style="font-family:monospace;color:${r.chg===null?'var(--muted)':r.chg>=0?'var(--green)':'var(--red)'}">
+          ${r.chg===null?'—':(r.chg>=0?'▲':'▼')+Math.abs(r.chg).toFixed(0)+'%'}</td>
+        <td style="color:var(--muted);font-size:.78rem">${r.lastOrder}</td>
+        <td><span class="tag ${r.tagClass}">${r.tag}</span></td>
+      </tr>`).join('');
+  }
+
+  // ── PILLAR 2: REP PERFORMANCE ──────────────────────────────
+  function renderRepPerf(cur,prev,allOutlets){
+    const repMap={};
+    cur.forEach(o=>{
+      const id=o.rep_id,name=o.users?.name||'—';
+      if(!repMap[id])repMap[id]={name,kg:0,rev:0,kgDel:0,outlets:new Set(),orders:0,visited:0};
+      const kg =o.order_items.reduce((s,i)=>s+Number(i.kg_ordered),0);
+      const rev=o.order_items.reduce((s,i)=>s+(Number(i.kg_ordered)*Number(i.unit_price))-Number(i.discount_amount),0);
+      const del=o.deliveries?.reduce((s,d)=>s+(d.delivery_items||[]).reduce((ss,di)=>ss+Number(di.kg_delivered),0),0)||0;
+      repMap[id].kg+=kg;repMap[id].rev+=rev;repMap[id].kgDel+=del;
+      repMap[id].outlets.add(o.outlet_id);repMap[id].orders++;
+    });
+    const prevRepKg={};
+    prev.forEach(o=>{
+      const kg=o.order_items.reduce((s,i)=>s+Number(i.kg_ordered),0);
+      prevRepKg[o.rep_id]=(prevRepKg[o.rep_id]||0)+kg;
+    });
+
+    const sorted=Object.entries(repMap).sort((a,b)=>b[1].kg-a[1].kg);
+    const totalKg=sorted.reduce((s,[,r])=>s+r.kg,0);
+
+    document.getElementById('rep-kpis').innerHTML=`
+      <div class="intel-card"><div class="intel-label">Top Rep</div>
+        <div class="intel-val blue" style="font-size:1.2rem">${sorted[0]?.[1]?.name||'—'}</div>
+        <div class="intel-sub">${sorted[0]?.[1]?.kg.toFixed(1)||0} kg this month</div></div>
+      <div class="intel-card"><div class="intel-label">Active Reps</div>
+        <div class="intel-val green">${sorted.length}</div>
+        <div class="intel-sub">placed orders this month</div></div>
+      <div class="intel-card"><div class="intel-label">Team Fill Rate</div>
+        <div class="intel-val ${totalKg>0?'green':'red'}">${totalKg>0?Math.round(sorted.reduce((s,[,r])=>s+r.kgDel,0)/totalKg*100):0}%</div>
+        <div class="intel-sub">kg delivered / kg ordered</div></div>
+      <div class="intel-card"><div class="intel-label">Avg kg per Rep</div>
+        <div class="intel-val amber">${sorted.length>0?(totalKg/sorted.length).toFixed(1):0}</div>
+        <div class="intel-sub">kg this month</div></div>`;
+
+    const names=sorted.map(([,r])=>r.name);
+    const kgs=sorted.map(([,r])=>r.kg);
+    const fills=sorted.map(([,r])=>r.kg>0?Math.round(r.kgDel/r.kg*100):0);
+    mkChart('rep-vol-chart','bar',names,kgs,'kg','var(--blue)');
+    mkChart('rep-fill-chart','bar',names,fills,'fill %',fills.map(f=>f>=95?'var(--green)':f>=90?'var(--amber)':'var(--red)'));
+
+    // Leaderboard
+    document.getElementById('rep-leaderboard').innerHTML=sorted.map(([id,r],i)=>{
+      const prev=prevRepKg[id]||0;
+      const chg=prev>0?((r.kg-prev)/prev*100):null;
+      const fr=r.kg>0?Math.round(r.kgDel/r.kg*100):0;
+      const rnk=i===0?'r1':i===1?'r2':i===2?'r3':'rn';
+      return`<tr>
+        <td><span class="${rnk}">${i+1}</span></td>
+        <td style="font-weight:600;color:#F1F5F9">${r.name}</td>
+        <td style="color:var(--muted)">—</td>
+        <td>${r.outlets.size}</td>
+        <td style="font-family:monospace;font-weight:600">${r.kg.toFixed(1)} kg</td>
+        <td style="color:${chg===null?'var(--muted)':chg>=0?'var(--green)':'var(--red)'};font-family:monospace">
+          ${chg===null?'new':(chg>=0?'+':'')+chg.toFixed(0)+'%'}</td>
+        <td style="color:${fr>=95?'var(--green)':fr>=90?'var(--amber)':'var(--red)'};font-weight:600">${fr}%</td>
+        <td style="font-family:monospace">${r.outlets.size>0?(r.kg/r.outlets.size).toFixed(1):0}</td>
+        <td>—</td>
+        <td style="font-family:monospace;color:var(--green)">${fmt.inr(r.rev)}</td>
+      </tr>`;
+    }).join('');
+
+    // Efficiency
+    document.getElementById('rep-eff-body').innerHTML=sorted.map(([id,r])=>{
+      const conv=r.outlets.size>0?Math.round(r.orders/r.outlets.size*100):0;
+      const avgSize=r.orders>0?(r.kg/r.orders).toFixed(1):0;
+      let dir='',dirCls='';
+      if(conv>=80){dir='Strong conversion';dirCls='var(--green)';}
+      else if(conv>=50){dir='Push more outlets';dirCls='var(--amber)';}
+      else{dir='Focus on conversion';dirCls='var(--red)';}
+      return`<tr>
+        <td style="font-weight:600;color:#F1F5F9">${r.name}</td>
+        <td>${r.outlets.size}</td><td>${r.orders}</td>
+        <td style="font-weight:600;color:${conv>=70?'var(--green)':'var(--amber)'}">${conv}%</td>
+        <td>—</td>
+        <td style="font-family:monospace">${avgSize} kg</td>
+        <td style="color:${dirCls};font-size:.8rem;font-weight:500">${dir}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ── PILLAR 3: CHANNEL & PENETRATION ───────────────────────
+  function renderChannel(cur,allOutlets){
+    const areaOutlets={};
+    allOutlets.forEach(o=>{
+      if(!areaOutlets[o.area])areaOutlets[o.area]={total:0,ordering:new Set(),kg:0};
+      areaOutlets[o.area].total++;
+    });
+    cur.forEach(o=>{
+      const area=o.outlets?.area||'—';
+      if(!areaOutlets[area])areaOutlets[area]={total:0,ordering:new Set(),kg:0};
+      const kg=o.order_items.reduce((s,i)=>s+Number(i.kg_ordered),0);
+      areaOutlets[area].ordering.add(o.outlet_id);
+      areaOutlets[area].kg+=kg;
+    });
+
+    const totalActive=new Set(cur.map(o=>o.outlet_id)).size;
+    const totalOutlets=allOutlets.length;
+    const overallPen=totalOutlets>0?Math.round(totalActive/totalOutlets*100):0;
+    const totalKg=cur.reduce((s,o)=>s+o.order_items.reduce((ss,i)=>ss+Number(i.kg_ordered),0),0);
+
+    document.getElementById('ch-kpis').innerHTML=`
+      <div class="intel-card"><div class="intel-label">Overall Penetration</div>
+        <div class="intel-val ${overallPen>=70?'green':overallPen>=50?'amber':'red'}">${overallPen}%</div>
+        <div class="intel-sub">${totalActive} of ${totalOutlets} outlets ordering</div></div>
+      <div class="intel-card"><div class="intel-label">Areas Covered</div>
+        <div class="intel-val blue">${Object.keys(areaOutlets).length}</div>
+        <div class="intel-sub">distinct areas with activity</div></div>
+      <div class="intel-card"><div class="intel-label">Hunt Opportunities</div>
+        <div class="intel-val amber">${totalOutlets-totalActive}</div>
+        <div class="intel-sub">outlets assigned, not ordering</div></div>
+      <div class="intel-card"><div class="intel-label">Total Volume</div>
+        <div class="intel-val green">${totalKg.toFixed(0)} kg</div>
+        <div class="intel-sub">across all areas this month</div></div>`;
+
+    // Area penetration table
+    const areaSorted=Object.entries(areaOutlets).sort((a,b)=>b[1].kg-a[1].kg);
+    document.getElementById('area-pen-body').innerHTML=areaSorted.map(([area,d])=>{
+      const pen=d.total>0?Math.round(d.ordering.size/d.total*100):0;
+      const opp=d.total-d.ordering.size;
+      const potentialKg=opp*(d.ordering.size>0?d.kg/d.ordering.size:0);
+      return`<tr>
+        <td style="font-weight:600;color:#F1F5F9">${area}</td>
+        <td>${d.total}</td><td>${d.ordering.size}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="bar-bg" style="flex:1"><div class="bar-fill" style="width:${pen}%;background:${pen>=70?'var(--green)':pen>=50?'var(--amber)':'var(--red)'}"></div></div>
+            <span style="font-family:monospace;font-weight:600;color:${pen>=70?'var(--green)':pen>=50?'var(--amber)':'var(--red)'}">${pen}%</span>
+          </div>
+        </td>
+        <td style="font-family:monospace;font-weight:600">${d.kg.toFixed(1)} kg</td>
+        <td style="font-family:monospace">${d.ordering.size>0?(d.kg/d.ordering.size).toFixed(1):0}</td>
+        <td style="color:var(--amber);font-size:.78rem">${opp>0?`${opp} outlets · ~${potentialKg.toFixed(0)} kg potential`:''}</td>
+      </tr>`;
+    }).join('');
+
+    // Area volume chart
+    mkChart('area-vol-chart','bar',areaSorted.map(([a])=>a),areaSorted.map(([,d])=>d.kg),'kg','var(--blue)');
+
+    // Heatmap - area x day
+    const dayMap={'Monday':0,'Tuesday':1,'Wednesday':2,'Thursday':3,'Friday':4,'Saturday':5};
+    const heatData={};
+    cur.forEach(o=>{
+      const area=o.outlets?.area||'—';
+      const day=new Date(o.date).toLocaleDateString('en-US',{weekday:'long'});
+      const idx=dayMap[day];if(idx===undefined)return;
+      const kg=o.order_items.reduce((s,i)=>s+Number(i.kg_ordered),0);
+      if(!heatData[area])heatData[area]=Array(6).fill(0);
+      heatData[area][idx]+=kg;
+    });
+    const days=['Mon','Tue','Wed','Thu','Fri','Sat'];
+    const areas=Object.keys(heatData).sort();
+    const allVals=areas.flatMap(a=>heatData[a]);
+    const maxV=Math.max(...allVals,1);
+    function hc(v){if(!v)return'#0F172A';const i=v/maxV;return i<.25?'#0c2340':i<.5?'#1D4ED8':i<.75?'#2563EB':'#60A5FA';}
+    document.getElementById('area-heat').innerHTML=areas.length?`
+      <table class="heat-table">
+        <thead><tr><th style="text-align:left">Area</th>${days.map(d=>`<th>${d}</th>`).join('')}</tr></thead>
+        <tbody>${areas.map(a=>`<tr>
+          <td class="rl">${a}</td>
+          ${heatData[a].map(v=>`<td style="background:${hc(v)};color:${v?'#F1F5F9':'#334155'}">${v?v.toFixed(0):''}</td>`).join('')}
+        </tr>`).join('')}</tbody>
+      </table>`:'<div style="color:var(--muted)">No data</div>';
+
+    // Hunt list
+    const orderingOutlets=new Set(cur.map(o=>o.outlet_id));
+    const huntOutlets=allOutlets.filter(o=>!orderingOutlets.has(o.id));
+    document.getElementById('hunt-body').innerHTML=huntOutlets.length?
+      huntOutlets.slice(0,20).map(o=>`<tr>
+        <td style="font-weight:600;color:#F1F5F9">${o.name}</td>
+        <td>${o.area}</td>
+        <td>${o.users?.name||'Unassigned'}</td>
+        <td style="font-family:monospace">${o.avg_kg_day||0} kg</td>
+        <td style="color:var(--muted)">—</td>
+        <td style="color:var(--red)">Not ordered this month</td>
+        <td><span class="tag tag-hunt">Visit Now</span></td>
+      </tr>`).join('')
+      :'<tr><td colspan="7" style="text-align:center;color:var(--green);padding:1.5rem">All assigned outlets are ordering! 🎉</td></tr>';
+  }
+
+  // ── PILLAR 4: CASH FLOOR ───────────────────────────────────
+  async function renderCashFloor(orders,range){
+    const totalInv=orders.reduce((s,o)=>s+o.order_items.reduce((ss,i)=>ss+(Number(i.kg_ordered)*Number(i.unit_price))-Number(i.discount_amount),0),0);
+    const totalCash=orders.reduce((s,o)=>s+(o.deliveries||[]).reduce((ss,d)=>ss+Number(d.cash_collected),0),0);
+    const outstanding=totalInv-totalCash;
+    const collectionRate=totalInv>0?Math.round(totalCash/totalInv*100):0;
+    const creditOrders=orders.filter(o=>(o.deliveries||[]).some(d=>d.payment_mode==='credit')).length;
+
+    document.getElementById('cf-kpis').innerHTML=`
+      <div class="intel-card"><div class="intel-label">Total Invoiced</div>
+        <div class="intel-val blue">${fmt.inr(totalInv)}</div>
+        <div class="intel-sub">this month</div></div>
+      <div class="intel-card"><div class="intel-label">Total Collected</div>
+        <div class="intel-val green">${fmt.inr(totalCash)}</div>
+        <div class="intel-sub">cash + UPI + cheque</div></div>
+      <div class="intel-card"><div class="intel-label">Outstanding</div>
+        <div class="intel-val ${outstanding>0?'red':'green'}">${fmt.inr(outstanding)}</div>
+        <div class="intel-sub">needs follow-up</div></div>
+      <div class="intel-card"><div class="intel-label">Collection Rate</div>
+        <div class="intel-val ${collectionRate>=90?'green':collectionRate>=75?'amber':'red'}">${collectionRate}%</div>
+        <div class="intel-sub">${creditOrders} credit orders</div></div>`;
+
+    // Daily cash trend
+    const dailyCash={};
+    orders.forEach(o=>{
+      const cash=(o.deliveries||[]).reduce((s,d)=>s+Number(d.cash_collected),0);
+      if(!dailyCash[o.date])dailyCash[o.date]=0;
+      dailyCash[o.date]+=cash;
+    });
+    const sortedDays=Object.keys(dailyCash).sort();
+    mkChart('cf-trend-chart','bar',sortedDays.map(d=>d.slice(5)),sortedDays.map(d=>dailyCash[d]),'₹ collected','var(--green)');
+
+    // Payment mode mix
+    const modes={cash:0,upi:0,credit:0,cheque:0};
+    orders.forEach(o=>(o.deliveries||[]).forEach(d=>{
+      const m=d.payment_mode?.toLowerCase()||'cash';
+      if(modes[m]!==undefined)modes[m]+=Number(d.cash_collected);
+    }));
+    mkChart('cf-mode-chart','doughnut',['Cash','UPI','Credit','Cheque'],Object.values(modes),'₹',['#4ADE80','#60A5FA','#F87171','#FBBF24']);
+
+    // Outstanding by outlet
+    const outstandMap={};
+    orders.forEach(o=>{
+      const id=o.outlet_id;
+      const inv=o.order_items.reduce((s,i)=>s+(Number(i.kg_ordered)*Number(i.unit_price))-Number(i.discount_amount),0);
+      const col=(o.deliveries||[]).reduce((s,d)=>s+Number(d.cash_collected),0);
+      if(!outstandMap[id])outstandMap[id]={name:o.outlets?.name||'—',area:o.outlets?.area||'—',rep:o.users?.name||'—',inv:0,col:0,lastDate:o.date};
+      outstandMap[id].inv+=inv;outstandMap[id].col+=col;
+      if(o.date>outstandMap[id].lastDate)outstandMap[id].lastDate=o.date;
+    });
+    const outstanding_rows=Object.values(outstandMap).filter(r=>r.inv-r.col>0).sort((a,b)=>(b.inv-b.col)-(a.inv-a.col));
+    document.getElementById('outstanding-body').innerHTML=outstanding_rows.length?
+      outstanding_rows.map(r=>{
+        const out=r.inv-r.col;
+        const days=Math.floor((new Date()-new Date(r.lastDate))/(1000*60*60*24));
+        const risk=days>7?'tag-risk':days>3?'tag-hunt':'tag-grow';
+        const riskLabel=days>7?'High':days>3?'Medium':'Low';
+        return`<tr>
+          <td style="font-weight:600;color:#F1F5F9">${r.name}</td>
+          <td>${r.area}</td><td>${r.rep}</td>
+          <td style="font-family:monospace">${fmt.inr(r.inv)}</td>
+          <td style="font-family:monospace;color:var(--green)">${fmt.inr(r.col)}</td>
+          <td style="font-family:monospace;font-weight:700;color:var(--red)">${fmt.inr(out)}</td>
+          <td style="color:var(--muted)">${days}d ago</td>
+          <td><span class="tag ${risk}">${riskLabel}</span></td>
+        </tr>`;
+      }).join('')
+      :'<tr><td colspan="8" style="text-align:center;color:var(--green);padding:1.5rem">No outstanding payments 🎉</td></tr>';
+
+    // Credit ratio by rep
+    const repCredit={};
+    orders.forEach(o=>{
+      const id=o.rep_id,name=o.users?.name||'—';
+      if(!repCredit[id])repCredit[id]={name,cash:0,upi:0,credit:0,cheque:0};
+      (o.deliveries||[]).forEach(d=>{
+        const m=d.payment_mode?.toLowerCase()||'cash';
+        const v=Number(d.cash_collected);
+        if(repCredit[id][m]!==undefined)repCredit[id][m]+=v;
+      });
+    });
+    document.getElementById('credit-body').innerHTML=Object.values(repCredit).map(r=>{
+      const total=r.cash+r.upi+r.credit+r.cheque;
+      const creditPct=total>0?Math.round(r.credit/total*100):0;
+      return`<tr>
+        <td style="font-weight:600;color:#F1F5F9">${r.name}</td>
+        <td style="font-family:monospace;color:var(--green)">${fmt.inr(r.cash)}</td>
+        <td style="font-family:monospace;color:var(--blue)">${fmt.inr(r.upi)}</td>
+        <td style="font-family:monospace;color:${r.credit>0?'var(--red)':'var(--muted)'}">${fmt.inr(r.credit)}</td>
+        <td style="font-family:monospace">${fmt.inr(r.cheque)}</td>
+        <td style="font-weight:600;color:${creditPct>30?'var(--red)':creditPct>15?'var(--amber)':'var(--green)'}">${creditPct}%</td>
+        <td>${creditPct>30?'<span class="tag tag-risk">High Credit Risk</span>':creditPct>15?'<span class="tag tag-hunt">Monitor</span>':'<span class="tag tag-grow">Healthy</span>'}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ── Chart helper ───────────────────────────────────────────
+  function mkChart(id,type,labels,data,label,color){
+    if(charts[id])charts[id].destroy();
+    const isDoughnut=type==='doughnut';
+    charts[id]=new Chart(document.getElementById(id),{
+      type,
+      data:{labels,datasets:[{label,data,
+        backgroundColor:Array.isArray(color)?color:isDoughnut?['#60A5FA','#4ADE80','#FBBF24','#F87171','#A78BFA']:color+'99',
+        borderColor:Array.isArray(color)?color:color,
+        borderWidth:isDoughnut?0:1,borderRadius:isDoughnut?0:3}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:isDoughnut,position:'right',labels:{color:'#94A3B8',font:{size:10}}}},
+        scales:isDoughnut?{}:{
+          x:{ticks:{color:'#64748B',font:{size:10}},grid:{color:'#1E293B'}},
+          y:{ticks:{color:'#64748B'},grid:{color:'#1E293B'},beginAtZero:true}}}
+    });
+  }
+</script>
+</body>
+</html>

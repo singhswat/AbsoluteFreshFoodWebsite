@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FL4T5WHM8W"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FL4T5WHM8W');
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Beat Plans — AFF</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css" />
+  <style>
+    /* DataTables dark theme override */
+    .dataTables_wrapper { color: var(--text); }
+    .dataTables_wrapper .dataTables_length select,
+    .dataTables_wrapper .dataTables_filter input {
+      background: #0F172A; border: 1px solid var(--border);
+      color: var(--text); border-radius: 6px; padding: 4px 8px;
+    }
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate { color: var(--muted); font-size:0.82rem; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+      color: var(--muted) !important; border-radius: 6px !important; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+      background: var(--blue-bg) !important; color: var(--blue) !important;
+      border: 1px solid var(--blue) !important; }
+    table.dataTable thead th {
+      background: #1E293B; color: var(--muted); font-size:0.72rem;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border) !important; }
+    table.dataTable tbody tr { background: var(--bg) !important; }
+    table.dataTable tbody tr:hover td { background: #1E293B !important; }
+    table.dataTable tbody td { border-bottom: 1px solid #1E293B !important;
+      color: #CBD5E1; vertical-align: middle; padding: 0.6rem 0.75rem; }
+    table.dataTable tbody td.td-bold { font-weight:600; color:#F1F5F9; }
+
+    /* Inline edit cells */
+    .editable { cursor: pointer; border-bottom: 1px dashed var(--border); }
+    .editable:hover { border-bottom-color: var(--blue); color: var(--blue); }
+    .inline-input { background: #0F172A; border: 1px solid var(--blue);
+      color: var(--text); border-radius: 4px; padding: 3px 6px;
+      font-size: 0.85rem; width: 80px; }
+    .inline-select { background: #0F172A; border: 1px solid var(--blue);
+      color: var(--text); border-radius: 4px; padding: 3px 6px; font-size: 0.85rem; }
+
+    /* Tabs */
+    .tab-bar { display:flex; gap:4px; margin-bottom:1rem; }
+    .tab { padding: 7px 16px; border-radius: 8px; font-size:0.85rem;
+           font-weight:500; cursor:pointer; border: 1px solid var(--border);
+           background: transparent; color: var(--muted); }
+    .tab.active { background: var(--blue-bg); color: var(--blue);
+                  border-color: var(--blue); }
+
+    /* Day pills */
+    .day-pill { display:inline-block; background: var(--blue-bg); color: var(--blue);
+      border-radius: 4px; padding: 1px 6px; font-size:0.72rem; margin:1px; }
+
+    /* Action bar */
+    .action-bar { display:flex; gap:8px; align-items:center;
+                  margin-bottom:1rem; flex-wrap:wrap; }
+    .action-bar select, .action-bar input {
+      background: #0F172A; border: 1px solid var(--border);
+      color: var(--text); border-radius: 6px; padding: 7px 10px; font-size:0.85rem; }
+  </style>
+</head>
+<body>
+<div class="admin-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon">🥬</span>
+      <span class="brand-name">AFF Sales</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-link" href="dashboard.html">📊 Dashboard</a>
+      <a class="nav-link active" href="beatplan.html">📋 Beat Plans</a>
+      <a class="nav-link" href="outlets.html">🏪 Outlets</a>
+      <a class="nav-link" href="orders.html">📦 Orders</a>
+      <a class="nav-link" href="deliveries-admin.html">🚚 Deliveries</a>
+      <a class="nav-link" href="collections.html">💰 Collections</a>
+      <a class="nav-link" href="analytics.html">📈 Analytics</a>
+      <a class="nav-link" href="sales-intel.html">🎯 Sales Intel</a>
+      <a class="nav-link" href="ledger.html">📒 Ledger</a>
+      <a class="nav-link" href="team.html">👥 Team</a>
+      <a class="nav-link" href="settings.html">⚙️ Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn btn-ghost btn-sm btn-full" onclick="signOut()">Sign Out</button>
+    </div>
+  </aside>
+
+  <main class="admin-main">
+    <div class="topbar">
+      <strong>Beat Plans</strong>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-ghost btn-sm" onclick="prevMonth()">‹</button>
+        <span id="month-label" style="min-width:130px;text-align:center;font-weight:500"></span>
+        <button class="btn btn-ghost btn-sm" onclick="nextMonth()">›</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div id="msg" class="alert" style="display:none;margin-bottom:1rem"></div>
+
+      <!-- Action bar -->
+      <div class="action-bar">
+        <select id="filter-rep">
+          <option value="">All Reps</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="openAddRow()">+ Add Row</button>
+        <button class="btn btn-ghost btn-sm" onclick="createPlansForAllReps()">
+          ⚡ Init Plans for All Reps
+        </button>
+        <button class="btn btn-ghost btn-sm" onclick="publishAll()">
+          📢 Publish All Drafts
+        </button>
+        <div style="margin-left:auto;font-size:0.8rem;color:var(--muted)" id="save-status"></div>
+      </div>
+
+      <!-- Grid -->
+      <div class="table-wrap" style="border-radius:12px">
+        <table id="beat-grid" style="width:100%">
+          <thead>
+            <tr>
+              <th>Rep</th>
+              <th>Outlet</th>
+              <th>Area</th>
+              <th>Frequency</th>
+              <th>Days</th>
+              <th>Target kg</th>
+              <th>Seq</th>
+              <th>Plan Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="grid-body">
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Add row modal -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <h3>Add Beat Plan Row</h3>
+    <div id="add-error" class="alert alert-red"></div>
+    <div class="form-row-2">
+      <div class="form-group">
+        <label>Rep *</label>
+        <select id="f-rep" class="form-input"></select>
+      </div>
+      <div class="form-group">
+        <label>Outlet *</label>
+        <select id="f-outlet" class="form-input"></select>
+      </div>
+    </div>
+    <div class="form-row-2">
+      <div class="form-group">
+        <label>Frequency *</label>
+        <select id="f-freq" class="form-input">
+          <option value="weekly">Weekly</option>
+          <option value="fortnightly">Fortnightly</option>
+          <option value="monthly">Monthly</option>
+          <option value="adhoc">Adhoc</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Target kg</label>
+        <input id="f-kg" type="number" class="form-input" value="10" min="1" step="0.5" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Preferred days *</label>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:6px">
+        <label class="day-chk"><input type="checkbox" value="Monday" /> Mon</label>
+        <label class="day-chk"><input type="checkbox" value="Tuesday" /> Tue</label>
+        <label class="day-chk"><input type="checkbox" value="Wednesday" /> Wed</label>
+        <label class="day-chk"><input type="checkbox" value="Thursday" /> Thu</label>
+        <label class="day-chk"><input type="checkbox" value="Friday" /> Fri</label>
+        <label class="day-chk"><input type="checkbox" value="Saturday" /> Sat</label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Visit sequence</label>
+      <input id="f-seq" type="number" class="form-input" value="1" min="1" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeAdd()">Cancel</button>
+      <button class="btn btn-primary" id="add-btn" onclick="saveRow()">Add Row</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .day-chk { display:flex; align-items:center; gap:5px; font-size:0.85rem;
+             cursor:pointer; padding:4px 8px; border-radius:6px;
+             border:1px solid var(--border); }
+  .day-chk input { accent-color:var(--blue); }
+  .day-chk:has(input:checked) { background:var(--blue-bg); border-color:var(--blue);
+                                  color:var(--blue); }
+</style>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/app.js"></script>
+<script>
+  let currentMonth = new Date();
+  currentMonth.setDate(1);
+  let reps = [], outlets = [], allItems = [], dt;
+
+  (async () => {
+    const user = await getUser();
+    if (!user || user.role !== 'admin') { location.href='dashboard.html'; return; }
+    initDataTable();
+    await Promise.all([loadReps(), loadOutlets()]);
+    await loadAllItems();
+  })();
+
+  function monthStr() {
+    return currentMonth.toISOString().split('T')[0].slice(0,7) + '-01';
+  }
+
+  function updateMonthLabel() {
+    document.getElementById('month-label').textContent =
+      currentMonth.toLocaleDateString('en-IN', { month:'long', year:'numeric' });
+  }
+
+  async function prevMonth() { currentMonth.setMonth(currentMonth.getMonth()-1); updateMonthLabel(); await loadAllItems(); }
+  async function nextMonth() { currentMonth.setMonth(currentMonth.getMonth()+1); updateMonthLabel(); await loadAllItems(); }
+
+  function initDataTable() {
+    updateMonthLabel();
+    dt = $('#beat-grid').DataTable({
+      data: [],
+      columns: [
+        { title:'Rep',    data:'rep_name',    className:'td-bold' },
+        { title:'Outlet', data:'outlet_name', className:'td-bold' },
+        { title:'Area',   data:'outlet_area' },
+        { title:'Frequency', data:'visit_frequency', render: f =>
+            `<span class="badge badge-blue">${f}</span>` },
+        { title:'Days', data:'preferred_days', render: days =>
+            (days||[]).map(d=>`<span class="day-pill">${d.slice(0,3)}</span>`).join('') },
+        { title:'Target kg', data:'target_kg', render: v =>
+            `<span style="font-family:monospace;font-weight:600">${v} kg</span>` },
+        { title:'Seq', data:'visit_sequence' },
+        { title:'Status', data:'plan_status', render: s =>
+            `<span class="badge ${s==='published'?'badge-green':'badge-amber'}">${s}</span>` },
+        { title:'Actions', data:'id', orderable:false, render: (id, _, row) =>
+            `<div style="display:flex;gap:4px">
+              <button class="btn btn-ghost btn-sm" onclick="editRow('${id}')">Edit</button>
+              <button class="btn btn-ghost btn-sm" style="color:var(--red)"
+                      onclick="deleteRow('${id}','${row.outlet_name}')">✕</button>
+            </div>` }
+      ],
+      pageLength: 25,
+      order: [[0,'asc'],[6,'asc']],
+      language: { emptyTable: 'No beat plan items yet. Click "+ Add Row" to start.' },
+      dom: '<"top"lf>rt<"bottom"ip>',
+    });
+  }
+
+  async function loadReps() {
+    const { data } = await db.from('users')
+      .select('id,name,area').eq('role','rep').eq('is_active',true).order('name');
+    reps = data || [];
+    const sel = document.getElementById('filter-rep');
+    sel.innerHTML = '<option value="">All Reps</option>' +
+      reps.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
+    sel.onchange = () => filterByRep(sel.value);
+    document.getElementById('f-rep').innerHTML =
+      reps.map(r=>`<option value="${r.id}">${r.name} (${r.area||'—'})</option>`).join('');
+  }
+
+  async function loadOutlets() {
+    const { data } = await db.from('outlets')
+      .select('id,name,area').eq('status','active').order('name');
+    outlets = data || [];
+    document.getElementById('f-outlet').innerHTML =
+      outlets.map(o=>`<option value="${o.id}">${o.name} — ${o.area}</option>`).join('');
+  }
+
+  async function loadAllItems() {
+    // Get all plans for this month
+    const { data: plans, error: pErr } = await db.from('monthly_beat_plans')
+      .select('id,rep_id,status').eq('month', monthStr());
+
+    console.log('Month:', monthStr(), '| Plans found:', plans?.length, '| Error:', pErr?.message);
+
+    if (pErr) { showMsg('Error: ' + pErr.message, 'red'); return; }
+    if (!plans || plans.length === 0) {
+      showMsg('No beat plans for ' + currentMonth.toLocaleDateString('en-IN',{month:'long',year:'numeric'}) + '. Click "Init Plans for All Reps" to create them.', 'amber');
+      dt.clear().draw(); return;
+    }
+
+    const planIds = plans.map(p=>p.id);
+    const repMap  = {}; reps.forEach(r => repMap[r.id] = r);
+    const planMap = {}; plans.forEach(p => planMap[p.id] = p);
+
+    // Get all items — join outlets directly
+    const { data: items, error: iErr } = await db.from('monthly_beat_items')
+      .select('*, outlets(id, name, area)')
+      .in('monthly_plan_id', planIds);
+    if (iErr) { showMsg('Error loading items: ' + iErr.message, 'red'); return; }
+
+    console.log('Items found:', items?.length, items?.[0]);
+
+    allItems = (items||[]).map(item => {
+      const plan = planMap[item.monthly_plan_id] || {};
+      const rep  = repMap[plan.rep_id] || {};
+      // Parse preferred_days — Postgres returns as string "{Mon,Tue}" or array
+      let days = item.preferred_days || [];
+      if (typeof days === 'string') {
+        days = days.replace(/[{}]/g,'').split(',').filter(Boolean);
+      }
+      return {
+        id:              item.id,
+        plan_id:         item.monthly_plan_id,
+        rep_id:          plan.rep_id,
+        rep_name:        rep.name || '—',
+        outlet_id:       item.outlet_id,
+        outlet_name:     item.outlets?.name || '—',
+        outlet_area:     item.outlets?.area || '—',
+        visit_frequency: item.visit_frequency,
+        preferred_days:  days,
+        target_kg:       item.target_kg,
+        visit_sequence:  item.visit_sequence,
+        plan_status:     plan.status || 'draft'
+      };
+    });
+
+    console.log('Items to show:', allItems.length);
+    dt.clear().rows.add(allItems).draw();
+  }
+
+  function filterByRep(repId) {
+    if (!repId) { dt.search('').draw(); return; }
+    const rep = reps.find(r=>r.id===repId);
+    dt.column(0).search(rep?.name||'').draw();
+  }
+
+  async function createPlansForAllReps() {
+    if (!reps.length) { showMsg('No active reps found. Add reps in Team first.', 'amber'); return; }
+    showMsg('Creating plans...', 'green');
+    let created = 0, skipped = 0;
+
+    for (const rep of reps) {
+      // Check if already exists
+      const { data: existing } = await db
+        .from('monthly_beat_plans')
+        .select('id')
+        .eq('rep_id', rep.id)
+        .eq('month', monthStr())
+        .maybeSingle();
+
+      if (existing) { skipped++; continue; }
+
+      const payload = {
+        rep_id: rep.id,
+        month:  monthStr(),
+        status: 'draft'
+      };
+
+      // Try with updated_at first (old schema has it)
+      let { error } = await db.from('monthly_beat_plans').insert({
+        ...payload, updated_at: new Date().toISOString()
+      });
+
+      // If that fails, try without updated_at
+      if (error && error.message.includes('updated_at')) {
+        ({ error } = await db.from('monthly_beat_plans').insert(payload));
+      }
+
+      if (error) {
+        console.error('Failed for', rep.name, ':', error.message);
+      } else {
+        created++;
+      }
+    }
+
+    const msg = created > 0
+      ? `✓ Created ${created} plan(s)${skipped ? `, ${skipped} already existed` : ''}. Now add outlets using + Add Row.`
+      : skipped > 0 ? `Plans already exist for all ${skipped} reps.`
+      : 'No plans created — check console for errors.';
+
+    showMsg(msg, created > 0 || skipped > 0 ? 'green' : 'red');
+    await loadAllItems();
+  }
+
+  async function publishAll() {
+    const { data: plans } = await db.from('monthly_beat_plans')
+      .select('id').eq('month', monthStr()).eq('status','draft');
+    if (!plans?.length) { showMsg('No draft plans to publish.', 'amber'); return; }
+    await db.from('monthly_beat_plans')
+      .update({ status:'published', published_at: new Date().toISOString() })
+      .in('id', plans.map(p=>p.id));
+    showMsg(`${plans.length} plans published!`, 'green');
+    await loadAllItems();
+  }
+
+  function openAddRow() {
+    document.getElementById('add-error').classList.remove('show');
+    document.getElementById('f-kg').value  = '10';
+    document.getElementById('f-seq').value = (allItems.length + 1).toString();
+    document.querySelectorAll('.day-chk input').forEach(cb => cb.checked = false);
+    document.getElementById('add-modal').classList.add('show');
+  }
+  function closeAdd() { document.getElementById('add-modal').classList.remove('show'); }
+
+  async function saveRow() {
+    const repId    = document.getElementById('f-rep').value;
+    const outletId = document.getElementById('f-outlet').value;
+    const freq     = document.getElementById('f-freq').value;
+    const kg       = parseFloat(document.getElementById('f-kg').value) || 0;
+    const seq      = parseInt(document.getElementById('f-seq').value) || 1;
+    const days     = Array.from(document.querySelectorAll('.day-chk input:checked')).map(cb=>cb.value);
+    const btn      = document.getElementById('add-btn');
+    const err      = document.getElementById('add-error');
+
+    if (!repId || !outletId || !days.length || kg <= 0) {
+      err.textContent = 'Rep, outlet, at least one day and target kg are required';
+      err.classList.add('show'); return;
+    }
+
+    loading(btn, true);
+
+    // Get or create monthly plan for this rep
+    let { data: plan } = await db.from('monthly_beat_plans')
+      .select('id,status').eq('rep_id',repId).eq('month',monthStr()).single();
+
+    if (!plan) {
+      const { data: newPlan } = await db.from('monthly_beat_plans')
+        .insert({ rep_id:repId, month:monthStr(), status:'draft' }).select().single();
+      plan = newPlan;
+    }
+
+    const { error } = await db.from('monthly_beat_items').insert({
+      monthly_plan_id: plan.id,
+      outlet_id:       outletId,
+      visit_frequency: freq,
+      preferred_days:  days,
+      target_kg:       kg,
+      visit_sequence:  seq
+    });
+
+    if (error) {
+      err.textContent = error.message.includes('unique') ?
+        'This outlet is already in this rep\'s plan' : error.message;
+      err.classList.add('show');
+    } else {
+      closeAdd();
+      showToast('Row added');
+      await loadAllItems();
+    }
+    loading(btn, false, 'Add Row');
+  }
+
+  function editRow(id) {
+    const item = allItems.find(i=>i.id===id);
+    if (!item) return;
+    // Pre-fill modal and switch to edit mode
+    document.getElementById('f-rep').value    = item.rep_id;
+    document.getElementById('f-outlet').value = item.outlet_id;
+    document.getElementById('f-freq').value   = item.visit_frequency;
+    document.getElementById('f-kg').value     = item.target_kg;
+    document.getElementById('f-seq').value    = item.visit_sequence;
+    document.querySelectorAll('.day-chk input').forEach(cb => {
+      cb.checked = item.preferred_days.includes(cb.value);
+    });
+    document.getElementById('add-btn').textContent = 'Save Changes';
+    document.getElementById('add-btn').onclick = () => updateRow(id);
+    document.getElementById('add-error').classList.remove('show');
+    document.getElementById('add-modal').classList.add('show');
+  }
+
+  async function updateRow(id) {
+    const freq  = document.getElementById('f-freq').value;
+    const kg    = parseFloat(document.getElementById('f-kg').value) || 0;
+    const seq   = parseInt(document.getElementById('f-seq').value) || 1;
+    const days  = Array.from(document.querySelectorAll('.day-chk input:checked')).map(cb=>cb.value);
+    const btn   = document.getElementById('add-btn');
+
+    loading(btn, true);
+    await db.from('monthly_beat_items').update({
+      visit_frequency: freq, preferred_days: days,
+      target_kg: kg, visit_sequence: seq
+    }).eq('id', id);
+
+    // Reset button
+    document.getElementById('add-btn').textContent = 'Add Row';
+    document.getElementById('add-btn').onclick = saveRow;
+    closeAdd();
+    showToast('Updated');
+    await loadAllItems();
+    loading(btn, false, 'Add Row');
+  }
+
+  async function deleteRow(id, name) {
+    if (!confirm(`Remove "${name}" from beat plan?`)) return;
+    await db.from('monthly_beat_items').delete().eq('id', id);
+    showToast('Row removed');
+    await loadAllItems();
+  }
+
+  function showMsg(text, type) {
+    const el = document.getElementById('msg');
+    el.textContent = text;
+    el.className = `alert alert-${type} show`;
+    setTimeout(() => el.classList.remove('show'), 5000);
+  }
+</script>
+</body>
+</html>

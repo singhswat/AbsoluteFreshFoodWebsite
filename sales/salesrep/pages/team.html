@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FL4T5WHM8W"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FL4T5WHM8W');
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team — AFF</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+<div class="admin-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon">🥬</span>
+      <span class="brand-name">AFF Sales</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-link" href="dashboard.html">📊 Dashboard</a>
+      <a class="nav-link" href="beatplan.html">📋 Beat Plans</a>
+      <a class="nav-link" href="outlets.html">🏪 Outlets</a>
+      <a class="nav-link" href="orders.html">📦 Orders</a>
+      <a class="nav-link" href="deliveries-admin.html">🚚 Deliveries</a>
+      <a class="nav-link" href="collections.html">💰 Collections</a>
+      <a class="nav-link active" href="team.html">👥 Team</a>
+      <a class="nav-link" href="settings.html">⚙️ Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div style="font-size:0.82rem;color:var(--muted);margin-bottom:8px" id="user-name"></div>
+      <button class="btn btn-ghost btn-sm btn-full" onclick="signOut()">Sign Out</button>
+    </div>
+  </aside>
+
+  <main class="admin-main">
+    <div class="topbar">
+      <strong>Team Management</strong>
+      <button class="btn btn-primary btn-sm" onclick="openAdd()">+ Add User</button>
+    </div>
+    <div class="content">
+
+      <div id="msg" class="alert" style="display:none"></div>
+
+      <!-- Pending approval -->
+      <div id="pending-section" style="display:none">
+        <h2 style="font-size:1rem;color:#CBD5E1;margin-bottom:0.75rem">
+          ⏳ Pending Approval
+        </h2>
+        <div id="pending-list"></div>
+      </div>
+
+      <!-- Active team -->
+      <h2 style="font-size:1rem;color:#CBD5E1;margin-bottom:0.75rem">Active Team</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th><th>Email</th><th>Role</th>
+              <th>Area</th><th>Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="team-table">
+            <tr><td colspan="6" class="loading">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Add user modal -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <h3>Add Team Member</h3>
+    <div id="add-error" class="alert alert-red"></div>
+    <div class="form-group">
+      <label>Full name *</label>
+      <input id="add-name" type="text" class="form-input" placeholder="e.g. Ravi Kumar" />
+    </div>
+    <div class="form-group">
+      <label>Email *</label>
+      <input id="add-email" type="email" class="form-input"
+             placeholder="ravi@absolutefreshfood.com" />
+    </div>
+    <div class="form-group">
+      <label>Password *</label>
+      <input id="add-pwd" type="text" class="form-input" placeholder="Min 8 characters" />
+    </div>
+    <div class="form-row-2">
+      <div class="form-group">
+        <label>Role *</label>
+        <select id="add-role" class="form-input">
+          <option value="rep">Sales Rep</option>
+          <option value="driver">Driver</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Area</label>
+        <input id="add-area" type="text" class="form-input" placeholder="e.g. Tambaram" />
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeAdd()">Cancel</button>
+      <button class="btn btn-primary" id="add-btn" onclick="addUser()">Add User</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/app.js"></script>
+<script>
+  let currentUser;
+
+  (async () => {
+    currentUser = await getUser();
+    if (!currentUser || currentUser.role !== 'admin') {
+      location.href = 'dashboard.html'; return;
+    }
+    document.getElementById('user-name').textContent = currentUser.name;
+    await loadTeam();
+  })();
+
+  async function loadTeam() {
+    const { data: users } = await db.from('users')
+      .select('*').order('role').order('name');
+
+    const pending = (users || []).filter(u => !u.is_active);
+    const active  = (users || []).filter(u => u.is_active);
+
+    // Pending section
+    const pendingSection = document.getElementById('pending-section');
+    const pendingList    = document.getElementById('pending-list');
+    if (pending.length > 0) {
+      pendingSection.style.display = 'block';
+      pendingList.innerHTML = pending.map(u => `
+        <div class="card" style="display:flex;align-items:center;gap:1rem;margin-bottom:0.5rem">
+          <div class="rep-avatar">${u.name.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>
+          <div style="flex:1">
+            <div style="font-weight:600;color:#F1F5F9">${u.name}</div>
+            <div style="font-size:0.78rem;color:var(--muted)">${u.email}</div>
+            <span class="badge badge-amber">${u.role}</span>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary btn-sm" onclick="activate('${u.id}')">Activate ✓</button>
+            <button class="btn btn-ghost btn-sm" onclick="deactivateUser('${u.id}')">Reject</button>
+          </div>
+        </div>`).join('');
+    } else {
+      pendingSection.style.display = 'none';
+    }
+
+    // Active table
+    const tbody = document.getElementById('team-table');
+    if (!active.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="loading">No active users yet</td></tr>';
+      return;
+    }
+    tbody.innerHTML = active.map(u => `
+      <tr>
+        <td class="td-bold">${u.name}</td>
+        <td style="color:var(--muted)">${u.email}</td>
+        <td><span class="badge ${roleBadge(u.role)}">${u.role}</span></td>
+        <td>${u.area || '—'}</td>
+        <td><span class="badge badge-green">Active</span></td>
+        <td>
+          <button class="btn btn-ghost btn-sm"
+                  onclick="deactivateUser('${u.id}')">Deactivate</button>
+        </td>
+      </tr>`).join('');
+  }
+
+  function roleBadge(r) {
+    return r === 'admin' ? 'badge-blue' : r === 'rep' ? 'badge-green' : 'badge-amber';
+  }
+
+  function openAdd() {
+    document.getElementById('add-name').value  = '';
+    document.getElementById('add-email').value = '';
+    document.getElementById('add-pwd').value   = '';
+    document.getElementById('add-area').value  = '';
+    document.getElementById('add-error').classList.remove('show');
+    document.getElementById('add-modal').classList.add('show');
+  }
+
+  function closeAdd() {
+    document.getElementById('add-modal').classList.remove('show');
+  }
+
+  async function addUser() {
+    const name  = document.getElementById('add-name').value.trim();
+    const email = document.getElementById('add-email').value.trim();
+    const pwd   = document.getElementById('add-pwd').value;
+    const role  = document.getElementById('add-role').value;
+    const area  = document.getElementById('add-area').value.trim();
+    const btn   = document.getElementById('add-btn');
+    const err   = document.getElementById('add-error');
+
+    if (!name || !email || !pwd || pwd.length < 8) {
+      err.textContent = 'Name, email and password (min 8 chars) are required';
+      err.classList.add('show'); return;
+    }
+
+    loading(btn, true);
+    err.classList.remove('show');
+
+    // Get current session token
+    const { data: { session } } = await db.auth.getSession();
+
+    // Call Supabase Edge Function (service role key is safe on server)
+    const response = await fetch(
+      `${SUPABASE_URL}/functions/v1/create-user`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+          'apikey': SUPABASE_ANON
+        },
+        body: JSON.stringify({ name, email, password: pwd, role, area })
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok || result.error) {
+      err.textContent = result.error || 'Failed to create user';
+      err.classList.add('show');
+      loading(btn, false, 'Add User');
+      return;
+    }
+
+    closeAdd();
+    // Show credentials clearly so admin can share with rep
+    const creds = `✅ User created successfully!\n\nShare these credentials:\nEmail: ${email}\nPassword: ${pwd}\n\nAsk them to change password after first login.`;
+    alert(creds);
+    await loadTeam();
+    loading(btn, false, 'Add User');
+  }
+
+  async function activate(userId) {
+    await db.from('users').update({ is_active: true }).eq('id', userId);
+    showToast('User activated');
+    await loadTeam();
+  }
+
+  async function deactivateUser(userId) {
+    if (!confirm('Deactivate this user?')) return;
+    await db.from('users').update({ is_active: false }).eq('id', userId);
+    showToast('User deactivated');
+    await loadTeam();
+  }
+</script>
+</body>
+</html>

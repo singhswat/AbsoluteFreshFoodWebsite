@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FL4T5WHM8W"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FL4T5WHM8W');
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Orders — AFF</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css" />
+  <style>
+    .dataTables_wrapper { color: var(--text); }
+    .dataTables_wrapper .dataTables_length select,
+    .dataTables_wrapper .dataTables_filter input {
+      background: #0F172A; border: 1px solid var(--border);
+      color: var(--text); border-radius: 6px; padding: 4px 8px; }
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate { color: var(--muted); font-size:0.82rem; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button { color: var(--muted) !important; border-radius: 6px !important; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+      background: var(--blue-bg) !important; color: var(--blue) !important; border: 1px solid var(--blue) !important; }
+    table.dataTable thead th {
+      background: #1E293B; color: var(--muted); font-size:0.72rem;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border) !important; }
+    table.dataTable tbody tr { background: var(--bg) !important; }
+    table.dataTable tbody tr:hover td { background: #1E293B !important; }
+    table.dataTable tbody td { border-bottom: 1px solid #1E293B !important; color: #CBD5E1; vertical-align: middle; padding: 0.6rem 0.75rem; }
+    .summary-bar { display:grid; grid-template-columns:repeat(5,1fr); gap:0.75rem; margin-bottom:1rem; }
+    .sum-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:0.75rem 1rem; }
+    .sum-label { font-size:0.72rem; color:var(--muted); margin-bottom:4px; }
+    .sum-val { font-size:1.3rem; font-weight:700; font-family:monospace; }
+    .action-bar { display:flex; gap:8px; align-items:center; margin-bottom:1rem; flex-wrap:wrap; }
+    .action-bar select, .action-bar input[type=date] {
+      background:#0F172A; border:1px solid var(--border);
+      color:var(--text); border-radius:6px; padding:7px 10px; font-size:0.85rem; }
+  </style>
+</head>
+<body>
+<div class="admin-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand"><span class="brand-icon">🥬</span><span class="brand-name">AFF Sales</span></div>
+    <nav class="sidebar-nav">
+      <a class="nav-link" href="dashboard.html">📊 Dashboard</a>
+      <a class="nav-link" href="beatplan.html">📋 Beat Plans</a>
+      <a class="nav-link" href="outlets.html">🏪 Outlets</a>
+      <a class="nav-link active" href="orders.html">📦 Orders</a>
+      <a class="nav-link" href="deliveries-admin.html">🚚 Deliveries</a>
+      <a class="nav-link" href="collections.html">💰 Collections</a>
+      <a class="nav-link" href="analytics.html">📈 Analytics</a>
+      <a class="nav-link" href="sales-intel.html">🎯 Sales Intel</a>
+      <a class="nav-link" href="ledger.html">📒 Ledger</a>
+      <a class="nav-link" href="team.html">👥 Team</a>
+      <a class="nav-link" href="settings.html">⚙️ Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn btn-ghost btn-sm btn-full" onclick="signOut()">Sign Out</button>
+    </div>
+  </aside>
+
+  <main class="admin-main">
+    <div class="topbar">
+      <strong>Orders</strong>
+      <div style="font-size:0.82rem;color:var(--muted)" id="last-refresh"></div>
+    </div>
+    <div class="content">
+
+      <!-- Summary bar -->
+      <div class="summary-bar">
+        <div class="sum-card"><div class="sum-label">Total Orders</div><div class="sum-val blue" id="s-orders">—</div></div>
+        <div class="sum-card"><div class="sum-label">Total kg</div><div class="sum-val blue" id="s-kg">—</div></div>
+        <div class="sum-card"><div class="sum-label">Invoice value</div><div class="sum-val green" id="s-invoice">—</div></div>
+        <div class="sum-card"><div class="sum-label">Delivered</div><div class="sum-val green" id="s-delivered">—</div></div>
+        <div class="sum-card"><div class="sum-label">Pending</div><div class="sum-val amber" id="s-pending">—</div></div>
+      </div>
+
+      <!-- Filters -->
+      <div class="action-bar">
+        <input type="date" id="f-from" />
+        <input type="date" id="f-to" />
+        <select id="f-rep"><option value="">All Reps</option></select>
+        <select id="f-status">
+          <option value="">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="delivered">Delivered</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="loadOrders()">Apply</button>
+        <button class="btn btn-ghost btn-sm" onclick="resetFilters()">Reset</button>
+        <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="exportCSV()">⬇ Export CSV</button>
+      </div>
+
+      <!-- Grid -->
+      <div class="table-wrap">
+        <table id="orders-grid" style="width:100%">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Outlet</th>
+              <th>Area</th>
+              <th>Rep</th>
+              <th>Product</th>
+              <th>Kg</th>
+              <th>Rate</th>
+              <th>Invoice ₹</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Cancel order modal -->
+<div class="modal-overlay" id="cancel-modal">
+  <div class="modal" style="max-width:380px">
+    <h3>Cancel Order</h3>
+    <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem">
+      Cancel order for <strong id="cancel-outlet"></strong>?
+      This cannot be undone.
+    </p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="document.getElementById('cancel-modal').classList.remove('show')">No, keep it</button>
+      <button class="btn btn-danger" id="confirm-cancel-btn" onclick="confirmCancel()">Yes, cancel</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/app.js"></script>
+<script>
+  let dt, cancelOrderId = '';
+
+  // Set default date range to today
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('f-from').value = today;
+  document.getElementById('f-to').value   = today;
+
+  (async () => {
+    const user = await getUser();
+    if (!user || user.role !== 'admin') { location.href='dashboard.html'; return; }
+    await loadReps();
+    initTable();
+    await loadOrders();
+  })();
+
+  async function loadReps() {
+    const { data } = await db.from('users')
+      .select('id,name').eq('role','rep').eq('is_active',true).order('name');
+    const sel = document.getElementById('f-rep');
+    sel.innerHTML = '<option value="">All Reps</option>' +
+      (data||[]).map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
+  }
+
+  function initTable() {
+    dt = $('#orders-grid').DataTable({
+      data: [], columns: [
+        { title:'Date',    data:'date' },
+        { title:'Time',    data:'time' },
+        { title:'Outlet',  data:'outlet_name', className:'td-bold' },
+        { title:'Area',    data:'outlet_area' },
+        { title:'Rep',     data:'rep_name' },
+        { title:'Product', data:'product_name' },
+        { title:'Kg',      data:'kg', render: v =>
+            `<span style="font-family:monospace;font-weight:600">${v}</span>` },
+        { title:'Rate ₹',  data:'rate', render: v =>
+            `<span style="font-family:monospace">₹${v}</span>` },
+        { title:'Invoice ₹', data:'invoice', render: v =>
+            `<span style="font-family:monospace;font-weight:600;color:var(--green)">₹${Number(v).toLocaleString('en-IN')}</span>` },
+        { title:'Status', data:'status', render: s => {
+            const cls = s==='delivered'?'badge-green':s==='pending'?'badge-amber':'badge-gray';
+            return `<span class="badge ${cls}">${s}</span>`; }},
+        { title:'', data:'order_id', orderable:false, render: (oid, _, row) =>
+            row.status === 'pending' ?
+            `<button class="btn btn-ghost btn-sm" style="color:var(--red);font-size:0.75rem"
+              onclick="openCancel('${oid}','${row.outlet_name.replace(/'/g,"\\'")}')">Cancel</button>` : '' }
+      ],
+      pageLength: 50,
+      order: [[0,'desc'],[1,'desc']],
+      language: { emptyTable: 'No orders found for selected filters.' },
+      dom: '<"top"lf>rt<"bottom"ip>',
+    });
+  }
+
+  async function loadOrders() {
+    const from   = document.getElementById('f-from').value;
+    const to     = document.getElementById('f-to').value;
+    const repId  = document.getElementById('f-rep').value;
+    const status = document.getElementById('f-status').value;
+
+    let query = db.from('orders')
+      .select('id, date, status, created_at, outlets(name,area), users(name), order_items(kg_ordered, unit_price, discount_amount, products(name))')
+      .order('date', { ascending: false })
+      .order('created_at', { ascending: false });
+
+    if (from) query = query.gte('date', from);
+    if (to)   query = query.lte('date', to);
+    if (repId)  query = query.eq('rep_id', repId);
+    if (status) query = query.eq('status', status);
+
+    const { data, error } = await query;
+    if (error) { console.error(error); return; }
+
+    const rows = [];
+    let totalKg = 0, totalInv = 0, totalDel = 0, totalPend = 0;
+
+    (data||[]).forEach(o => {
+      const items = o.order_items || [];
+      items.forEach(item => {
+        const kg  = Number(item.kg_ordered);
+        const inv = (kg * Number(item.unit_price)) - Number(item.discount_amount);
+        totalKg  += kg;
+        totalInv += inv;
+        if (o.status === 'delivered') totalDel++;
+        if (o.status === 'pending')   totalPend++;
+        rows.push({
+          order_id:    o.id,
+          date:        o.date,
+          time:        new Date(o.created_at).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}),
+          outlet_name: o.outlets?.name || '—',
+          outlet_area: o.outlets?.area || '—',
+          rep_name:    o.users?.name   || '—',
+          product_name: item.products?.name || '—',
+          kg:          kg,
+          rate:        Number(item.unit_price),
+          invoice:     inv,
+          status:      o.status
+        });
+      });
+    });
+
+    dt.clear().rows.add(rows).draw();
+
+    // Update summary
+    document.getElementById('s-orders').textContent   = data?.length || 0;
+    document.getElementById('s-kg').textContent       = fmt.kg(totalKg);
+    document.getElementById('s-invoice').textContent  = fmt.inr(totalInv);
+    document.getElementById('s-delivered').textContent = totalDel;
+    document.getElementById('s-pending').textContent  = totalPend;
+    document.getElementById('last-refresh').textContent =
+      'Updated ' + new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  }
+
+  function resetFilters() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('f-from').value   = today;
+    document.getElementById('f-to').value     = today;
+    document.getElementById('f-rep').value    = '';
+    document.getElementById('f-status').value = '';
+    loadOrders();
+  }
+
+  function openCancel(orderId, outletName) {
+    cancelOrderId = orderId;
+    document.getElementById('cancel-outlet').textContent = outletName;
+    document.getElementById('cancel-modal').classList.add('show');
+  }
+
+  async function confirmCancel() {
+    const btn = document.getElementById('confirm-cancel-btn');
+    loading(btn, true);
+    await db.from('orders').update({ status:'cancelled' }).eq('id', cancelOrderId);
+    document.getElementById('cancel-modal').classList.remove('show');
+    showToast('Order cancelled');
+    await loadOrders();
+    loading(btn, false, 'Yes, cancel');
+  }
+
+  function exportCSV() {
+    const rows = dt.rows({ search:'applied' }).data().toArray();
+    const headers = ['Date','Time','Outlet','Area','Rep','Product','Kg','Rate','Invoice','Status'];
+    const csv = [headers.join(','),
+      ...rows.map(r => [r.date,r.time,`"${r.outlet_name}"`,`"${r.outlet_area}"`,
+        `"${r.rep_name}"`,`"${r.product_name}"`,r.kg,r.rate,r.invoice,r.status].join(','))
+    ].join('\n');
+    const a = document.createElement('a');
+    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+    a.download = `orders_${document.getElementById('f-from').value}_${document.getElementById('f-to').value}.csv`;
+    a.click();
+  }
+
+  // Auto-refresh every 60 seconds
+  setInterval(loadOrders, 60000);
+</script>
+</body>
+</html>

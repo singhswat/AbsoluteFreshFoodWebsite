@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FL4T5WHM8W"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FL4T5WHM8W');
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — AFF</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+<div class="admin-shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon">🥬</span>
+      <span class="brand-name">AFF Sales</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-link active" href="dashboard.html">📊 Dashboard</a>
+      <a class="nav-link" href="beatplan.html">📋 Beat Plans</a>
+      <a class="nav-link" href="outlets.html">🏪 Outlets</a>
+      <a class="nav-link" href="orders.html">📦 Orders</a>
+      <a class="nav-link" href="deliveries-admin.html">🚚 Deliveries</a>
+      <a class="nav-link" href="collections.html">💰 Collections</a>
+      <a class="nav-link" href="analytics.html">📈 Analytics</a>
+      <a class="nav-link" href="sales-intel.html">🎯 Sales Intel</a>
+      <a class="nav-link" href="ledger.html">📒 Ledger</a>
+      <a class="nav-link" href="team.html">👥 Team</a>
+      <a class="nav-link" href="settings.html">⚙️ Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div style="font-size:0.82rem;color:var(--muted);margin-bottom:8px"
+           id="user-name">Admin</div>
+      <button class="btn btn-ghost btn-sm btn-full" onclick="signOut()">
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="admin-main">
+    <div class="topbar">
+      <div>
+        <strong id="page-title">Live Dashboard</strong>
+        <span class="live-badge" style="margin-left:10px">● LIVE</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:0.82rem;color:var(--muted)" id="today-date"></span>
+        <button class="lang-btn" onclick="toggleLang()">हि/EN</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- KPIs -->
+      <div class="kpi-grid" id="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">Total Ordered</div>
+          <div class="kpi-val blue" id="kpi-ordered">— kg</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Total Delivered</div>
+          <div class="kpi-val green" id="kpi-delivered">— kg</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Fill Rate</div>
+          <div class="kpi-val" id="kpi-fillrate">—%</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Collections</div>
+          <div class="kpi-val green" id="kpi-collections">₹—</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Pending Orders</div>
+          <div class="kpi-val amber" id="kpi-pending">—</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Overdue</div>
+          <div class="kpi-val red" id="kpi-overdue">—</div>
+        </div>
+      </div>
+
+      <!-- Rep Overview -->
+      <div class="page-title-row">
+        <h2 style="font-size:1.1rem;color:#CBD5E1">Rep Overview</h2>
+        <button class="btn btn-ghost btn-sm" onclick="loadDashboard()">↻ Refresh</button>
+      </div>
+
+      <div id="rep-grid" class="rep-grid">
+        <div class="loading">Loading...</div>
+      </div>
+
+      <!-- Recent Orders -->
+      <h2 style="font-size:1.1rem;color:#CBD5E1;margin:1.5rem 0 0.75rem">
+        Recent Orders
+      </h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th><th>Outlet</th><th>Area</th>
+              <th>Rep</th><th>Kg</th><th>Invoice</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="orders-table">
+            <tr><td colspan="7" class="loading">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/app.js"></script>
+<script>
+  let refreshTimer;
+
+  document.getElementById('today-date').textContent =
+    new Date().toLocaleDateString('en-IN', { weekday:'long', day:'2-digit', month:'long' });
+
+  (async () => {
+    const user = await getUser();
+    if (!user) return;
+    if (user.role !== 'admin') { window.location.href = 'beat.html'; return; }
+    document.getElementById('user-name').textContent = user.name;
+    await loadDashboard();
+    refreshTimer = setInterval(loadDashboard, 60000);
+  })();
+
+  async function loadDashboard() {
+    const today = new Date().toISOString().split('T')[0];
+
+    // Load orders for today
+    const { data: orders } = await db.from('orders')
+      .select('*, outlets(name, area), users(name), order_items(kg_ordered, unit_price, discount_amount)')
+      .eq('date', today)
+      .order('created_at', { ascending: false });
+
+    const { data: deliveries } = await db.from('deliveries')
+      .select('*, delivery_items(kg_delivered), orders!inner(date)')
+      .eq('orders.date', today);
+
+    // Calculate KPIs
+    const totalOrdered    = (orders || []).reduce((s, o) =>
+      s + o.order_items.reduce((ss, i) => ss + Number(i.kg_ordered), 0), 0);
+    const totalDelivered  = (deliveries || []).reduce((s, d) =>
+      s + (d.delivery_items||[]).reduce((ss, i) => ss + Number(i.kg_delivered), 0), 0);
+    const totalCollected  = (deliveries || []).reduce((s, d) => s + Number(d.cash_collected), 0);
+    const pendingOrders   = (orders || []).filter(o => o.status === 'pending').length;
+    const overdueTime     = new Date(); overdueTime.setHours(16, 0, 0);
+    const overdueOrders   = (orders || []).filter(o =>
+      o.status === 'pending' && new Date() > overdueTime).length;
+    const fr = fillRate(totalOrdered, totalDelivered);
+
+    // Update KPIs
+    document.getElementById('kpi-ordered').textContent     = fmt.kg(totalOrdered);
+    document.getElementById('kpi-delivered').textContent   = fmt.kg(totalDelivered);
+    document.getElementById('kpi-fillrate').textContent    = fmt.pct(fr);
+    document.getElementById('kpi-fillrate').className      = `kpi-val ${fillClass(fr)}`;
+    document.getElementById('kpi-collections').textContent = fmt.inr(totalCollected);
+    document.getElementById('kpi-pending').textContent     = pendingOrders;
+    document.getElementById('kpi-overdue').textContent     = overdueOrders;
+    document.getElementById('kpi-overdue').className       =
+      `kpi-val ${overdueOrders > 0 ? 'red' : 'green'}`;
+
+    // Rep overview
+    const { data: reps } = await db.from('users')
+      .select('id, name, area').eq('role', 'rep').eq('is_active', true);
+
+    const repGrid = document.getElementById('rep-grid');
+    if (!reps || reps.length === 0) {
+      repGrid.innerHTML = '<div class="empty"><div class="empty-sub">No reps set up yet</div></div>';
+    } else {
+      repGrid.innerHTML = reps.map(rep => {
+        const repOrders = (orders || []).filter(o => o.rep_id === rep.id);
+        const kgOrdered = repOrders.reduce((s, o) =>
+          s + o.order_items.reduce((ss, i) => ss + Number(i.kg_ordered), 0), 0);
+        const repDeliveries = (deliveries || []).filter(d =>
+          repOrders.some(o => o.id === d.order_id));
+        const kgDelivered = repDeliveries.reduce((s, d) =>
+          s + (d.delivery_items||[]).reduce((ss, i) => ss + Number(i.kg_delivered), 0), 0);
+        const cash = repDeliveries.reduce((s, d) => s + Number(d.cash_collected), 0);
+        const fr   = fillRate(kgOrdered, kgDelivered);
+        const fc   = fillClass(fr);
+        const icon = fr >= 95 ? '🟢' : fr >= 90 ? '🟡' : kgOrdered > 0 ? '🔴' : '⚪';
+
+        return `<div class="rep-card">
+          <div class="rep-card-top">
+            <div class="rep-avatar">${rep.name.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>
+            <div style="flex:1">
+              <div style="font-weight:600;color:#F1F5F9">${rep.name}</div>
+              <div style="font-size:0.75rem;color:var(--muted)">${rep.area || ''}</div>
+            </div>
+            <span style="font-size:1.3rem">${icon}</span>
+          </div>
+          <div class="rep-stats">
+            <div class="rep-stat">
+              <span class="stat-l">Orders</span>
+              <span class="stat-r">${repOrders.length}</span>
+            </div>
+            <div class="rep-stat">
+              <span class="stat-l">Kg ordered</span>
+              <span class="stat-r">${fmt.kg(kgOrdered)}</span>
+            </div>
+            <div class="rep-stat">
+              <span class="stat-l">Kg delivered</span>
+              <span class="stat-r">${fmt.kg(kgDelivered)}</span>
+            </div>
+            <div class="rep-stat">
+              <span class="stat-l">Fill rate</span>
+              <span class="stat-r ${fc}">${fmt.pct(fr)}</span>
+            </div>
+            <div class="rep-stat">
+              <span class="stat-l">Collected</span>
+              <span class="stat-r green">${fmt.inr(cash)}</span>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    // Recent orders table
+    const tbody = document.getElementById('orders-table');
+    if (!orders || orders.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="loading">No orders today yet</td></tr>';
+    } else {
+      tbody.innerHTML = orders.map(o => {
+        const kg  = o.order_items.reduce((s,i) => s + Number(i.kg_ordered), 0);
+        const inv = o.order_items.reduce((s,i) =>
+          s + (Number(i.kg_ordered) * Number(i.unit_price)) - Number(i.discount_amount), 0);
+        const status = o.status === 'delivered'
+          ? '<span class="badge badge-green">Delivered</span>'
+          : '<span class="badge badge-amber">Pending</span>';
+        return `<tr>
+          <td>${fmt.time(o.created_at)}</td>
+          <td class="td-bold">${o.outlets?.name || '—'}</td>
+          <td>${o.outlets?.area || '—'}</td>
+          <td>${o.users?.name || '—'}</td>
+          <td class="td-mono">${fmt.kg(kg)}</td>
+          <td class="td-mono">${fmt.inr(inv)}</td>
+          <td>${status}</td>
+        </tr>`;
+      }).join('');
+    }
+  }
+
+  function toggleLang() { setLang(lang === 'en' ? 'hi' : 'en'); }
+</script>
+</body>
+</html>

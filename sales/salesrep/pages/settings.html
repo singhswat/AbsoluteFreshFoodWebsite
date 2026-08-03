@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FL4T5WHM8W"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FL4T5WHM8W');
+  </script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Settings — AFF</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+<div class="admin-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand"><span class="brand-icon">🥬</span><span class="brand-name">AFF Sales</span></div>
+    <nav class="sidebar-nav">
+      <a class="nav-link" href="dashboard.html">📊 Dashboard</a>
+      <a class="nav-link" href="beatplan.html">📋 Beat Plans</a>
+      <a class="nav-link" href="outlets.html">🏪 Outlets</a>
+      <a class="nav-link" href="orders.html">📦 Orders</a>
+      <a class="nav-link" href="deliveries-admin.html">🚚 Deliveries</a>
+      <a class="nav-link" href="collections.html">💰 Collections</a>
+      <a class="nav-link" href="analytics.html">📈 Analytics</a>
+      <a class="nav-link" href="sales-intel.html">🎯 Sales Intel</a>
+      <a class="nav-link" href="ledger.html">📒 Ledger</a>
+      <a class="nav-link" href="team.html">👥 Team</a>
+      <a class="nav-link active" href="settings.html">⚙️ Settings</a>
+    </nav>
+    <div class="sidebar-footer"><button class="btn btn-ghost btn-sm btn-full" onclick="signOut()">Sign Out</button></div>
+  </aside>
+  <main class="admin-main">
+    <div class="topbar"><strong>Settings</strong></div>
+    <div class="content" style="max-width:600px">
+      <div id="msg" class="alert" style="display:none;margin-bottom:1rem"></div>
+
+      <h2 style="font-size:1rem;color:#CBD5E1;margin-bottom:0.75rem">Operations</h2>
+      <div class="card" style="margin-bottom:1.5rem">
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Beat confirm deadline</label>
+            <input id="s-beat" type="text" class="form-input" placeholder="09:00"/>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">Alert if rep hasn't confirmed by this time (HH:MM)</div>
+          </div>
+          <div class="form-group">
+            <label>Overdue flag time</label>
+            <input id="s-overdue" type="text" class="form-input" placeholder="16:00"/>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">Flag undelivered orders after this time (HH:MM)</div>
+          </div>
+        </div>
+      </div>
+
+      <h2 style="font-size:1rem;color:#CBD5E1;margin-bottom:0.75rem">WhatsApp Alerts</h2>
+      <div class="card" style="margin-bottom:1.5rem">
+        <div class="form-group">
+          <label>Manager WhatsApp number</label>
+          <input id="s-whatsapp" type="text" class="form-input" placeholder="+91 98765 43210"/>
+        </div>
+      </div>
+
+      <h2 style="font-size:1rem;color:#CBD5E1;margin-bottom:0.75rem">Products</h2>
+      <div class="card" style="margin-bottom:1.5rem">
+        <div id="products-list" style="margin-bottom:0.75rem"></div>
+        <div style="display:flex;gap:8px">
+          <input id="new-product" type="text" class="form-input" placeholder="Product name e.g. Idli Batter" style="flex:1"/>
+          <input id="new-price" type="number" class="form-input" placeholder="Price ₹/kg" style="width:120px"/>
+          <button class="btn btn-primary btn-sm" onclick="addProduct()">Add</button>
+        </div>
+      </div>
+
+      <h2 style="font-size:1rem;color:#CBD5E1;margin-bottom:0.75rem">About</h2>
+      <div class="card" style="margin-bottom:1.5rem">
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:0.85rem">
+          <div style="display:flex;justify-content:space-between">
+            <span style="color:var(--muted)">App version</span><span>1.0.0</span>
+          </div>
+          <div style="display:flex;justify-content:space-between">
+            <span style="color:var(--muted)">Company</span><span>Absolute Fresh Food</span>
+          </div>
+          <div style="display:flex;justify-content:space-between">
+            <span style="color:var(--muted)">Supabase project</span>
+            <span style="font-family:monospace;font-size:0.78rem;color:var(--blue)">fbfopgzblqmsflkfejwa</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+    </div>
+  </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/app.js"></script>
+<script>
+  (async () => {
+    const user = await getUser();
+    if (!user || user.role !== 'admin') { location.href='dashboard.html'; return; }
+    await loadSettings();
+    await loadProducts();
+  })();
+
+  async function loadSettings() {
+    const { data } = await db.from('app_settings').select('*');
+    const map = {};
+    (data||[]).forEach(s => map[s.key] = s.value);
+    document.getElementById('s-beat').value     = map['beat_confirm_deadline'] || '09:00';
+    document.getElementById('s-overdue').value  = map['overdue_flag_time']     || '16:00';
+    document.getElementById('s-whatsapp').value = map['whatsapp_number']       || '';
+  }
+
+  async function saveSettings() {
+    const settings = [
+      { key:'beat_confirm_deadline', value: document.getElementById('s-beat').value    || '09:00' },
+      { key:'overdue_flag_time',     value: document.getElementById('s-overdue').value || '16:00' },
+      { key:'whatsapp_number',       value: document.getElementById('s-whatsapp').value || '' }
+    ];
+    for (const s of settings) {
+      await db.from('app_settings').upsert(s, { onConflict:'key' });
+    }
+    showMsg('Settings saved ✓', 'green');
+  }
+
+  async function loadProducts() {
+    const { data } = await db.from('products').select('*').order('name');
+    const list = document.getElementById('products-list');
+    if (!data?.length) { list.innerHTML = '<div style="color:var(--muted);font-size:0.85rem">No products yet.</div>'; return; }
+    list.innerHTML = data.map(p => `
+      <div style="display:flex;justify-content:space-between;align-items:center;
+                  padding:8px 0;border-bottom:1px solid var(--border)">
+        <div>
+          <span style="font-weight:500">${p.name}</span>
+          <span style="color:var(--muted);margin-left:10px;font-family:monospace">₹${p.base_price}/kg</span>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="badge ${p.is_active?'badge-green':'badge-gray'}">${p.is_active?'Active':'Inactive'}</span>
+          <button class="btn btn-ghost btn-sm" onclick="toggleProduct('${p.id}',${p.is_active})">
+            ${p.is_active?'Deactivate':'Activate'}
+          </button>
+        </div>
+      </div>`).join('');
+  }
+
+  async function addProduct() {
+    const name  = document.getElementById('new-product').value.trim();
+    const price = parseFloat(document.getElementById('new-price').value) || 0;
+    if (!name || price <= 0) { showMsg('Name and price required','amber'); return; }
+    const { error } = await db.from('products').insert({ name, base_price: price, unit:'kg', is_active:true });
+    if (error) { showMsg(error.message,'red'); return; }
+    document.getElementById('new-product').value = '';
+    document.getElementById('new-price').value   = '';
+    showToast(`${name} added`);
+    await loadProducts();
+  }
+
+  async function toggleProduct(id, current) {
+    await db.from('products').update({ is_active: !current }).eq('id', id);
+    await loadProducts();
+  }
+
+  function showMsg(text, type) {
+    const el = document.getElementById('msg');
+    el.textContent = text;
+    el.className = `alert alert-${type} show`;
+    setTimeout(() => el.classList.remove('show'), 4000);
+  }
+</script>
+</body>
+</html>

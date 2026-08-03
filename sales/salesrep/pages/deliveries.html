@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FL4T5WHM8W"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FL4T5WHM8W');
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deliveries — AFF</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+<div class="mobile-shell">
+
+  <div class="top-bar">
+    <span style="font-size:1.3rem">🥬</span>
+    <span style="font-weight:600;color:#F1F5F9">AFF Sales</span>
+    <div class="top-bar-right">
+      <span style="background:var(--amber-bg);color:var(--amber);
+            border-radius:8px;padding:2px 8px;font-size:0.75rem" id="user-badge">Driver</span>
+    </div>
+  </div>
+
+  <div class="page-content">
+    <div class="page" style="padding-top:1rem">
+
+      <div style="margin-bottom:1rem">
+        <div style="font-size:1.2rem;font-weight:600;color:#F1F5F9">Pending Deliveries 🚚</div>
+        <div style="font-size:0.8rem;color:var(--muted)" id="today-date"></div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="stat-label">Pending</div>
+          <div class="stat-val amber" id="stat-pending">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total kg</div>
+          <div class="stat-val blue" id="stat-kg">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Collected</div>
+          <div class="stat-val green" id="stat-collected">₹0</div>
+        </div>
+      </div>
+
+      <div class="section-lbl">Pending Orders</div>
+      <div id="orders-list"><div class="loading">Loading...</div></div>
+
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-btn active" onclick="location.href='deliveries.html'">
+      <span class="icon">⏳</span><span class="label">Pending</span>
+    </button>
+    <button class="nav-btn" onclick="location.href='done-today.html'">
+      <span class="icon">✅</span><span class="label">Done Today</span>
+    </button>
+  </div>
+</div>
+
+<!-- Confirm modal -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal">
+    <h3>Confirm Delivery</h3>
+    <div id="confirm-outlet" style="font-size:0.85rem;color:var(--muted);
+         margin-bottom:1rem"></div>
+
+    <div id="confirm-error" class="alert alert-red"></div>
+
+    <div id="delivery-items"></div>
+
+    <div class="form-row-2" style="margin-top:0.75rem">
+      <div class="form-group">
+        <label>Cash / UPI collected (₹)</label>
+        <input id="cash-input" type="number" class="form-input"
+               style="font-size:1.2rem;font-family:monospace;text-align:center"
+               placeholder="0" min="0" />
+      </div>
+      <div class="form-group">
+        <label>Payment mode</label>
+        <select id="payment-mode" class="form-input">
+          <option value="cash">Cash</option>
+          <option value="upi">UPI</option>
+          <option value="credit">Credit</option>
+          <option value="cheque">Cheque</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-primary" id="confirm-btn" onclick="confirmDelivery()">
+        Confirm Delivery ✓
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/app.js"></script>
+<script>
+  let currentUser, pendingOrders = [], selectedOrder;
+
+  document.getElementById('today-date').textContent =
+    new Date().toLocaleDateString('en-IN', { weekday:'long', day:'2-digit', month:'long' });
+
+  (async () => {
+    currentUser = await getUser();
+    if (!currentUser) {
+      window.location.href = '../index.html';
+      return;
+    }
+    if (currentUser.role === 'admin') {
+      window.location.href = 'dashboard.html';
+      return;
+    }
+    if (currentUser.role === 'rep') {
+      window.location.href = 'beat.html';
+      return;
+    }
+    document.getElementById('user-badge').textContent = currentUser.name.split(' ')[0];
+    await loadPending();
+    await loadCollected();
+  })();
+
+  async function loadPending() {
+    const today = new Date().toISOString().split('T')[0];
+
+    console.log('Loading pending orders for date:', today);
+
+    // Fetch separately to avoid join issues
+    const { data: ordersRaw, error } = await db.from('orders')
+      .select('id,date,status,rep_id,outlet_id,outlets(name,area),users(name)')
+      .eq('date', today).eq('status','pending').order('outlet_id');
+
+    console.log('Pending orders:', ordersRaw?.length, error?.message);
+
+    if (error) {
+      document.getElementById('orders-list').innerHTML =
+        '<div style="color:var(--red);padding:1rem;text-align:center">Error: ' + error.message + '</div>';
+      return;
+    }
+
+    const orderIds = (ordersRaw||[]).map(o=>o.id);
+    let allItems = [];
+    if (orderIds.length > 0) {
+      const { data: items } = await db.from('order_items')
+        .select('id,order_id,kg_ordered,unit_price,discount_amount,products(name)')
+        .in('order_id', orderIds);
+      allItems = items||[];
+    }
+    const itemMap = {};
+    allItems.forEach(i => {
+      if (!itemMap[i.order_id]) itemMap[i.order_id] = [];
+      itemMap[i.order_id].push(i);
+    });
+    pendingOrders = (ordersRaw||[]).map(o => ({
+      ...o, order_items: itemMap[o.id]||[]
+    }));
+
+    const totalKg = pendingOrders.reduce((s, o) =>
+      s + o.order_items.reduce((ss, i) => ss + Number(i.kg_ordered), 0), 0);
+
+    document.getElementById('stat-pending').textContent = pendingOrders.length;
+    document.getElementById('stat-kg').textContent      = fmt.kg(totalKg);
+
+    const list = document.getElementById('orders-list');
+    if (pendingOrders.length === 0) {
+      list.innerHTML = `<div class="empty">
+        <div class="empty-icon">🎉</div>
+        <div class="empty-title">All deliveries done!</div>
+        <div class="empty-sub">No pending orders for today.</div>
+      </div>`;
+      return;
+    }
+
+    // Group by area
+    const byArea = {};
+    pendingOrders.forEach(o => {
+      const area = o.outlets?.area || 'Unknown';
+      if (!byArea[area]) byArea[area] = [];
+      byArea[area].push(o);
+    });
+
+    list.innerHTML = Object.entries(byArea).map(([area, orders]) => `
+      <div class="section-lbl">📍 ${area}</div>
+      ${orders.map(o => {
+        const kg  = o.order_items.reduce((s,i) => s + Number(i.kg_ordered), 0);
+        const inv = o.order_items.reduce((s,i) =>
+          s + (Number(i.kg_ordered) * Number(i.unit_price)) - Number(i.discount_amount), 0);
+        return `<div class="card" style="margin-bottom:0.6rem">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.5rem">
+            <div>
+              <div style="font-weight:600;color:#F1F5F9">${o.outlets?.name}</div>
+              <div style="font-size:0.78rem;color:var(--muted)">by ${o.users?.name}</div>
+            </div>
+            <div style="font-family:monospace;font-weight:700;font-size:1.2rem;color:var(--amber)">
+              ${fmt.kg(kg)}
+            </div>
+          </div>
+          ${o.order_items.map(i =>
+            `<div style="display:flex;justify-content:space-between;font-size:0.82rem;color:var(--muted);padding:3px 0">
+              <span>${i.products?.name}</span><span>${i.kg_ordered} kg</span>
+            </div>`).join('')}
+          <div style="display:flex;justify-content:space-between;padding:0.5rem 0;
+                      border-top:1px solid var(--border);margin-top:0.4rem">
+            <span style="color:var(--muted);font-size:0.85rem">Invoice to collect</span>
+            <span style="font-weight:700;color:var(--green)">${fmt.inr(inv)}</span>
+          </div>
+          <button class="btn btn-primary btn-full btn-sm"
+                  onclick="openConfirm('${o.id}')">
+            Confirm Delivery →
+          </button>
+        </div>`;
+      }).join('')}
+    `).join('');
+  }
+
+  async function loadCollected() {
+    const today = new Date().toISOString().split('T')[0];
+    // Get today&#39;s deliveries for this driver directly
+    const { data: todayOrders } = await db.from('orders')
+      .select('id').eq('date', today);
+    const todayOrderIds = (todayOrders||[]).map(o=>o.id);
+    
+    let data = [];
+    if (todayOrderIds.length > 0) {
+      const { data: dels } = await db.from('deliveries')
+        .select('cash_collected')
+        .eq('driver_id', currentUser.id)
+        .in('order_id', todayOrderIds);
+      data = dels || [];
+    }
+    const total = (data || []).reduce((s, d) => s + Number(d.cash_collected), 0);
+    document.getElementById('stat-collected').textContent = fmt.inr(total);
+  }
+
+  function openConfirm(orderId) {
+    selectedOrder = pendingOrders.find(o => o.id === orderId);
+    if (!selectedOrder) return;
+
+    document.getElementById('confirm-outlet').textContent =
+      `${selectedOrder.outlets?.name} — ${selectedOrder.outlets?.area}`;
+
+    const totalInv = selectedOrder.order_items.reduce((s,i) =>
+      s + (Number(i.kg_ordered) * Number(i.unit_price)) - Number(i.discount_amount), 0);
+
+    document.getElementById('cash-input').value = totalInv.toFixed(0);
+
+    // Delivery items
+    document.getElementById('delivery-items').innerHTML =
+      selectedOrder.order_items.map(item => `
+        <div style="background:#0F172A;border-radius:8px;padding:10px;margin-bottom:8px">
+          <div style="font-weight:500;margin-bottom:6px">${item.products?.name}</div>
+          <div class="form-row-2">
+            <div>
+              <div style="font-size:0.72rem;color:var(--muted)">Ordered</div>
+              <div style="font-family:monospace;font-weight:700">${item.kg_ordered} kg</div>
+            </div>
+            <div class="form-group" style="margin:0">
+              <label style="font-size:0.72rem">Delivered *</label>
+              <input type="number" class="form-input delivery-kg"
+                     data-item-id="${item.id}"
+                     data-ordered="${item.kg_ordered}"
+                     value="${item.kg_ordered}"
+                     min="0" step="0.5" max="${item.kg_ordered}"
+                     style="font-family:monospace;font-weight:700;text-align:center"
+                     oninput="checkShort(this)" />
+            </div>
+          </div>
+          <div class="short-reason" id="short-${item.id}" style="display:none;margin-top:6px">
+            <input type="text" class="form-input" placeholder="Reason for short delivery *"
+                   id="reason-${item.id}" style="font-size:0.82rem" />
+          </div>
+        </div>
+      `).join('');
+
+    document.getElementById('confirm-error').classList.remove('show');
+    document.getElementById('confirm-modal').classList.add('show');
+  }
+
+  function checkShort(input) {
+    const ordered = parseFloat(input.dataset.ordered);
+    const itemId  = input.dataset.itemId;
+    const box     = document.getElementById(`short-${itemId}`);
+    if (parseFloat(input.value) < ordered) {
+      box.style.display = 'block';
+    } else {
+      box.style.display = 'none';
+    }
+  }
+
+  function closeConfirm() {
+    document.getElementById('confirm-modal').classList.remove('show');
+  }
+
+  async function confirmDelivery() {
+    const cash   = parseFloat(document.getElementById('cash-input').value) || 0;
+    const mode   = document.getElementById('payment-mode').value;
+    const btn    = document.getElementById('confirm-btn');
+    const err    = document.getElementById('confirm-error');
+
+    // Validate short reasons
+    const items = [];
+    let valid = true;
+    document.querySelectorAll('.delivery-kg').forEach(input => {
+      const itemId   = input.dataset.itemId;
+      const ordered  = parseFloat(input.dataset.ordered);
+      const delivered = parseFloat(input.value) || 0;
+      const reason   = document.getElementById(`reason-${itemId}`)?.value || '';
+      if (delivered < ordered && !reason.trim()) {
+        err.textContent = 'Please provide reason for short delivery';
+        err.classList.add('show');
+        valid = false;
+      }
+      items.push({ order_item_id: itemId, kg_delivered: delivered, short_reason: reason });
+    });
+    if (!valid) return;
+
+    loading(btn, true, 'Confirming...');
+
+    // Create delivery
+    const { data: delivery, error } = await db.from('deliveries').insert({
+      order_id: selectedOrder.id,
+      driver_id: currentUser.id,
+      cash_collected: cash,
+      payment_mode: mode,
+      delivered_at: new Date().toISOString()
+    }).select().single();
+
+    if (error) {
+      err.textContent = error.message;
+      err.classList.add('show');
+      loading(btn, false, 'Confirm Delivery ✓');
+      return;
+    }
+
+    // Create delivery items
+    await db.from('delivery_items').insert(
+      items.map(i => ({ ...i, delivery_id: delivery.id }))
+    );
+
+    // Update order status
+    await db.from('orders').update({ status: 'delivered' })
+      .eq('id', selectedOrder.id);
+
+    closeConfirm();
+    showToast(`Delivery confirmed — ₹${cash} collected`);
+    await loadPending();
+    await loadCollected();
+    loading(btn, false, 'Confirm Delivery ✓');
+  }
+</script>
+</body>
+</html>
