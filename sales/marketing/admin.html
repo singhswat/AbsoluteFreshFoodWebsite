@@ -1119,6 +1119,7 @@
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
 
+    if (name === 'coupons') loadCoupons();
     if (name === 'campaigns') loadCampaigns();
     if (name === 'samples') loadSamples();
     if (name === 'reviews') loadContentReviews();
