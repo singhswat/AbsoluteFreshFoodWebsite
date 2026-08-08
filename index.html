@@ -1323,15 +1323,20 @@ async function applyCoupon() {
   if (!_appliedCoupon) btn.textContent = 'Apply';
 }
 
-// whatsapp
+// whatsapp + supabase hybrid order
 const WA='918318767689';
-function sendWA(e){
+async function sendWA(e){
   e.preventDefault();
+  const btn = e.target.querySelector('button[type="submit"]');
   const n=document.getElementById('f-name').value.trim();
   const ph=document.getElementById('f-phone').value.trim();
   const ad=document.getElementById('f-addr').value.trim();
   const pk=document.getElementById('f-pack').value;
   if(!n||!ph||!ad){alert('Please fill all fields.');return}
+
+  // Disable button while saving
+  btn.disabled = true;
+  btn.textContent = 'Saving order…';
 
   // Build coupon line
   let couponLine = '';
@@ -1341,8 +1346,26 @@ function sendWA(e){
     _db.from('coupons').update({ times_used: _appliedCoupon.times_used + 1 }).eq('id', _appliedCoupon.id).then(() => {});
   }
 
+  // ── 1. Save to Supabase (fire-and-forget, never block customer) ──
+  try {
+    await _db.from('d2c_orders').insert({
+      name: n,
+      phone: ph,
+      address: ad,
+      pack: pk,
+      coupon_code: _appliedCoupon ? _appliedCoupon.code : null,
+      discount_pct: _appliedCoupon ? _appliedCoupon.discount_value : null
+    });
+  } catch(err) {
+    console.warn('Order save failed (non-blocking):', err);
+  }
+
+  // ── 2. Open WhatsApp with pre-filled message ──
   const msg=`Hi Absolute Fresh! 🌿%0A%0AName: ${encodeURIComponent(n)}%0APhone: ${encodeURIComponent(ph)}%0AAddress: ${encodeURIComponent(ad)}%0APack: ${encodeURIComponent(pk)}${couponLine}%0APayment: COD / UPI%0A%0APlease confirm batch and delivery slot.`;
   window.open(`https://wa.me/${WA}?text=${msg}`,'_blank');
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fa-brands fa-whatsapp"></i> Check today\'s fresh batch';
 }
 </script>
 <!-- EMAIL SIGNUP POPUP -->
