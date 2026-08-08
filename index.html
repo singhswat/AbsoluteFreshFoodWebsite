@@ -1093,14 +1093,14 @@ function setSubPack(size) {
         <p class="order-sub">We confirm availability, delivery slot and COD/UPI on WhatsApp.</p>
         <form class="form" onsubmit="sendWA(event)">
           <input id="f-name" required placeholder="Your name"/>
-          <input id="f-phone" required placeholder="Phone number"/>
+          <input id="f-phone" type="tel" required placeholder="Phone number (e.g. 98765 43210)" inputmode="numeric"/>
           <textarea id="f-addr" required placeholder="Delivery address · area / landmark"></textarea>
-          <select id="f-pack">
-            <option>1 kg Pack — ₹140</option>
-            <option>500g Family Pack — ₹75</option>
-            <option>Weekly Subscription</option>
-            <option>Daily Subscription</option>
-            <option>Bulk / Hotel &amp; Restaurant Supply (5kg+)</option>
+          <select id="f-pack" onchange="updateOrderSummary()">
+            <option value="140">1 kg Pack — ₹140</option>
+            <option value="75">500g Family Pack — ₹75</option>
+            <option value="0">Weekly Subscription</option>
+            <option value="0">Daily Subscription</option>
+            <option value="0">Bulk / Hotel &amp; Restaurant Supply (5kg+)</option>
           </select>
           <div class="coupon-row">
             <input id="f-coupon" placeholder="Have a coupon code?" autocomplete="off" oninput="this.value=this.value.toUpperCase()"/>
@@ -1108,7 +1108,22 @@ function setSubPack(size) {
           </div>
           <div class="coupon-success" id="coupon-success"></div>
           <div class="coupon-error" id="coupon-error"></div>
-          <button class="form-wa-btn" type="submit"><i class="fa-brands fa-whatsapp"></i> Check today’s fresh batch</button>
+
+          <!-- Order Summary -->
+          <div id="order-summary" style="display:none;background:#f0faf4;border:1.5px solid #86efac;border-radius:12px;padding:14px 16px;font-size:.88rem;color:#14532d">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+              <span>Pack price</span><span id="sum-base">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;color:#16a34a" id="sum-discount-row">
+              <span id="sum-discount-label">Coupon discount</span><span id="sum-discount">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-weight:800;font-size:1rem;border-top:1px solid #86efac;padding-top:8px;margin-top:4px">
+              <span>You pay</span><span id="sum-final" style="color:#15803d">—</span>
+            </div>
+            <div style="font-size:.72rem;color:#4ade80;margin-top:6px;text-align:center">💵 Cash or UPI on delivery</div>
+          </div>
+
+          <button class="form-wa-btn" type="submit"><i class="fa-brands fa-whatsapp"></i> Confirm order on WhatsApp</button>
         </form>
       </div>
       <div class="rev-r">
@@ -1310,6 +1325,7 @@ async function applyCoupon() {
       successEl.textContent = `✅ Coupon "${coupon.code}" applied — ${coupon.discount_value}% off your order!`;
       successEl.style.display = 'block';
       btn.textContent = '✓';
+      updateOrderSummary();
     }
   } catch(ex) {
     errorEl.textContent = 'Could not verify coupon. Please try again.';
@@ -1323,30 +1339,60 @@ async function applyCoupon() {
   if (!_appliedCoupon) btn.textContent = 'Apply';
 }
 
+// ── Pack prices map ──────────────────────────────────────────
+const PACK_PRICES = { '140': 140, '75': 75, '0': 0 };
+
+function getOrderPrices() {
+  const base = parseInt(document.getElementById('f-pack').value) || 0;
+  const disc = _appliedCoupon ? _appliedCoupon.discount_value : 0;
+  const saving = base > 0 ? Math.round(base * disc / 100) : 0;
+  const final = base - saving;
+  return { base, disc, saving, final };
+}
+
+function updateOrderSummary() {
+  const { base, disc, saving, final } = getOrderPrices();
+  const box = document.getElementById('order-summary');
+  if (base === 0) { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  document.getElementById('sum-base').textContent = `₹${base}`;
+  if (saving > 0) {
+    document.getElementById('sum-discount-row').style.display = 'flex';
+    document.getElementById('sum-discount-label').textContent = `Coupon (${disc}% off)`;
+    document.getElementById('sum-discount').textContent = `−₹${saving}`;
+  } else {
+    document.getElementById('sum-discount-row').style.display = 'none';
+  }
+  document.getElementById('sum-final').textContent = `₹${final}`;
+}
+
 // whatsapp + supabase hybrid order
 const WA='918318767689';
 async function sendWA(e){
   e.preventDefault();
   const btn = e.target.querySelector('button[type="submit"]');
   const n=document.getElementById('f-name').value.trim();
-  const ph=document.getElementById('f-phone').value.trim();
+  const ph=document.getElementById('f-phone').value.trim().replace(/[\s\-]/g,'').replace(/^\+91/,'').replace(/^0/,'');
   const ad=document.getElementById('f-addr').value.trim();
-  const pk=document.getElementById('f-pack').value;
+  const pk=document.getElementById('f-pack').options[document.getElementById('f-pack').selectedIndex].text;
   if(!n||!ph||!ad){alert('Please fill all fields.');return}
+  if(ph.length < 10){alert('Please enter a valid 10-digit phone number.');return}
 
-  // Disable button while saving
   btn.disabled = true;
-  btn.textContent = 'Saving order…';
+  btn.textContent = 'Placing order…';
+
+  const { base, disc, saving, final } = getOrderPrices();
 
   // Build coupon line
   let couponLine = '';
   if (_appliedCoupon) {
-    couponLine = `%0ACoupon: ${encodeURIComponent(_appliedCoupon.code)} (${_appliedCoupon.discount_value}% off)`;
-    // Increment times_used (fire-and-forget)
+    couponLine = `%0ACoupon: ${encodeURIComponent(_appliedCoupon.code)} (${disc}% off — saved ₹${saving})`;
     _db.from('coupons').update({ times_used: _appliedCoupon.times_used + 1 }).eq('id', _appliedCoupon.id).then(() => {});
   }
 
-  // ── 1. Save to Supabase (fire-and-forget, never block customer) ──
+  const priceNote = base > 0 ? `%0ATotal: ₹${final}${saving>0?` (after ₹${saving} discount)`:''}` : '';
+
+  // ── 1. Save to Supabase ──────────────────────────────────────
   try {
     await _db.from('d2c_orders').insert({
       name: n,
@@ -1354,18 +1400,20 @@ async function sendWA(e){
       address: ad,
       pack: pk,
       coupon_code: _appliedCoupon ? _appliedCoupon.code : null,
-      discount_pct: _appliedCoupon ? _appliedCoupon.discount_value : null
+      discount_pct: _appliedCoupon ? disc : null,
+      base_price: base || null,
+      final_price: final || null
     });
   } catch(err) {
     console.warn('Order save failed (non-blocking):', err);
   }
 
-  // ── 2. Open WhatsApp with pre-filled message ──
-  const msg=`Hi Absolute Fresh! 🌿%0A%0AName: ${encodeURIComponent(n)}%0APhone: ${encodeURIComponent(ph)}%0AAddress: ${encodeURIComponent(ad)}%0APack: ${encodeURIComponent(pk)}${couponLine}%0APayment: COD / UPI%0A%0APlease confirm batch and delivery slot.`;
+  // ── 2. WhatsApp ──────────────────────────────────────────────
+  const msg=`Hi Absolute Fresh! 🌿%0A%0AName: ${encodeURIComponent(n)}%0APhone: +91${ph}%0AAddress: ${encodeURIComponent(ad)}%0APack: ${encodeURIComponent(pk)}${couponLine}${priceNote}%0APayment: COD / UPI%0A%0APlease confirm batch and delivery slot.`;
   window.open(`https://wa.me/${WA}?text=${msg}`,'_blank');
 
   btn.disabled = false;
-  btn.innerHTML = '<i class="fa-brands fa-whatsapp"></i> Check today\'s fresh batch';
+  btn.innerHTML = '<i class="fa-brands fa-whatsapp"></i> Confirm order on WhatsApp';
 }
 </script>
 <!-- EMAIL SIGNUP POPUP -->
