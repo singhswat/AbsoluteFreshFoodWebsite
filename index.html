@@ -1374,14 +1374,14 @@ async function sendWA(e){
   <div class="email-popup-box">
     <button class="popup-close" onclick="closePopup()">✕</button>
     <div id="popupForm">
-      <div class="popup-leaf">🌿</div>
+      <div class="popup-leaf">🎁</div>
       <h3>Get <em>10% off</em><br>your first order</h3>
-      <p>Join 500+ Lucknow families getting fresh batter every morning. Subscribe for exclusive early-bird offers and batch availability alerts.</p>
+      <p>Enter your phone number and we'll instantly generate a coupon code for you — no email needed.</p>
       <div class="popup-input-row">
-        <input type="email" id="popupEmail" placeholder="your@email.com" />
-        <button class="popup-btn" onclick="submitPopup()">Claim Offer</button>
+        <input type="tel" id="popupPhone" placeholder="+91 98765 43210" maxlength="13" inputmode="numeric" />
+        <button class="popup-btn" id="popupBtn" onclick="submitPopup()">Get Coupon</button>
       </div>
-      <p class="popup-note">No spam. Unsubscribe anytime. We respect your inbox.</p>
+      <p class="popup-note" id="popupNote">📵 No spam calls. We only use this to send your order updates.</p>
       <div class="popup-badge">
         <div class="popup-badge-item"><span>🪨</span>Stone Ground</div>
         <div class="popup-badge-item"><span>🌙</span>Naturally Fermented</div>
@@ -1389,16 +1389,23 @@ async function sendWA(e){
       </div>
     </div>
     <div class="popup-success" id="popupSuccess" style="display:none">
-      <div class="big-tick">✅</div>
-      <h4>You're in!</h4>
-      <p>WhatsApp us <b>FRESH10</b> on +91 83187 67689 to claim your 10% discount on your first order. We'll confirm your delivery slot.</p>
+      <div class="big-tick">🎉</div>
+      <h4>Your coupon is ready!</h4>
+      <p style="margin-bottom:16px">Use this code when placing your order:</p>
+      <div style="background:var(--leaf-dark);color:#fff;font-size:1.6rem;font-weight:900;letter-spacing:.15em;padding:16px 24px;border-radius:14px;text-align:center;cursor:pointer;user-select:all" id="couponDisplay" onclick="copyCoupon(this)">—</div>
+      <p style="font-size:12px;color:var(--muted);margin-top:10px">Tap to copy · Valid on your first order · 10% off</p>
+      <button class="popup-btn" style="width:100%;margin-top:18px;display:flex;align-items:center;justify-content:center;gap:8px" onclick="useNow()">
+        <i class="fa-brands fa-whatsapp"></i> Order now on WhatsApp
+      </button>
     </div>
   </div>
 </div>
 
 <script>
-// ── Email popup on scroll
+// ── Phone popup on scroll ──────────────────────────────────
 let popupShown = false;
+let _generatedCoupon = '';
+
 window.addEventListener('scroll', () => {
   if (popupShown) return;
   const scrolled = window.scrollY / (document.body.scrollHeight - window.innerHeight);
@@ -1407,20 +1414,78 @@ window.addEventListener('scroll', () => {
     popupShown = true;
   }
 });
+
 function closePopup() {
   document.getElementById('emailPopup').classList.remove('show');
 }
-function submitPopup() {
-  const email = document.getElementById('popupEmail').value.trim();
-  if (!email || !email.includes('@')) {
-    document.getElementById('popupEmail').focus();
-    document.getElementById('popupEmail').style.borderColor = 'var(--terra)';
+
+function genCouponCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const suffix = Array.from(crypto.getRandomValues(new Uint8Array(5)))
+    .map(b => chars[b % chars.length]).join('');
+  return 'FRESH-' + suffix;
+}
+
+async function submitPopup() {
+  const inp = document.getElementById('popupPhone');
+  const btn = document.getElementById('popupBtn');
+  const raw = inp.value.trim().replace(/[\s\-]/g,'').replace(/^\+91/,'').replace(/^0/,'');
+
+  if (raw.length < 10) {
+    inp.style.borderColor = 'var(--terra)';
+    document.getElementById('popupNote').textContent = '⚠️ Please enter a valid 10-digit mobile number.';
+    document.getElementById('popupNote').style.color = 'var(--terra)';
+    inp.focus();
     return;
   }
+
+  btn.disabled = true;
+  btn.textContent = 'Generating…';
+
+  const code = genCouponCode();
+  _generatedCoupon = code;
+
+  // Save lead + coupon to Supabase (fire-and-forget)
+  try {
+    await Promise.all([
+      _db.from('leads').insert({ phone: raw, coupon: code }),
+      _db.from('coupons').insert({
+        code,
+        discount_type: 'percentage',
+        discount_value: 10,
+        first_order_only: true,
+        usage_limit_per_customer: 1,
+        usage_limit_total: 1,
+        times_used: 0,
+        status: 'active',
+        valid_from: new Date().toISOString(),
+        expires_on: new Date(Date.now() + 30*24*60*60*1000).toISOString() // 30 days
+      })
+    ]);
+  } catch(err) {
+    console.warn('Coupon save error (non-blocking):', err);
+  }
+
+  // Show coupon immediately
+  document.getElementById('couponDisplay').textContent = code;
   document.getElementById('popupForm').style.display = 'none';
   document.getElementById('popupSuccess').style.display = 'block';
-  setTimeout(closePopup, 5000);
 }
+
+function copyCoupon(el) {
+  navigator.clipboard.writeText(el.textContent).then(() => {
+    const orig = el.textContent;
+    el.textContent = '✓ Copied!';
+    setTimeout(() => el.textContent = orig, 1500);
+  });
+}
+
+function useNow() {
+  closePopup();
+  const msg = `Hi Absolute Fresh! 🌿 I have a coupon code: ${_generatedCoupon} for 10% off my first order.`;
+  window.open(`https://wa.me/918318767689?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopup(); });
 </script>
 </html>
