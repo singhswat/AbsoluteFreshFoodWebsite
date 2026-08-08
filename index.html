@@ -1420,10 +1420,7 @@ function closePopup() {
 }
 
 function genCouponCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  const suffix = Array.from(crypto.getRandomValues(new Uint8Array(5)))
-    .map(b => chars[b % chars.length]).join('');
-  return 'FRESH-' + suffix;
+  return 'READY5MIN';
 }
 
 async function submitPopup() {
@@ -1445,25 +1442,11 @@ async function submitPopup() {
   const code = genCouponCode();
   _generatedCoupon = code;
 
-  // Save lead + coupon to Supabase (fire-and-forget)
+  // Log lead to Supabase (fire-and-forget)
   try {
-    await Promise.all([
-      _db.from('leads').insert({ phone: raw, coupon: code }),
-      _db.from('coupons').insert({
-        code,
-        discount_type: 'percentage',
-        discount_value: 10,
-        first_order_only: true,
-        usage_limit_per_customer: 1,
-        usage_limit_total: 1,
-        times_used: 0,
-        status: 'active',
-        valid_from: new Date().toISOString(),
-        expires_on: new Date(Date.now() + 30*24*60*60*1000).toISOString() // 30 days
-      })
-    ]);
+    await _db.from('leads').insert({ phone: raw, coupon: code });
   } catch(err) {
-    console.warn('Coupon save error (non-blocking):', err);
+    console.warn('Lead save error (non-blocking):', err);
   }
 
   // Show coupon immediately
