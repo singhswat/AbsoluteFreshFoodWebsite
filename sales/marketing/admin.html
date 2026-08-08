@@ -845,8 +845,8 @@
 </div>
 
 <!-- ════ MODAL: Edit Web Order ════ -->
-<div class="modal-overlay" id="modal-edit-weborder">
-  <div class="modal-box" style="max-width:480px">
+<div class="modal-overlay" id="modal-edit-weborder" style="align-items:center;justify-content:center">
+  <div class="modal-box" style="max-width:480px;width:100%;border-radius:16px">
     <div class="modal-title">Edit Web Order <span id="edit-wo-ref" style="color:#4ADE80;font-size:.85em"></span></div>
     <input type="hidden" id="edit-wo-id"/>
     <label class="modal-label">Customer Name</label>
@@ -1802,7 +1802,7 @@
 
     updateWOStats(orders);
     tbody.innerHTML = orders.map(o => {
-      const itemSummary = (o.items || []).map(i => `${i.name}${i.qty > 1 ? ' ×'+i.qty : ''}`).join(', ');
+      const itemSummary = (o.items || []).map(i => `${i.name || i.pack || '—'}${i.qty > 1 ? ' ×'+i.qty : ''}`).join(', ') || '—';
       const time = new Date(o.created_at).toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
       const nextStatus = WO_STATUS_NEXT[o.status];
       const nextBtn = nextStatus

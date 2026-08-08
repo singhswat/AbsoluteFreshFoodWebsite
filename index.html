@@ -1400,7 +1400,7 @@ async function sendWA(e){
       customer_name: n,
       customer_phone: ph,
       customer_address: ad,
-      items: [{ pack: pk, price: base }],
+      items: [{ name: pk, qty: 1, price: base }],
       coupon_code: _appliedCoupon ? _appliedCoupon.code : null,
       coupon_id: _appliedCoupon ? _appliedCoupon.id : null,
       subtotal: base || null,
