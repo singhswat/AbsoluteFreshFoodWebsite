@@ -101,16 +101,16 @@
     #modal-edit-weborder.show .modal-box{opacity:1;transform:scale(1)}
     .sheet{background:#1E293B;border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:92vh;overflow-y:auto}
     .handle{width:32px;height:4px;background:#334155;border-radius:2px;margin:0 auto 16px}
-    .modal-box{background:#1E293B;border:1px solid #334155;border-radius:18px;padding:28px 24px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.6)}
-    .modal-title{font-size:1.05rem;font-weight:700;color:#F1F5F9;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid #334155}
-    .modal-label{display:block;font-size:.72rem;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.07em;margin:14px 0 6px}
-    .modal-input{width:100%;background:#0F172A;border:1.5px solid #334155;color:#F1F5F9;border-radius:9px;padding:10px 13px;font-size:.9rem;font-family:inherit;outline:none;box-sizing:border-box;transition:border .15s}
-    .modal-input:focus{border-color:#CC0000}
-    .modal-actions{display:flex;gap:10px;margin-top:22px;padding-top:16px;border-top:1px solid #334155}
+    .modal-box{background:#FFFFFF;border:1px solid #E2E8F0;border-radius:18px;padding:28px 24px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+    .modal-title{font-size:1.05rem;font-weight:700;color:#0F172A;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid #E2E8F0}
+    .modal-label{display:block;font-size:.72rem;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.07em;margin:14px 0 6px}
+    .modal-input{width:100%;background:#F8FAFC;border:1.5px solid #CBD5E1;color:#0F172A;border-radius:9px;padding:10px 13px;font-size:.9rem;font-family:inherit;outline:none;box-sizing:border-box;transition:border .15s}
+    .modal-input:focus{border-color:#CC0000;background:#fff}
+    .modal-actions{display:flex;gap:10px;margin-top:22px;padding-top:16px;border-top:1px solid #E2E8F0}
     .modal-save{flex:1;background:#CC0000;color:#fff;border:none;border-radius:9px;padding:11px;font-size:.88rem;font-weight:700;cursor:pointer;transition:background .15s}
     .modal-save:hover{background:#B91C1C}
-    .modal-cancel{flex:1;background:transparent;color:#94A3B8;border:1px solid #334155;border-radius:9px;padding:11px;font-size:.88rem;cursor:pointer;transition:all .15s}
-    .modal-cancel:hover{background:#1E293B;color:#F1F5F9}
+    .modal-cancel{flex:1;background:#F1F5F9;color:#475569;border:1px solid #CBD5E1;border-radius:9px;padding:11px;font-size:.88rem;cursor:pointer;transition:all .15s}
+    .modal-cancel:hover{background:#E2E8F0;color:#0F172A}
     .sheet h3{font-size:.95rem;font-weight:600;color:#F1F5F9;margin-bottom:4px}
     .sheet-sub{font-size:.78rem;color:#64748B;margin-bottom:14px}
     .sinp{width:100%;background:#0F172A;border:1.5px solid #334155;color:#F1F5F9;border-radius:8px;padding:11px 12px;font-size:.9rem;font-family:inherit;outline:none;transition:border .15s;-webkit-appearance:none}
@@ -538,7 +538,7 @@
         <div class="stat-card"><div class="stat-num" id="wo-stat-delivered">—</div><div class="stat-label">Delivered Today</div></div>
       </div>
 
-      <!-- Date filter -->
+      <!-- Date filter + bulk toolbar -->
       <div class="toolbar" style="margin-bottom:10px">
         <button class="t-btn active" onclick="loadWebOrders('today',this)">Today</button>
         <button class="t-btn" onclick="loadWebOrders('yesterday',this)">Yesterday</button>
@@ -546,9 +546,22 @@
         <button class="t-btn" style="margin-left:auto;background:#22C55E22;color:#4ADE80" onclick="loadWebOrders('today')">↻ Refresh</button>
       </div>
 
+      <!-- Bulk action bar -->
+      <div id="bulk-bar" style="display:none;background:#1E3A5F;border:1px solid #2563EB;border-radius:10px;padding:10px 16px;margin-bottom:10px;align-items:center;gap:12px;flex-wrap:wrap">
+        <span id="bulk-count" style="font-size:.82rem;font-weight:700;color:#93C5FD">0 selected</span>
+        <span style="color:#334155">|</span>
+        <span style="font-size:.78rem;color:#94A3B8">Change status to:</span>
+        <button class="act-btn approve" onclick="bulkStatus('confirmed')">✓ Confirm All</button>
+        <button class="act-btn" onclick="bulkStatus('out_for_delivery')" style="background:#A78BFA22;color:#A78BFA">🚴 Out for Delivery</button>
+        <button class="act-btn" onclick="bulkStatus('delivered')" style="background:#34D39922;color:#34D399">✅ Delivered</button>
+        <button class="act-btn danger" onclick="bulkStatus('cancelled')">✕ Cancel</button>
+        <button onclick="clearSelection()" style="margin-left:auto;background:none;border:none;color:#64748B;cursor:pointer;font-size:.8rem">Clear</button>
+      </div>
+
       <div class="grid-wrap">
         <table>
           <thead><tr>
+            <th style="width:36px"><input type="checkbox" id="select-all-orders" onchange="toggleSelectAll(this)" style="cursor:pointer"/></th>
             <th>Ref</th>
             <th>Time</th>
             <th>Customer</th>
@@ -559,7 +572,7 @@
             <th>Actions</th>
           </tr></thead>
           <tbody id="web-orders-body">
-            <tr class="empty-row"><td colspan="8">Loading…</td></tr>
+            <tr class="empty-row"><td colspan="9">Loading…</td></tr>
           </tbody>
         </table>
       </div>
@@ -1822,8 +1835,8 @@
       const nextBtn = nextStatus
         ? `<button class="action-btn" onclick="advanceWOStatus('${o.id}','${nextStatus}')">${WO_STATUS_BTN[o.status]}</button>`
         : '';
-      const canCancel = ['new','confirmed'].includes(o.status);
-      return `<tr>
+      return `<tr id="row-${o.id}">
+        <td><input type="checkbox" class="order-chk" value="${o.id}" onchange="onOrderCheck()" style="cursor:pointer"/></td>
         <td style="font-weight:700;color:#4ADE80;font-size:.78rem">${o.order_ref||'—'}</td>
         <td style="font-size:.75rem;color:#64748B">${time}</td>
         <td>${o.customer_name}</td>
@@ -1834,7 +1847,6 @@
         <td style="display:flex;gap:6px;flex-wrap:wrap">
           ${nextBtn}
           <button class="action-btn" style="background:#1E40AF22;color:#60A5FA" onclick="openEditWO('${o.id}')">Edit</button>
-          ${canCancel ? `<button class="action-btn" style="background:#7F1D1D22;color:#F87171" onclick="cancelWO('${o.id}')">Cancel</button>` : ''}
         </td>
       </tr>`;
     }).join('');
@@ -1858,6 +1870,44 @@
   async function cancelWO(id) {
     if (!confirm('Cancel this order?')) return;
     await db.from('web_orders').update({ status: 'cancelled' }).eq('id', id);
+    loadWebOrders('today');
+  }
+
+  // ── Bulk selection ───────────────────────────────────────────
+  function getSelectedIds() {
+    return [...document.querySelectorAll('.order-chk:checked')].map(c => c.value);
+  }
+
+  function onOrderCheck() {
+    const ids = getSelectedIds();
+    const bar = document.getElementById('bulk-bar');
+    document.getElementById('bulk-count').textContent = `${ids.length} selected`;
+    bar.style.display = ids.length > 0 ? 'flex' : 'none';
+    const all = document.getElementById('select-all-orders');
+    const total = document.querySelectorAll('.order-chk').length;
+    if (all) all.checked = ids.length === total && total > 0;
+  }
+
+  function toggleSelectAll(cb) {
+    document.querySelectorAll('.order-chk').forEach(c => c.checked = cb.checked);
+    onOrderCheck();
+  }
+
+  function clearSelection() {
+    document.querySelectorAll('.order-chk').forEach(c => c.checked = false);
+    const all = document.getElementById('select-all-orders');
+    if (all) all.checked = false;
+    onOrderCheck();
+  }
+
+  async function bulkStatus(newStatus) {
+    const ids = getSelectedIds();
+    if (!ids.length) return;
+    if (!confirm(`Change ${ids.length} order(s) to "${newStatus}"?`)) return;
+    await Promise.all(ids.map(id =>
+      db.from('web_orders').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('id', id)
+    ));
+    clearSelection();
     loadWebOrders('today');
   }
 
