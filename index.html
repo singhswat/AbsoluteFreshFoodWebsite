@@ -1395,7 +1395,7 @@ async function sendWA(e){
       <div style="background:var(--leaf-dark);color:#fff;font-size:1.6rem;font-weight:900;letter-spacing:.15em;padding:16px 24px;border-radius:14px;text-align:center;cursor:pointer;user-select:all" id="couponDisplay" onclick="copyCoupon(this)">—</div>
       <p style="font-size:12px;color:var(--muted);margin-top:10px">Tap to copy · Valid on your first order · 10% off</p>
       <button class="popup-btn" style="width:100%;margin-top:18px;display:flex;align-items:center;justify-content:center;gap:8px" onclick="useNow()">
-        <i class="fa-brands fa-whatsapp"></i> Order now on WhatsApp
+        🛒 Place my order — coupon applied
       </button>
     </div>
   </div>
@@ -1404,7 +1404,19 @@ async function sendWA(e){
 <script>
 // ── Phone popup on scroll ──────────────────────────────────
 let popupShown = false;
-let _generatedCoupon = '';
+let _welcomeCoupon = '';
+
+// Fetch the active welcome coupon from Supabase on page load
+(async () => {
+  try {
+    const { data } = await _db.from('coupons')
+      .select('code,discount_value')
+      .eq('is_welcome_coupon', true)
+      .eq('status', 'active')
+      .maybeSingle();
+    if (data) _welcomeCoupon = data.code;
+  } catch(e) {}
+})();
 
 window.addEventListener('scroll', () => {
   if (popupShown) return;
@@ -1417,10 +1429,6 @@ window.addEventListener('scroll', () => {
 
 function closePopup() {
   document.getElementById('emailPopup').classList.remove('show');
-}
-
-function genCouponCode() {
-  return 'READY5MIN';
 }
 
 async function submitPopup() {
@@ -1437,19 +1445,18 @@ async function submitPopup() {
   }
 
   btn.disabled = true;
-  btn.textContent = 'Generating…';
+  btn.textContent = 'Getting your coupon…';
 
-  const code = genCouponCode();
-  _generatedCoupon = code;
+  const code = _welcomeCoupon || 'READY5MIN';
 
-  // Log lead to Supabase (fire-and-forget)
+  // Log lead (fire-and-forget)
   try {
     await _db.from('leads').insert({ phone: raw, coupon: code });
   } catch(err) {
     console.warn('Lead save error (non-blocking):', err);
   }
 
-  // Show coupon immediately
+  // Show coupon
   document.getElementById('couponDisplay').textContent = code;
   document.getElementById('popupForm').style.display = 'none';
   document.getElementById('popupSuccess').style.display = 'block';
@@ -1464,9 +1471,19 @@ function copyCoupon(el) {
 }
 
 function useNow() {
+  const code = document.getElementById('couponDisplay').textContent;
   closePopup();
-  const msg = `Hi Absolute Fresh! 🌿 I have a coupon code: ${_generatedCoupon} for 10% off my first order.`;
-  window.open(`https://wa.me/918318767689?text=${encodeURIComponent(msg)}`, '_blank');
+  // Auto-fill and apply the coupon in the order form
+  const couponInp = document.getElementById('f-coupon');
+  if (couponInp) {
+    couponInp.value = code;
+    // Trigger the apply coupon flow
+    applyCoupon();
+  }
+  // Scroll to order form smoothly
+  setTimeout(() => {
+    document.getElementById('order').scrollIntoView({ behavior: 'smooth' });
+  }, 300);
 }
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopup(); });
