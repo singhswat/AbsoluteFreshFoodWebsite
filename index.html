@@ -1392,17 +1392,22 @@ async function sendWA(e){
 
   const priceNote = base > 0 ? `%0ATotal: ₹${final}${saving>0?` (after ₹${saving} discount)`:''}` : '';
 
-  // ── 1. Save to Supabase ──────────────────────────────────────
+  // ── 1. Save to Supabase (web_orders) ───────────────────────
   try {
-    await _db.from('d2c_orders').insert({
-      name: n,
-      phone: ph,
-      address: ad,
-      pack: pk,
+    const ref = 'WEB-' + Date.now().toString(36).toUpperCase();
+    await _db.from('web_orders').insert({
+      order_ref: ref,
+      customer_name: n,
+      customer_phone: ph,
+      customer_address: ad,
+      items: [{ pack: pk, price: base }],
       coupon_code: _appliedCoupon ? _appliedCoupon.code : null,
-      discount_pct: _appliedCoupon ? disc : null,
-      base_price: base || null,
-      final_price: final || null
+      coupon_id: _appliedCoupon ? _appliedCoupon.id : null,
+      subtotal: base || null,
+      discount_amount: saving || null,
+      total: final || null,
+      status: 'pending',
+      source: 'website'
     });
   } catch(err) {
     console.warn('Order save failed (non-blocking):', err);
