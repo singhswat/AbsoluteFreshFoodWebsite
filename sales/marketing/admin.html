@@ -93,8 +93,12 @@
     .section-head{font-size:.68rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.07em;margin:14px 0 8px}
 
     /* ── Modal sheet ── */
-    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:flex-end;z-index:100}
-    .modal-overlay.show{display:flex}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0);display:flex;align-items:flex-end;z-index:100;pointer-events:none;transition:background .25s ease}
+    .modal-overlay.show{background:rgba(0,0,0,.75);pointer-events:all}
+    .modal-overlay .modal-box,.modal-overlay .sheet{opacity:0;transform:translateY(24px) scale(.97);transition:opacity .25s ease,transform .25s ease}
+    .modal-overlay.show .modal-box,.modal-overlay.show .sheet{opacity:1;transform:translateY(0) scale(1)}
+    #modal-edit-weborder .modal-box{transform:scale(.94);transition:opacity .22s ease,transform .22s ease}
+    #modal-edit-weborder.show .modal-box{opacity:1;transform:scale(1)}
     .sheet{background:#1E293B;border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:92vh;overflow-y:auto}
     .handle{width:32px;height:4px;background:#334155;border-radius:2px;margin:0 auto 16px}
     .sheet h3{font-size:.95rem;font-weight:600;color:#F1F5F9;margin-bottom:4px}
