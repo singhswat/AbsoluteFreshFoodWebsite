@@ -728,12 +728,10 @@
             <th>Rep</th>
             <th>Outlet</th>
             <th>Kg Ordered</th>
-            <th>Kg Delivered</th>
             <th>Amount (₹)</th>
-            <th>Collected (₹)</th>
             <th>Status</th>
           </tr></thead>
-          <tbody id="sd-orders-body"><tr class="empty-row"><td colspan="8">Loading…</td></tr></tbody>
+          <tbody id="sd-orders-body"><tr class="empty-row"><td colspan="6">Loading…</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -2576,11 +2574,13 @@
     }
 
     // Load orders with items and rep info
+    // Actual columns: orders(id, outlet_id, rep_id, date, status, notes, discount_amount)
+    // order_items(kg_ordered, unit_price) — no kg_delivered, no total_amount/collected_amount
     let query = db.from('orders')
-      .select('id,status,total_amount,collected_amount,order_date,rep_id,outlets(name,area),users(name),order_items(kg_ordered,kg_delivered,unit_price)')
-      .order('order_date', { ascending: false })
+      .select('id,status,date,rep_id,outlet_id,discount_amount,outlets(name,area),users(name),order_items(kg_ordered,unit_price)')
+      .order('date', { ascending: false })
       .limit(200);
-    if (fromDate) query = query.gte('order_date', fromDate.split('T')[0]);
+    if (fromDate) query = query.gte('date', fromDate.split('T')[0]);
 
     const { data: orders, error } = await query;
     if (error) {
@@ -2590,39 +2590,41 @@
 
     const rows = orders || [];
 
-    // Compute KPIs
-    let totalKgOrd = 0, totalKgDel = 0, totalColl = 0, totalAmt = 0;
+    // Compute KPIs — amount = sum(kg_ordered * unit_price) - discount_amount
+    let totalKgOrd = 0, totalAmt = 0;
     rows.forEach(o => {
+      let lineAmt = 0;
       (o.order_items || []).forEach(i => {
-        totalKgOrd += parseFloat(i.kg_ordered) || 0;
-        totalKgDel += parseFloat(i.kg_delivered) || 0;
+        const kg = parseFloat(i.kg_ordered) || 0;
+        totalKgOrd += kg;
+        lineAmt += kg * (parseFloat(i.unit_price) || 0);
       });
-      totalColl += parseFloat(o.collected_amount) || 0;
-      totalAmt  += parseFloat(o.total_amount) || 0;
+      totalAmt += Math.max(0, lineAmt - (parseFloat(o.discount_amount) || 0));
     });
-    const fillRate = totalKgOrd > 0 ? ((totalKgDel / totalKgOrd) * 100).toFixed(1) + '%' : '—';
-    const pending = rows.filter(o => ['pending','confirmed','partial_delivered'].includes(o.status)).length;
+    const pending = rows.filter(o => ['pending','confirmed'].includes(o.status)).length;
 
-    document.getElementById('sd-kg-ord').textContent   = totalKgOrd.toFixed(1);
-    document.getElementById('sd-kg-del').textContent   = totalKgDel.toFixed(1);
-    document.getElementById('sd-fill').textContent     = fillRate;
-    document.getElementById('sd-coll').textContent     = '₹' + fmt(totalColl);
-    document.getElementById('sd-pending').textContent  = pending;
+    document.getElementById('sd-kg-ord').textContent    = totalKgOrd.toFixed(1);
+    document.getElementById('sd-kg-del').textContent    = '—';
+    document.getElementById('sd-fill').textContent      = '—';
+    document.getElementById('sd-coll').textContent      = '₹' + fmt(totalAmt);
+    document.getElementById('sd-pending').textContent   = pending;
     document.getElementById('sd-total-ord').textContent = rows.length;
     document.getElementById('sd-last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
 
     // Per-rep breakdown
     const repMap = {};
     rows.forEach(o => {
-      const repId = o.rep_id;
+      const repId = o.rep_id || 'unknown';
       const repName = o.users?.name || 'Unknown';
-      if (!repMap[repId]) repMap[repId] = { name: repName, orders: 0, kgOrd: 0, kgDel: 0, coll: 0 };
+      if (!repMap[repId]) repMap[repId] = { name: repName, orders: 0, kgOrd: 0, amt: 0 };
       repMap[repId].orders++;
+      let lineAmt = 0;
       (o.order_items || []).forEach(i => {
-        repMap[repId].kgOrd += parseFloat(i.kg_ordered) || 0;
-        repMap[repId].kgDel += parseFloat(i.kg_delivered) || 0;
+        const kg = parseFloat(i.kg_ordered) || 0;
+        repMap[repId].kgOrd += kg;
+        lineAmt += kg * (parseFloat(i.unit_price) || 0);
       });
-      repMap[repId].coll += parseFloat(o.collected_amount) || 0;
+      repMap[repId].amt += Math.max(0, lineAmt - (parseFloat(o.discount_amount) || 0));
     });
 
     const repCards = document.getElementById('sd-rep-cards');
@@ -2630,47 +2632,36 @@
     if (!repEntries.length) {
       repCards.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#475569">No orders in this period</div>';
     } else {
-      repCards.innerHTML = repEntries.map(r => {
-        const fill = r.kgOrd > 0 ? ((r.kgDel / r.kgOrd) * 100).toFixed(0) : 0;
-        const fillColor = fill >= 90 ? '#4ADE80' : fill >= 70 ? '#FBBF24' : '#F87171';
-        return `<div style="background:#1E293B;border:1px solid #334155;border-radius:10px;padding:14px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-            <span style="font-weight:700;color:#F1F5F9">${r.name}</span>
-            <span style="font-size:.75rem;color:${fillColor};font-weight:700">${fill}% fill</span>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center">
+      repCards.innerHTML = repEntries.map(r => `
+        <div style="background:#1E293B;border:1px solid #334155;border-radius:10px;padding:14px">
+          <div style="font-weight:700;color:#F1F5F9;margin-bottom:10px">${r.name}</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center">
             <div><div style="font-size:1rem;font-weight:700;color:#60A5FA;font-family:monospace">${r.orders}</div><div style="font-size:.62rem;color:#64748B">Orders</div></div>
-            <div><div style="font-size:1rem;font-weight:700;color:#4ADE80;font-family:monospace">${r.kgOrd.toFixed(1)}</div><div style="font-size:.62rem;color:#64748B">Kg Ord</div></div>
-            <div><div style="font-size:1rem;font-weight:700;color:#34D399;font-family:monospace">${r.kgDel.toFixed(1)}</div><div style="font-size:.62rem;color:#64748B">Kg Del</div></div>
-            <div><div style="font-size:1rem;font-weight:700;color:#FBBF24;font-family:monospace">₹${fmt(r.coll)}</div><div style="font-size:.62rem;color:#64748B">Collected</div></div>
+            <div><div style="font-size:1rem;font-weight:700;color:#4ADE80;font-family:monospace">${r.kgOrd.toFixed(1)}</div><div style="font-size:.62rem;color:#64748B">Kg Ordered</div></div>
+            <div><div style="font-size:1rem;font-weight:700;color:#FBBF24;font-family:monospace">₹${fmt(r.amt)}</div><div style="font-size:.62rem;color:#64748B">Amount</div></div>
           </div>
-          <div style="margin-top:8px;background:#0F172A;border-radius:4px;height:5px;overflow:hidden">
-            <div style="height:100%;width:${Math.min(fill,100)}%;background:${fillColor};border-radius:4px;transition:width .4s"></div>
-          </div>
-        </div>`;
-      }).join('');
+        </div>`).join('');
     }
 
     // Recent orders table
     const tbody = document.getElementById('sd-orders-body');
     if (!rows.length) {
-      tbody.innerHTML = '<tr class="empty-row"><td colspan="8">No orders found</td></tr>';
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="7">No orders found</td></tr>';
       return;
     }
-    const statusColor = { pending:'#FBBF24', confirmed:'#60A5FA', partial_delivered:'#FB923C', delivered:'#4ADE80', cancelled:'#F87171' };
+    const statusColor = { pending:'#FBBF24', confirmed:'#60A5FA', delivered:'#4ADE80', cancelled:'#F87171' };
     tbody.innerHTML = rows.slice(0, 50).map(o => {
       const kgOrd = (o.order_items||[]).reduce((s,i)=>s+parseFloat(i.kg_ordered||0),0);
-      const kgDel = (o.order_items||[]).reduce((s,i)=>s+parseFloat(i.kg_delivered||0),0);
+      const amt   = (o.order_items||[]).reduce((s,i)=>s+(parseFloat(i.kg_ordered||0)*parseFloat(i.unit_price||0)),0)
+                    - (parseFloat(o.discount_amount)||0);
       const color = statusColor[o.status] || '#94A3B8';
-      const date = o.order_date ? new Date(o.order_date).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '—';
+      const date  = o.date ? new Date(o.date).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '—';
       return `<tr>
         <td style="font-size:.76rem;color:#94A3B8">${date}</td>
         <td class="bold">${o.users?.name || '—'}</td>
         <td style="font-size:.76rem">${o.outlets?.name || '—'}<br/><span style="color:#475569;font-size:.66rem">${o.outlets?.area||''}</span></td>
         <td class="mono">${kgOrd.toFixed(1)}</td>
-        <td class="mono" style="color:#4ADE80">${kgDel.toFixed(1)}</td>
-        <td class="mono">₹${fmt(o.total_amount||0)}</td>
-        <td class="mono" style="color:#34D399">₹${fmt(o.collected_amount||0)}</td>
+        <td class="mono">₹${fmt(Math.max(0,amt))}</td>
         <td><span style="font-size:.68rem;font-weight:700;color:${color};text-transform:capitalize">${o.status?.replace(/_/g,' ')||'—'}</span></td>
       </tr>`;
     }).join('');
