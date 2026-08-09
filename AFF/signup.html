@@ -89,6 +89,17 @@
     .done-icon{font-size:3.8rem;margin-bottom:16px}
     .done-title{font-size:1.2rem;font-weight:800;color:#111827;margin-bottom:8px}
     .done-msg{font-size:.84rem;color:#6b7280;line-height:1.65;margin-bottom:24px}
+    .platform-checks{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
+    .chk{
+      display:flex;align-items:center;gap:6px;
+      background:#f9fafb;border:1.5px solid #e5e7eb;border-radius:8px;
+      padding:8px 12px;font-size:.84rem;color:#374151;cursor:pointer;
+      transition:border-color .15s,background .15s;font-weight:normal;
+      text-transform:none;letter-spacing:0;
+    }
+    .chk:hover{border-color:#16a34a;background:#f0fdf4}
+    .chk input[type="checkbox"]{width:16px;height:16px;accent-color:#16a34a;cursor:pointer}
+
     .done-back{
       display:inline-block;background:#16a34a;color:#fff;
       border-radius:12px;padding:13px 32px;font-weight:700;font-size:.9rem;
@@ -144,6 +155,18 @@
     <div class="field" id="field-insta">
       <label>Instagram / Social Handle</label>
       <input id="f-insta" placeholder="@yourhandle"/>
+    </div>
+
+    <div class="field">
+      <label>Where will you promote?</label>
+      <div class="platform-checks">
+        <label class="chk"><input type="checkbox" value="instagram"/> Instagram</label>
+        <label class="chk"><input type="checkbox" value="youtube"/> YouTube</label>
+        <label class="chk"><input type="checkbox" value="whatsapp"/> WhatsApp</label>
+        <label class="chk"><input type="checkbox" value="facebook"/> Facebook</label>
+        <label class="chk"><input type="checkbox" value="society"/> Society / Apartment</label>
+        <label class="chk"><input type="checkbox" value="other"/> Other</label>
+      </div>
     </div>
 
     <button class="submit-btn" id="submit-btn" onclick="submitForm()">Submit →</button>
@@ -213,6 +236,7 @@
     const phone = document.getElementById('f-phone').value.trim().replace(/\D/g,'');
     const city  = document.getElementById('f-city').value.trim();
     const insta = document.getElementById('f-insta').value.trim().replace(/^@/,'');
+    const platforms = [...document.querySelectorAll('.platform-checks input:checked')].map(c => c.value);
 
     if (!name) { errEl.textContent = 'Please enter your name.'; errEl.classList.add('show'); return; }
     if (phone.length < 10) { errEl.textContent = 'Please enter a valid 10-digit WhatsApp number.'; errEl.classList.add('show'); return; }
@@ -225,7 +249,7 @@
       phone,
       city,
       instagram_handle: insta ? '@' + insta : null,
-      content_type: currentRole,
+      content_type: platforms.length ? platforms.join(',') : currentRole,
       status: 'pending',
       discount_ceiling: 20,
       total_orders: 0,
