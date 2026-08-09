@@ -1095,6 +1095,10 @@ function setSubPack(size) {
           <input id="f-name" required placeholder="Your name"/>
           <input id="f-phone" type="tel" required placeholder="Phone number (e.g. 98765 43210)" inputmode="numeric"/>
           <textarea id="f-addr" required placeholder="Delivery address · area / landmark"></textarea>
+          <div>
+            <input id="f-pin" type="tel" inputmode="numeric" maxlength="6" required placeholder="Pincode (e.g. 226012)" oninput="this.value=this.value.replace(/\D/g,'')" onblur="checkPin()" style="margin-bottom:0"/>
+            <div id="pin-status" style="font-size:.78rem;margin-top:4px;margin-bottom:10px;min-height:18px;padding-left:2px"></div>
+          </div>
           <!-- Multi-item pack selector -->
           <div style="margin-bottom:4px;font-size:.75rem;font-weight:700;color:#4a7c59;text-transform:uppercase;letter-spacing:.06em">Select Packs</div>
           <div id="pack-selector" style="display:flex;flex-direction:column;gap:10px;margin-bottom:4px">
@@ -1152,6 +1156,9 @@ function setSubPack(size) {
             <div style="font-size:.72rem;color:#4ade80;margin-top:6px;text-align:center">💵 Cash or UPI on delivery</div>
           </div>
 
+          <div id="delivery-date-row" style="background:#f0faf4;border:1.5px solid #86efac;border-radius:10px;padding:10px 14px;font-size:.85rem;color:#14532d;display:flex;align-items:center;gap:8px">
+            🚚 <span>Delivery: <strong id="delivery-date-text">Tomorrow</strong></span>
+          </div>
           <button class="form-wa-btn" type="submit"><i class="fa-brands fa-whatsapp"></i> Confirm order on WhatsApp</button>
         </form>
       </div>
@@ -1436,6 +1443,42 @@ function updateOrderSummary() {
   document.getElementById('sum-final').textContent = base > 0 ? `₹${final}` : 'To be quoted';
 }
 
+// ── Serviceable areas ──────────────────────────────────────────
+let _serviceAreas = null; // null = loading, [] = none configured
+let _pinValid = false;
+(async () => {
+  const { data } = await _db.from('service_areas').select('pincode,area_name').eq('is_active', true);
+  _serviceAreas = data || [];
+})();
+
+function checkPin() {
+  const pin = document.getElementById('f-pin').value.trim();
+  const el  = document.getElementById('pin-status');
+  if (pin.length < 6) { el.innerHTML = ''; _pinValid = false; return; }
+  if (_serviceAreas === null) { el.innerHTML = '<span style="color:#b45309">Checking…</span>'; return; }
+  if (_serviceAreas.length === 0) { _pinValid = true; el.innerHTML = ''; return; } // no restrictions set
+  const area = _serviceAreas.find(a => a.pincode === pin);
+  if (area) {
+    el.innerHTML = `<span style="color:#15803d;font-weight:600">✓ We deliver to ${area.area_name || pin}!</span>`;
+    _pinValid = true;
+  } else {
+    el.innerHTML = `<span style="color:#b91c1c">Sorry, we don't deliver to this area yet. <a href="https://wa.me/918318767689" style="color:#b91c1c;text-decoration:underline;font-weight:600">WhatsApp us</a> to check.</span>`;
+    _pinValid = false;
+  }
+}
+
+// ── Delivery date ───────────────────────────────────────────────
+const _tomorrow = (() => {
+  const d = new Date(); d.setDate(d.getDate() + 1);
+  const iso = d.toISOString().split('T')[0];
+  const display = d.toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'short' });
+  return { iso, display };
+})();
+document.addEventListener('DOMContentLoaded', () => {
+  const el = document.getElementById('delivery-date-text');
+  if (el) el.textContent = _tomorrow.display;
+});
+
 // whatsapp + supabase hybrid order
 const WA='918318767689';
 async function sendWA(e){
@@ -1444,8 +1487,13 @@ async function sendWA(e){
   const n  = document.getElementById('f-name').value.trim();
   const ph = document.getElementById('f-phone').value.trim().replace(/[\s\-]/g,'').replace(/^\+91/,'').replace(/^0/,'');
   const ad = document.getElementById('f-addr').value.trim();
+  const pin = document.getElementById('f-pin').value.trim();
   if (!n || !ph || !ad) { alert('Please fill your name, phone and address.'); return; }
   if (ph.length < 10)   { alert('Please enter a valid 10-digit phone number.'); return; }
+  // validate pincode
+  if (pin.length < 6)   { alert('Please enter your 6-digit pincode.'); document.getElementById('f-pin').focus(); return; }
+  checkPin();
+  if (!_pinValid) { document.getElementById('f-pin').focus(); return; }
 
   const { base, disc, saving, final, items } = getOrderPrices();
   if (items.length === 0 && !_wantSubscription) { alert('Please add at least one pack to your order.'); return; }
@@ -1478,15 +1526,17 @@ async function sendWA(e){
       subtotal:         base   || null,
       discount_amount:  saving || null,
       total:            final  || null,
+      customer_pincode: pin,
       status:           'new',
-      source:           'website'
+      source:           'website',
+      delivery_date:    _tomorrow.iso
     });
   } catch(err) {
     console.warn('Order save failed (non-blocking):', err);
   }
 
   // ── 2. WhatsApp ──────────────────────────────────────────────
-  const msg = `Hi Absolute Fresh! 🌿%0A%0AName: ${encodeURIComponent(n)}%0APhone: +91${ph}%0AAddress: ${encodeURIComponent(ad)}%0A%0AOrder:${itemLines}${subLine}${couponLine}${totalLine}%0APayment: COD / UPI%0A%0APlease confirm batch and delivery slot.`;
+  const msg = `Hi Absolute Fresh! 🌿%0A%0AName: ${encodeURIComponent(n)}%0APhone: +91${ph}%0AAddress: ${encodeURIComponent(ad)} - ${pin}%0ADelivery Date: ${_tomorrow.display}%0A%0AOrder:${itemLines}${subLine}${couponLine}${totalLine}%0APayment: COD / UPI%0A%0APlease confirm availability and delivery slot.`;
   window.open(`https://wa.me/${WA}?text=${msg}`, '_blank');
 
   btn.disabled = false;

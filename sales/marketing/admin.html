@@ -198,6 +198,7 @@
     <button class="tab-btn" onclick="switchTab('salesreps',this)">👷 Sales Reps</button>
     <button class="tab-btn" onclick="switchTab('beatplans',this)">🗺️ Beat Plans</button>
     <button class="tab-btn" onclick="switchTab('salesdash',this)">📊 Sales Ops</button>
+    <button class="tab-btn" onclick="switchTab('serviceareas',this)">📍 Service Areas</button>
   </div>
 
   <div class="page-wrap">
@@ -643,6 +644,31 @@
           </tr></thead>
           <tbody id="reps-body"><tr class="empty-row"><td colspan="8">Loading…</td></tr></tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- ═══════════ SERVICE AREAS ═══════════ -->
+    <div id="tab-serviceareas" style="display:none">
+      <div class="toolbar">
+        <button class="add-btn" onclick="openAreaModal()">+ Add Pincode</button>
+      </div>
+      <p style="color:#94A3B8;font-size:.8rem;margin-bottom:12px">These are the pincodes where you currently deliver. Customers must enter a matching pincode to place an order.</p>
+      <table class="tbl">
+        <thead><tr><th>Pincode</th><th>Area Name</th><th>Status</th><th>Added</th><th>Actions</th></tr></thead>
+        <tbody id="areas-tbody"><tr><td colspan="5" style="text-align:center;color:#64748B;padding:20px">Loading…</td></tr></tbody>
+      </table>
+
+      <!-- Add area modal -->
+      <div id="area-modal" class="modal-overlay">
+        <div class="modal-box" style="max-width:380px">
+          <div class="modal-title">Add Serviceable Pincode</div>
+          <label class="modal-label">Pincode <input id="area-pin" class="modal-input" maxlength="6" placeholder="e.g. 226016" inputmode="numeric"/></label>
+          <label class="modal-label">Area Name <input id="area-name" class="modal-input" placeholder="e.g. Gomtinagar"/></label>
+          <div style="display:flex;gap:10px;margin-top:16px">
+            <button class="modal-save" onclick="saveArea()">Add Pincode</button>
+            <button class="modal-cancel" onclick="closeAreaModal()">Cancel</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1120,6 +1146,7 @@
     btn.classList.add('active');
 
     if (name === 'coupons') loadCoupons();
+    if (name === 'serviceareas') loadServiceAreas();
     if (name === 'campaigns') loadCampaigns();
     if (name === 'samples') loadSamples();
     if (name === 'reviews') loadContentReviews();
@@ -1237,6 +1264,57 @@
     closeModal('ceiling-modal');
     btn.disabled = false; btn.textContent = 'Save';
     loadInfluencers();
+  }
+
+  // ── Service Areas ────────────────────────────────────────────
+  async function loadServiceAreas() {
+    const { data, error } = await db.from('service_areas').select('*').order('created_at', { ascending: false });
+    const tb = document.getElementById('areas-tbody');
+    if (error || !data?.length) {
+      tb.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#64748B;padding:20px">${error ? error.message : 'No service areas yet. Add your first pincode.'}</td></tr>`;
+      return;
+    }
+    tb.innerHTML = data.map(a => `
+      <tr>
+        <td style="font-weight:700;font-size:.95rem">${a.pincode}</td>
+        <td>${a.area_name || '—'}</td>
+        <td><span style="padding:3px 10px;border-radius:999px;font-size:.72rem;font-weight:600;background:${a.is_active ? '#14532d' : '#3D1A1A'};color:${a.is_active ? '#4ADE80' : '#F87171'}">${a.is_active ? 'Active' : 'Paused'}</span></td>
+        <td style="color:#64748B;font-size:.78rem">${new Date(a.created_at).toLocaleDateString('en-IN')}</td>
+        <td>
+          <button onclick="toggleArea('${a.id}',${!a.is_active})" style="margin-right:6px;padding:3px 10px;border-radius:6px;border:none;background:#1E293B;color:#94A3B8;font-size:.75rem;cursor:pointer">${a.is_active ? 'Pause' : 'Activate'}</button>
+          <button onclick="deleteArea('${a.id}')" style="padding:3px 10px;border-radius:6px;border:none;background:#3D1A1A;color:#F87171;font-size:.75rem;cursor:pointer">Delete</button>
+        </td>
+      </tr>`).join('');
+  }
+
+  function openAreaModal() {
+    document.getElementById('area-pin').value = '';
+    document.getElementById('area-name').value = '';
+    document.getElementById('area-modal').classList.add('show');
+  }
+  function closeAreaModal() {
+    document.getElementById('area-modal').classList.remove('show');
+  }
+
+  async function saveArea() {
+    const pin = document.getElementById('area-pin').value.trim();
+    const name = document.getElementById('area-name').value.trim();
+    if (pin.length !== 6 || isNaN(pin)) { alert('Enter a valid 6-digit pincode'); return; }
+    const { error } = await db.from('service_areas').insert({ pincode: pin, area_name: name || null });
+    if (error) { alert(error.message); return; }
+    closeAreaModal();
+    loadServiceAreas();
+  }
+
+  async function toggleArea(id, val) {
+    await db.from('service_areas').update({ is_active: val }).eq('id', id);
+    loadServiceAreas();
+  }
+
+  async function deleteArea(id) {
+    if (!confirm('Remove this pincode?')) return;
+    await db.from('service_areas').delete().eq('id', id);
+    loadServiceAreas();
   }
 
   // ── Coupons ──────────────────────────────────────────────────
