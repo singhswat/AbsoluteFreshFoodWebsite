@@ -354,6 +354,13 @@
     showDone('📋', 'Access Request Sent!',
       `Your request has been submitted, ${name}. The admin will review it, assign your area and activate your account. You'll be contacted on ${phone}.`);
   }
+
+  // Auto-select role from URL param (?role=influencer / partner / salesrep)
+  window.addEventListener('DOMContentLoaded', () => {
+    const param = new URLSearchParams(window.location.search).get('role');
+    if (param === 'influencer' || param === 'partner') selectRole('partner');
+    else if (param === 'salesrep' || param === 'sales') selectRole('sales');
+  });
 </script>
 </body>
 </html>
