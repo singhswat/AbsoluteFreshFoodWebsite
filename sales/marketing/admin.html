@@ -657,19 +657,6 @@
         <thead><tr><th>Pincode</th><th>Area Name</th><th>Status</th><th>Added</th><th>Actions</th></tr></thead>
         <tbody id="areas-tbody"><tr><td colspan="5" style="text-align:center;color:#64748B;padding:20px">Loading…</td></tr></tbody>
       </table>
-
-      <!-- Add area modal -->
-      <div id="area-modal" class="modal-overlay">
-        <div class="modal-box" style="max-width:380px">
-          <div class="modal-title">Add Serviceable Pincode</div>
-          <label class="modal-label">Pincode <input id="area-pin" class="modal-input" maxlength="6" placeholder="e.g. 226016" inputmode="numeric"/></label>
-          <label class="modal-label">Area Name <input id="area-name" class="modal-input" placeholder="e.g. Gomtinagar"/></label>
-          <div style="display:flex;gap:10px;margin-top:16px">
-            <button class="modal-save" onclick="saveArea()">Add Pincode</button>
-            <button class="modal-cancel" onclick="closeAreaModal()">Cancel</button>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- ═══════════ SALES OPS DASHBOARD ═══════════ -->
@@ -749,6 +736,19 @@
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- ════ MODAL: Add Service Area ════ -->
+<div id="area-modal" class="modal-overlay">
+  <div class="modal-box" style="max-width:380px">
+    <div class="modal-title">Add Serviceable Pincode</div>
+    <label class="modal-label">Pincode <input id="area-pin" class="modal-input" maxlength="6" placeholder="e.g. 226016" inputmode="numeric"/></label>
+    <label class="modal-label">Area Name <input id="area-name" class="modal-input" placeholder="e.g. Gomtinagar"/></label>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="modal-save" onclick="saveArea()">Add Pincode</button>
+      <button class="modal-cancel" onclick="closeAreaModal()">Cancel</button>
+    </div>
   </div>
 </div>
 
