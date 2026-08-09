@@ -1358,7 +1358,10 @@ async function applyCoupon() {
       errorEl.style.display = 'block';
     } else {
       _appliedCoupon = coupon;
-      successEl.textContent = `✅ Coupon "${coupon.code}" applied — ${coupon.discount_value}% off your order!`;
+      const msg = coupon.discount_type === 'bogo'
+        ? `🎁 Coupon "${coupon.code}" applied — Buy 1 Get 1 FREE!`
+        : `✅ Coupon "${coupon.code}" applied — ${coupon.discount_value}% off your order!`;
+      successEl.textContent = msg;
       successEl.style.display = 'block';
       btn.textContent = '✓';
       updateOrderSummary();
@@ -1407,10 +1410,22 @@ function getOrderItems() {
 function getOrderPrices() {
   const items = getOrderItems();
   const base = items.reduce((s, i) => s + i.price * i.qty, 0);
-  const disc = _appliedCoupon ? _appliedCoupon.discount_value : 0;
-  const saving = base > 0 ? Math.round(base * disc / 100) : 0;
+
+  let disc = 0, saving = 0, freeItems = [];
+
+  if (_appliedCoupon) {
+    if (_appliedCoupon.discount_type === 'bogo') {
+      // Each ordered item gets one free (same pack, same qty)
+      freeItems = items.map(i => ({ ...i, free: true }));
+      saving = freeItems.reduce((s, i) => s + i.price * i.qty, 0);
+    } else {
+      disc = _appliedCoupon.discount_value || 0;
+      saving = base > 0 ? Math.round(base * disc / 100) : 0;
+    }
+  }
+
   const final = base - saving;
-  return { base, disc, saving, final, items };
+  return { base, disc, saving, final, items, freeItems };
 }
 
 function updateOrderSummary() {
@@ -1422,20 +1437,28 @@ function updateOrderSummary() {
 
   // Per-item lines
   const itemsEl = document.getElementById('sum-items-list');
-  itemsEl.innerHTML = items.map(i =>
+  const isBogo = _appliedCoupon && _appliedCoupon.discount_type === 'bogo';
+  const paidLines = items.map(i =>
     `<div style="display:flex;justify-content:space-between;margin-bottom:5px;color:#166534;font-size:.83rem">
       <span>${i.name} ×${i.qty}</span><span>₹${i.price * i.qty}</span>
     </div>`
-  ).join('') + (_wantSubscription
+  ).join('');
+  const freeLines = isBogo ? freeItems.map(i =>
+    `<div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:.83rem;color:#15803d;font-weight:700">
+      <span>🎁 FREE ${i.name} ×${i.qty}</span><span style="text-decoration:line-through;opacity:.5">₹${i.price * i.qty}</span>
+    </div>`
+  ).join('') : '';
+  const subLine = _wantSubscription
     ? `<div style="display:flex;justify-content:space-between;margin-bottom:5px;color:#92400e;font-size:.83rem"><span>Subscription / Bulk</span><span>Quote on WhatsApp</span></div>`
-    : '');
+    : '';
+  itemsEl.innerHTML = paidLines + freeLines + subLine;
 
   document.getElementById('sum-subtotal-row').style.display = items.length > 1 ? 'flex' : 'none';
   document.getElementById('sum-base').textContent = `₹${base}`;
 
   if (saving > 0) {
     document.getElementById('sum-discount-row').style.display = 'flex';
-    document.getElementById('sum-discount-label').textContent = `Coupon (${disc}% off)`;
+    document.getElementById('sum-discount-label').textContent = isBogo ? '🇮🇳 BOGO — free packs' : `Coupon (${disc}% off)`;
     document.getElementById('sum-discount').textContent = `−₹${saving}`;
   } else {
     document.getElementById('sum-discount-row').style.display = 'none';
@@ -1495,26 +1518,35 @@ async function sendWA(e){
   checkPin();
   if (!_pinValid) { document.getElementById('f-pin').focus(); return; }
 
-  const { base, disc, saving, final, items } = getOrderPrices();
+  const { base, disc, saving, final, items, freeItems } = getOrderPrices();
   if (items.length === 0 && !_wantSubscription) { alert('Please add at least one pack to your order.'); return; }
 
   btn.disabled = true;
   btn.textContent = 'Placing order…';
 
+  const isBogo = _appliedCoupon && _appliedCoupon.discount_type === 'bogo';
+
   // Build WhatsApp lines
   const itemLines = items.map(i => `%0A  • ${i.name} ×${i.qty} = ₹${i.price*i.qty}`).join('');
+  const freeLines = isBogo ? freeItems.map(i => `%0A  🎁 FREE ${i.name} ×${i.qty}`).join('') : '';
   const subLine   = _wantSubscription ? '%0A  • Subscription / Bulk (quote needed)' : '';
   let couponLine  = '';
   if (_appliedCoupon && saving > 0) {
-    couponLine = `%0ACoupon: ${_appliedCoupon.code} (${disc}% off — saved ₹${saving})`;
-    _db.from('coupons').update({ times_used: _appliedCoupon.times_used + 1 }).eq('id', _appliedCoupon.id).then(() => {});
+    couponLine = isBogo
+      ? `%0ACoupon: ${_appliedCoupon.code} (Buy 1 Get 1 FREE — saved ₹${saving})`
+      : `%0ACoupon: ${_appliedCoupon.code} (${disc}% off — saved ₹${saving})`;
+    _db.from('coupons').update({ times_used: (_appliedCoupon.times_used || 0) + 1 }).eq('id', _appliedCoupon.id).then(() => {});
   }
-  const totalLine = base > 0 ? `%0ATotal: ₹${final}${saving > 0 ? ` (after ₹${saving} discount)` : ''}` : '';
+  const totalLine = base > 0 ? `%0ATotal: ₹${final}${saving > 0 ? ` (saved ₹${saving})` : ''}` : '';
 
   // ── 1. Save to Supabase ──────────────────────────────────────
   try {
     const ref = 'WEB-' + Date.now().toString(36).toUpperCase();
-    const allItems = [...items, ...(_wantSubscription ? [{ name: 'Subscription/Bulk', qty: 1, price: 0 }] : [])];
+    const allItems = [
+      ...items,
+      ...(isBogo ? freeItems.map(i => ({ ...i, name: `FREE ${i.name}`, price: 0 })) : []),
+      ...(_wantSubscription ? [{ name: 'Subscription/Bulk', qty: 1, price: 0 }] : [])
+    ];
     await _db.from('web_orders').insert({
       order_ref:        ref,
       customer_name:    n,
@@ -1536,7 +1568,7 @@ async function sendWA(e){
   }
 
   // ── 2. WhatsApp ──────────────────────────────────────────────
-  const msg = `Hi Absolute Fresh! 🌿%0A%0AName: ${encodeURIComponent(n)}%0APhone: +91${ph}%0AAddress: ${encodeURIComponent(ad)} - ${pin}%0ADelivery Date: ${_tomorrow.display}%0A%0AOrder:${itemLines}${subLine}${couponLine}${totalLine}%0APayment: COD / UPI%0A%0APlease confirm availability and delivery slot.`;
+  const msg = `Hi Absolute Fresh! 🌿%0A%0AName: ${encodeURIComponent(n)}%0APhone: +91${ph}%0AAddress: ${encodeURIComponent(ad)} - ${pin}%0ADelivery Date: ${_tomorrow.display}%0A%0AOrder:${itemLines}${freeLines}${subLine}${couponLine}${totalLine}%0APayment: COD / UPI%0A%0APlease confirm availability and delivery slot.`;
   window.open(`https://wa.me/${WA}?text=${msg}`, '_blank');
 
   btn.disabled = false;
