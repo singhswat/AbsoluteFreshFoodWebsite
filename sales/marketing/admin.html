@@ -47,8 +47,8 @@
     .s-val{font-size:1.3rem;font-weight:700;font-family:monospace}
 
     /* ── Tab nav ── */
-    .tab-nav{display:flex;background:#1E293B;border-bottom:1px solid #334155;overflow-x:auto;position:sticky;top:44px;z-index:40}
-    .tab-btn{flex:1;min-width:80px;padding:11px 6px;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;font-size:.72rem;font-weight:600;color:#64748B;cursor:pointer;white-space:nowrap;text-align:center}
+    .tab-nav{display:flex;flex-wrap:wrap;background:#1E293B;border-bottom:1px solid #334155;position:sticky;top:44px;z-index:40}
+    .tab-btn{padding:9px 10px;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;font-size:.68rem;font-weight:600;color:#64748B;cursor:pointer;white-space:nowrap;text-align:center}
     .tab-btn.active{color:#4ADE80;border-bottom-color:#22C55E}
 
     .page-wrap{padding:12px 12px 80px}
@@ -186,19 +186,18 @@
   <!-- Tab Nav -->
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('home',this)">🏠 Home</button>
-    <button class="tab-btn" onclick="switchTab('influencers',this)">👥 Influencers</button>
+    <button class="tab-btn" onclick="switchTab('weborders',this)">🛒 Orders</button>
     <button class="tab-btn" onclick="switchTab('coupons',this)">🎟️ Coupons</button>
+    <button class="tab-btn" onclick="switchTab('serviceareas',this)">📍 Areas</button>
+    <button class="tab-btn" onclick="switchTab('influencers',this)">👥 Influencers</button>
     <button class="tab-btn" onclick="switchTab('campaigns',this)">📣 Campaigns</button>
-    <button class="tab-btn" onclick="switchTab('samples',this)">📦 Samples</button>
     <button class="tab-btn" onclick="switchTab('reviews',this)">📸 Content</button>
     <button class="tab-btn" onclick="switchTab('payouts',this)">💰 Payouts</button>
     <button class="tab-btn" onclick="switchTab('analytics',this)">📊 Analytics</button>
-    <button class="tab-btn" onclick="switchTab('weborders',this)">🛒 Web Orders</button>
     <button class="tab-btn" onclick="switchTab('products',this)">🥬 Products</button>
-    <button class="tab-btn" onclick="switchTab('salesreps',this)">👷 Sales Reps</button>
+    <button class="tab-btn" onclick="switchTab('salesreps',this)">👷 Reps</button>
     <button class="tab-btn" onclick="switchTab('beatplans',this)">🗺️ Beat Plans</button>
     <button class="tab-btn" onclick="switchTab('salesdash',this)">📊 Sales Ops</button>
-    <button class="tab-btn" onclick="switchTab('serviceareas',this)">📍 Service Areas</button>
   </div>
 
   <div class="page-wrap">
