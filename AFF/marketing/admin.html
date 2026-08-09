@@ -47,8 +47,8 @@
     .s-val{font-size:1.3rem;font-weight:700;font-family:monospace}
 
     /* ── Tab nav ── */
-    .tab-nav{display:flex;background:#1E293B;border-bottom:1px solid #334155;overflow-x:auto;position:sticky;top:44px;z-index:40}
-    .tab-btn{flex:1;min-width:80px;padding:11px 6px;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;font-size:.72rem;font-weight:600;color:#64748B;cursor:pointer;white-space:nowrap;text-align:center}
+    .tab-nav{display:flex;flex-wrap:wrap;background:#1E293B;border-bottom:1px solid #334155;position:sticky;top:44px;z-index:40}
+    .tab-btn{padding:9px 10px;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;font-size:.68rem;font-weight:600;color:#64748B;cursor:pointer;white-space:nowrap;text-align:center}
     .tab-btn.active{color:#4ADE80;border-bottom-color:#22C55E}
 
     .page-wrap{padding:12px 12px 80px}
@@ -93,10 +93,24 @@
     .section-head{font-size:.68rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.07em;margin:14px 0 8px}
 
     /* ── Modal sheet ── */
-    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:flex-end;z-index:100}
-    .modal-overlay.show{display:flex}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0);display:flex;align-items:flex-end;z-index:100;pointer-events:none;transition:background .25s ease}
+    .modal-overlay.show{background:rgba(0,0,0,.75);pointer-events:all}
+    .modal-overlay .modal-box,.modal-overlay .sheet{opacity:0;transform:translateY(24px) scale(.97);transition:opacity .25s ease,transform .25s ease}
+    .modal-overlay.show .modal-box,.modal-overlay.show .sheet{opacity:1;transform:translateY(0) scale(1)}
+    #modal-edit-weborder .modal-box{transform:scale(.94);transition:opacity .22s ease,transform .22s ease}
+    #modal-edit-weborder.show .modal-box{opacity:1;transform:scale(1)}
     .sheet{background:#1E293B;border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:92vh;overflow-y:auto}
     .handle{width:32px;height:4px;background:#334155;border-radius:2px;margin:0 auto 16px}
+    .modal-box{background:#FFFFFF;border:1px solid #E2E8F0;border-radius:18px;padding:28px 24px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+    .modal-title{font-size:1.05rem;font-weight:700;color:#0F172A;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid #E2E8F0}
+    .modal-label{display:block;font-size:.72rem;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.07em;margin:14px 0 6px}
+    .modal-input{width:100%;background:#F8FAFC;border:1.5px solid #CBD5E1;color:#0F172A;border-radius:9px;padding:10px 13px;font-size:.9rem;font-family:inherit;outline:none;box-sizing:border-box;transition:border .15s}
+    .modal-input:focus{border-color:#CC0000;background:#fff}
+    .modal-actions{display:flex;gap:10px;margin-top:22px;padding-top:16px;border-top:1px solid #E2E8F0}
+    .modal-save{flex:1;background:#CC0000;color:#fff;border:none;border-radius:9px;padding:11px;font-size:.88rem;font-weight:700;cursor:pointer;transition:background .15s}
+    .modal-save:hover{background:#B91C1C}
+    .modal-cancel{flex:1;background:#F1F5F9;color:#475569;border:1px solid #CBD5E1;border-radius:9px;padding:11px;font-size:.88rem;cursor:pointer;transition:all .15s}
+    .modal-cancel:hover{background:#E2E8F0;color:#0F172A}
     .sheet h3{font-size:.95rem;font-weight:600;color:#F1F5F9;margin-bottom:4px}
     .sheet-sub{font-size:.78rem;color:#64748B;margin-bottom:14px}
     .sinp{width:100%;background:#0F172A;border:1.5px solid #334155;color:#F1F5F9;border-radius:8px;padding:11px 12px;font-size:.9rem;font-family:inherit;outline:none;transition:border .15s;-webkit-appearance:none}
@@ -172,17 +186,20 @@
   <!-- Tab Nav -->
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('home',this)">🏠 Home</button>
-    <button class="tab-btn" onclick="switchTab('influencers',this)">👥 Influencers</button>
+    <button class="tab-btn" onclick="switchTab('weborders',this)">🛒 Orders</button>
     <button class="tab-btn" onclick="switchTab('coupons',this)">🎟️ Coupons</button>
+    <button class="tab-btn" onclick="switchTab('serviceareas',this)">📍 Areas</button>
+    <button class="tab-btn" onclick="switchTab('influencers',this)">👥 Influencers</button>
     <button class="tab-btn" onclick="switchTab('campaigns',this)">📣 Campaigns</button>
     <button class="tab-btn" onclick="switchTab('samples',this)">📦 Samples</button>
     <button class="tab-btn" onclick="switchTab('reviews',this)">📸 Content</button>
     <button class="tab-btn" onclick="switchTab('payouts',this)">💰 Payouts</button>
     <button class="tab-btn" onclick="switchTab('analytics',this)">📊 Analytics</button>
-    <button class="tab-btn" onclick="switchTab('weborders',this)">🛒 Web Orders</button>
-    <button class="tab-btn" onclick="switchTab('salesreps',this)">👷 Sales Reps</button>
+    <button class="tab-btn" onclick="switchTab('products',this)">🥬 Products</button>
+    <button class="tab-btn" onclick="switchTab('salesreps',this)">👷 Reps</button>
     <button class="tab-btn" onclick="switchTab('beatplans',this)">🗺️ Beat Plans</button>
     <button class="tab-btn" onclick="switchTab('salesdash',this)">📊 Sales Ops</button>
+    <button class="tab-btn" onclick="switchTab('outlets',this)">🏪 Outlets</button>
   </div>
 
   <div class="page-wrap">
@@ -311,6 +328,9 @@
 
     <!-- ═══════════ COUPONS ═══════════ -->
     <div id="tab-coupons" style="display:none">
+      <div class="toolbar">
+        <button class="add-btn" onclick="openCouponModal()">+ Create Coupon</button>
+      </div>
       <div class="grid-wrap">
         <table>
           <thead><tr>
@@ -325,6 +345,42 @@
           </tr></thead>
           <tbody id="cpn-body"><tr class="empty-row"><td colspan="8">Loading…</td></tr></tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- ── Create Coupon Modal ── -->
+    <div id="coupon-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;display:none;align-items:center;justify-content:center;padding:16px">
+      <div style="background:#1E293B;border-radius:16px;padding:28px;width:100%;max-width:460px;border:1px solid #334155">
+        <h3 style="color:#F1F5F9;font-size:1.1rem;margin-bottom:20px">Create Coupon</h3>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div>
+            <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Code</label>
+            <input id="cpn-code" style="width:100%;background:#0F172A;border:1.5px solid #334155;color:#fff;border-radius:8px;padding:10px 12px;font-size:.95rem;text-transform:uppercase" placeholder="e.g. READY5MIN" oninput="this.value=this.value.toUpperCase()"/>
+          </div>
+          <div>
+            <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Discount %</label>
+            <input id="cpn-discount" type="number" min="1" max="100" value="10" style="width:100%;background:#0F172A;border:1.5px solid #334155;color:#fff;border-radius:8px;padding:10px 12px;font-size:.95rem"/>
+          </div>
+          <div>
+            <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Expires On</label>
+            <input id="cpn-expires" type="date" style="width:100%;background:#0F172A;border:1.5px solid #334155;color:#fff;border-radius:8px;padding:10px 12px;font-size:.95rem"/>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;background:#0F172A;border:1.5px solid #F472B6;border-radius:8px;padding:12px 14px">
+            <input type="checkbox" id="cpn-welcome" style="width:18px;height:18px;cursor:pointer"/>
+            <label for="cpn-welcome" style="color:#F472B6;font-size:.85rem;font-weight:600;cursor:pointer">Set as Website Welcome Coupon <span style="color:#94A3B8;font-weight:400;font-size:.75rem">(shown in popup to new visitors)</span></label>
+          </div>
+          <div>
+            <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">First Order Only</label>
+            <select id="cpn-firstonly" style="width:100%;background:#0F172A;border:1.5px solid #334155;color:#fff;border-radius:8px;padding:10px 12px;font-size:.95rem">
+              <option value="true">Yes — first order only</option>
+              <option value="false">No — all orders</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:22px">
+          <button onclick="saveCoupon()" style="flex:1;background:#CC0000;color:#fff;border:none;border-radius:8px;padding:11px;font-weight:700;cursor:pointer">Save Coupon</button>
+          <button onclick="document.getElementById('coupon-modal').style.display='none'" style="flex:1;background:#1E293B;color:#94A3B8;border:1px solid #334155;border-radius:8px;padding:11px;cursor:pointer">Cancel</button>
+        </div>
       </div>
     </div>
 
@@ -484,7 +540,7 @@
         <div class="stat-card"><div class="stat-num" id="wo-stat-delivered">—</div><div class="stat-label">Delivered Today</div></div>
       </div>
 
-      <!-- Date filter -->
+      <!-- Date filter + bulk toolbar -->
       <div class="toolbar" style="margin-bottom:10px">
         <button class="t-btn active" onclick="loadWebOrders('today',this)">Today</button>
         <button class="t-btn" onclick="loadWebOrders('yesterday',this)">Yesterday</button>
@@ -492,9 +548,22 @@
         <button class="t-btn" style="margin-left:auto;background:#22C55E22;color:#4ADE80" onclick="loadWebOrders('today')">↻ Refresh</button>
       </div>
 
+      <!-- Bulk action bar -->
+      <div id="bulk-bar" style="display:none;background:#1E3A5F;border:1px solid #2563EB;border-radius:10px;padding:10px 16px;margin-bottom:10px;align-items:center;gap:12px;flex-wrap:wrap">
+        <span id="bulk-count" style="font-size:.82rem;font-weight:700;color:#93C5FD">0 selected</span>
+        <span style="color:#334155">|</span>
+        <span style="font-size:.78rem;color:#94A3B8">Change status to:</span>
+        <button class="act-btn approve" onclick="bulkStatus('confirmed')">✓ Confirm All</button>
+        <button class="act-btn" onclick="bulkStatus('out_for_delivery')" style="background:#A78BFA22;color:#A78BFA">🚴 Out for Delivery</button>
+        <button class="act-btn" onclick="bulkStatus('delivered')" style="background:#34D39922;color:#34D399">✅ Delivered</button>
+        <button class="act-btn danger" onclick="bulkStatus('cancelled')">✕ Cancel</button>
+        <button onclick="clearSelection()" style="margin-left:auto;background:none;border:none;color:#64748B;cursor:pointer;font-size:.8rem">Clear</button>
+      </div>
+
       <div class="grid-wrap">
         <table>
           <thead><tr>
+            <th style="width:36px"><input type="checkbox" id="select-all-orders" onchange="toggleSelectAll(this)" style="cursor:pointer"/></th>
             <th>Ref</th>
             <th>Time</th>
             <th>Customer</th>
@@ -505,18 +574,63 @@
             <th>Actions</th>
           </tr></thead>
           <tbody id="web-orders-body">
-            <tr class="empty-row"><td colspan="8">Loading…</td></tr>
+            <tr class="empty-row"><td colspan="9">Loading…</td></tr>
           </tbody>
         </table>
       </div>
     </div>
 
 
+    <!-- ═══════════ PRODUCTS ═══════════ -->
+    <div id="tab-products" style="display:none">
+      <div class="toolbar">
+        <button class="add-btn" onclick="openAddProduct()">+ Add Product</button>
+      </div>
+      <div class="grid-wrap">
+        <table>
+          <thead><tr>
+            <th>Product Name</th>
+            <th>Unit</th>
+            <th>Base Price</th>
+            <th>Status</th>
+            <th>Added</th>
+            <th>Actions</th>
+          </tr></thead>
+          <tbody id="products-body"><tr class="empty-row"><td colspan="6">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- ═══════════ SALES REPS ═══════════ -->
     <div id="tab-salesreps" style="display:none">
-      <div class="toolbar">
-        <button class="add-btn" onclick="openAddRepModal()">+ Add Rep</button>
+
+      <!-- ── Pending Signup Requests ── -->
+      <div id="pending-requests-section" style="margin-bottom:20px">
+        <div class="section-head" style="display:flex;align-items:center;gap:10px">
+          ⏳ Pending Signup Requests
+          <span id="pending-count-badge" style="background:#7C2D12;color:#FCA5A5;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:20px;display:none">0</span>
+        </div>
+        <div class="grid-wrap">
+          <table>
+            <thead><tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Role</th>
+              <th>Area</th>
+              <th>Requested</th>
+              <th>Actions</th>
+            </tr></thead>
+            <tbody id="requests-body"><tr class="empty-row"><td colspan="7">Loading…</td></tr></tbody>
+          </table>
+        </div>
       </div>
+
+      <!-- ── Active Reps ── -->
+      <div class="toolbar">
+        <button class="add-btn" onclick="openAddRepModal()">+ Add Rep Manually</button>
+      </div>
+      <div class="section-head">Active Staff</div>
       <div class="grid-wrap">
         <table>
           <thead><tr>
@@ -532,6 +646,48 @@
           <tbody id="reps-body"><tr class="empty-row"><td colspan="8">Loading…</td></tr></tbody>
         </table>
       </div>
+    </div>
+
+    <!-- ═══════════ OUTLETS ═══════════ -->
+    <div id="tab-outlets" style="display:none">
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+        <select id="outlets-rep-filter" class="sinp" style="max-width:200px" onchange="loadOutlets()">
+          <option value="">All Reps</option>
+        </select>
+        <select id="outlets-status-filter" class="sinp" style="max-width:160px" onchange="loadOutlets()">
+          <option value="">All Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+        <span id="outlets-count" style="font-size:.78rem;color:#64748B;margin-left:auto"></span>
+      </div>
+      <div class="grid-wrap">
+        <table>
+          <thead><tr>
+            <th>Outlet</th>
+            <th>Area</th>
+            <th>Owner</th>
+            <th>Phone</th>
+            <th>Rep</th>
+            <th>Avg kg/day</th>
+            <th>Status</th>
+            <th>Added</th>
+          </tr></thead>
+          <tbody id="outlets-tbody"><tr class="empty-row"><td colspan="8">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════ SERVICE AREAS ═══════════ -->
+    <div id="tab-serviceareas" style="display:none">
+      <div class="toolbar">
+        <button class="add-btn" onclick="openAreaModal()">+ Add Pincode</button>
+      </div>
+      <p style="color:#94A3B8;font-size:.8rem;margin-bottom:12px">These are the pincodes where you currently deliver. Customers must enter a matching pincode to place an order.</p>
+      <table class="tbl">
+        <thead><tr><th>Pincode</th><th>Area Name</th><th>Status</th><th>Added</th><th>Actions</th></tr></thead>
+        <tbody id="areas-tbody"><tr><td colspan="5" style="text-align:center;color:#64748B;padding:20px">Loading…</td></tr></tbody>
+      </table>
     </div>
 
     <!-- ═══════════ SALES OPS DASHBOARD ═══════════ -->
@@ -611,6 +767,75 @@
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- ════ MODAL: Add Service Area ════ -->
+<div id="area-modal" class="modal-overlay">
+  <div class="modal-box" style="max-width:380px">
+    <div class="modal-title">Add Serviceable Pincode</div>
+    <label class="modal-label">Pincode <input id="area-pin" class="modal-input" maxlength="6" placeholder="e.g. 226016" inputmode="numeric"/></label>
+    <label class="modal-label">Area Name <input id="area-name" class="modal-input" placeholder="e.g. Gomtinagar"/></label>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="modal-save" onclick="saveArea()">Add Pincode</button>
+      <button class="modal-cancel" onclick="closeAreaModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL: Add / Edit Product ════ -->
+<div class="modal-overlay" id="modal-product">
+  <div class="sheet">
+    <div class="handle"></div>
+    <h3 id="product-modal-title">Add Product</h3>
+    <div class="sheet-sub">Products appear in beat plans and orders</div>
+    <input type="hidden" id="product-id"/>
+    <div id="product-err" style="background:#450a0a;border:1px solid #7f1d1d;color:#FCA5A5;border-radius:8px;padding:10px;font-size:.8rem;margin-bottom:10px;display:none"></div>
+    <div class="sfield">
+      <label class="slbl">Product Name *</label>
+      <input id="product-name" class="sinp" placeholder="Idli &amp; Dosa Batter 1kg"/>
+    </div>
+    <div class="srow">
+      <div class="sfield">
+        <label class="slbl">Unit</label>
+        <select id="product-unit" class="sinp">
+          <option value="kg">kg</option>
+          <option value="litre">litre</option>
+          <option value="pcs">pcs</option>
+          <option value="pack">pack</option>
+          <option value="gm">gm</option>
+        </select>
+      </div>
+    </div>
+    <div class="slbl" style="margin-bottom:8px;margin-top:4px">Pricing (₹ per unit)</div>
+    <!-- MRP row -->
+    <div class="sfield" style="background:#0A1A2A;border:1px solid #0C2A3E;border-radius:8px;padding:10px;margin-bottom:8px">
+      <label class="slbl" style="color:#F472B6;font-size:.8rem">MRP / D2C — Consumer Price (Influencers sell at this)</label>
+      <input id="product-price-0" type="number" class="sinp" placeholder="0" min="0" step="0.5"/>
+    </div>
+    <div class="slbl" style="margin-bottom:6px;color:#475569;font-size:.7rem">B2B TRADE PRICES</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="sfield">
+        <label class="slbl" style="color:#A78BFA">T1 — Enterprise / Chain</label>
+        <input id="product-price-1" type="number" class="sinp" placeholder="0" min="0" step="0.5"/>
+      </div>
+      <div class="sfield">
+        <label class="slbl" style="color:#60A5FA">T2 — Mega Store</label>
+        <input id="product-price-2" type="number" class="sinp" placeholder="0" min="0" step="0.5"/>
+      </div>
+      <div class="sfield">
+        <label class="slbl" style="color:#34D399">T3 — Supermarket</label>
+        <input id="product-price-3" type="number" class="sinp" placeholder="0" min="0" step="0.5"/>
+      </div>
+      <div class="sfield">
+        <label class="slbl" style="color:#FBBF24">T4 — Retail (default)</label>
+        <input id="product-price-4" type="number" class="sinp" placeholder="0" min="0" step="0.5"/>
+      </div>
+    </div>
+    <div class="m-actions">
+      <button class="m-cancel" onclick="closeModal('modal-product')">Cancel</button>
+      <button class="m-save" onclick="saveProduct()">Save Product ✅</button>
+    </div>
   </div>
 </div>
 
@@ -704,8 +929,8 @@
 </div>
 
 <!-- ════ MODAL: Edit Web Order ════ -->
-<div class="modal-overlay" id="modal-edit-weborder">
-  <div class="modal-box" style="max-width:480px">
+<div class="modal-overlay" id="modal-edit-weborder" style="align-items:center;justify-content:center">
+  <div class="modal-box" style="max-width:480px;width:100%;border-radius:16px">
     <div class="modal-title">Edit Web Order <span id="edit-wo-ref" style="color:#4ADE80;font-size:.85em"></span></div>
     <input type="hidden" id="edit-wo-id"/>
     <label class="modal-label">Customer Name</label>
@@ -885,7 +1110,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   const SUPABASE_URL = 'https://fbfopgzblqmsflkfejwa.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_r7mYhsyIKtBjBKzxH8St9g_OHjTU-RQ';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZiZm9wZ3pibHFtc2Zsa2ZlandhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzExOTksImV4cCI6MjA5MTQwNzE5OX0.IL23Wfgq4kMW1UYQNM4gieCL7rLCTTUtAAWwVwUH6kY';
   const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   // ── Auth ────────────────────────────────────────────────────
@@ -924,6 +1149,11 @@
     loadAdminApp();
   });
 
+  async function sha256(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
   function loadAdminApp() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
@@ -940,19 +1170,23 @@
 
   // ── Tab switching ────────────────────────────────────────────
   function switchTab(name, btn) {
-    ['home','influencers','coupons','campaigns','samples','reviews','payouts','analytics','weborders','salesreps','beatplans','salesdash'].forEach(t => {
+    ['home','influencers','coupons','campaigns','samples','reviews','payouts','analytics','weborders','products','salesreps','beatplans','salesdash','serviceareas','outlets'].forEach(t => {
       document.getElementById('tab-' + t).style.display = t === name ? 'block' : 'none';
     });
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
 
+    if (name === 'coupons') loadCoupons();
+    if (name === 'serviceareas') loadServiceAreas();
+    if (name === 'outlets') loadOutlets();
     if (name === 'campaigns') loadCampaigns();
     if (name === 'samples') loadSamples();
     if (name === 'reviews') loadContentReviews();
     if (name === 'payouts') loadPayouts();
     if (name === 'analytics') loadAnalytics();
     if (name === 'weborders') loadWebOrders('today');
-    if (name === 'salesreps') loadSalesReps();
+    if (name === 'products') loadProducts();
+    if (name === 'salesreps') { loadPendingRequests(); loadSalesReps(); }
     if (name === 'beatplans') { loadSalesReps(); document.getElementById('bp-month-select').value = new Date().toISOString().slice(0,7); }
     if (name === 'salesdash') loadSalesDash();
     if (name === 'home') loadHomeStats();
@@ -1064,6 +1298,98 @@
     loadInfluencers();
   }
 
+  // ── Outlets ──────────────────────────────────────────────────
+  let _outletRepsLoaded = false;
+  async function loadOutlets() {
+    // Populate rep filter once
+    if (!_outletRepsLoaded) {
+      const { data: reps } = await db.from('users').select('id,name').order('name');
+      const sel = document.getElementById('outlets-rep-filter');
+      (reps||[]).forEach(r => {
+        const o = document.createElement('option'); o.value = r.id; o.textContent = r.name; sel.appendChild(o);
+      });
+      _outletRepsLoaded = true;
+    }
+
+    const repId  = document.getElementById('outlets-rep-filter').value;
+    const status = document.getElementById('outlets-status-filter').value;
+
+    let q = db.from('outlets').select('*, users(name)').order('created_at', { ascending: false });
+    if (repId)  q = q.eq('rep_id', repId);
+    if (status) q = q.eq('status', status);
+
+    const { data, error } = await q;
+    const tbody = document.getElementById('outlets-tbody');
+    if (error || !data?.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="8">No outlets found</td></tr>';
+      document.getElementById('outlets-count').textContent = '';
+      return;
+    }
+    document.getElementById('outlets-count').textContent = `${data.length} outlet${data.length!==1?'s':''}`;
+    tbody.innerHTML = data.map(o => `
+      <tr>
+        <td class="bold">${o.name||'—'}</td>
+        <td>${o.area||'—'}</td>
+        <td>${o.owner_name||'—'}</td>
+        <td>${o.phone||'—'}</td>
+        <td>${o.users?.name||'—'}</td>
+        <td class="mono">${parseFloat(o.avg_kg_day||0).toFixed(1)}</td>
+        <td><span class="pill ${o.status==='active'?'pill-approved':'pill-rejected'}">${o.status||'—'}</span></td>
+        <td style="font-size:.75rem;color:#64748B">${o.created_at ? new Date(o.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '—'}</td>
+      </tr>`).join('');
+  }
+
+  // ── Service Areas ────────────────────────────────────────────
+  async function loadServiceAreas() {
+    const { data, error } = await db.from('service_areas').select('*').order('created_at', { ascending: false });
+    const tb = document.getElementById('areas-tbody');
+    if (error || !data?.length) {
+      tb.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#64748B;padding:20px">${error ? error.message : 'No service areas yet. Add your first pincode.'}</td></tr>`;
+      return;
+    }
+    tb.innerHTML = data.map(a => `
+      <tr>
+        <td style="font-weight:700;font-size:.95rem">${a.pincode}</td>
+        <td>${a.area_name || '—'}</td>
+        <td><span style="padding:3px 10px;border-radius:999px;font-size:.72rem;font-weight:600;background:${a.is_active ? '#14532d' : '#3D1A1A'};color:${a.is_active ? '#4ADE80' : '#F87171'}">${a.is_active ? 'Active' : 'Paused'}</span></td>
+        <td style="color:#64748B;font-size:.78rem">${new Date(a.created_at).toLocaleDateString('en-IN')}</td>
+        <td>
+          <button onclick="toggleArea('${a.id}',${!a.is_active})" style="margin-right:6px;padding:3px 10px;border-radius:6px;border:none;background:#1E293B;color:#94A3B8;font-size:.75rem;cursor:pointer">${a.is_active ? 'Pause' : 'Activate'}</button>
+          <button onclick="deleteArea('${a.id}')" style="padding:3px 10px;border-radius:6px;border:none;background:#3D1A1A;color:#F87171;font-size:.75rem;cursor:pointer">Delete</button>
+        </td>
+      </tr>`).join('');
+  }
+
+  function openAreaModal() {
+    document.getElementById('area-pin').value = '';
+    document.getElementById('area-name').value = '';
+    document.getElementById('area-modal').classList.add('show');
+  }
+  function closeAreaModal() {
+    document.getElementById('area-modal').classList.remove('show');
+  }
+
+  async function saveArea() {
+    const pin = document.getElementById('area-pin').value.trim();
+    const name = document.getElementById('area-name').value.trim();
+    if (pin.length !== 6 || isNaN(pin)) { alert('Enter a valid 6-digit pincode'); return; }
+    const { error } = await db.from('service_areas').insert({ pincode: pin, area_name: name || null });
+    if (error) { alert(error.message); return; }
+    closeAreaModal();
+    loadServiceAreas();
+  }
+
+  async function toggleArea(id, val) {
+    await db.from('service_areas').update({ is_active: val }).eq('id', id);
+    loadServiceAreas();
+  }
+
+  async function deleteArea(id) {
+    if (!confirm('Remove this pincode?')) return;
+    await db.from('service_areas').delete().eq('id', id);
+    loadServiceAreas();
+  }
+
   // ── Coupons ──────────────────────────────────────────────────
   async function loadCoupons() {
     const { data } = await db.from('coupons')
@@ -1074,12 +1400,15 @@
     const tbody = document.getElementById('cpn-body');
     if (!data?.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="8">No coupons</td></tr>'; return; }
     tbody.innerHTML = data.map(c => {
-      const expires = new Date(c.expires_on).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'2-digit' });
+      const expires = c.expires_on ? new Date(c.expires_on).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'2-digit' }) : '—';
       const statusPill = c.status === 'active'
         ? '<span class="pill pill-active">Active</span>'
         : `<span class="pill pill-paused">${c.status}</span>`;
+      const welcomeBadge = c.is_welcome_coupon
+        ? '<span style="background:#F472B6;color:#1E1B4B;font-size:.65rem;font-weight:800;border-radius:4px;padding:2px 6px;margin-left:6px">WELCOME</span>'
+        : '';
       return `<tr>
-        <td class="bold mono" style="color:#4ADE80">${c.code}</td>
+        <td class="bold mono" style="color:#4ADE80">${c.code}${welcomeBadge}</td>
         <td style="font-size:.78rem">${c.influencers?.name || '—'}</td>
         <td class="mono">${c.discount_value}%</td>
         <td class="mono">${c.times_used} / ${c.usage_limit_total || '∞'}</td>
@@ -1087,6 +1416,7 @@
         <td style="color:#94A3B8;font-size:.76rem">${expires}</td>
         <td>${statusPill}</td>
         <td>
+          ${c.is_welcome_coupon ? '' : `<button class="act-btn approve" onclick="setWelcomeCoupon('${c.id}')">Set Welcome</button>`}
           ${c.status === 'active'
             ? `<button class="act-btn" onclick="toggleCoupon('${c.id}','paused')">Pause</button>`
             : c.status === 'paused'
@@ -1100,6 +1430,55 @@
 
   async function toggleCoupon(id, status) {
     await db.from('coupons').update({ status, updated_at: new Date().toISOString() }).eq('id', id);
+    loadCoupons();
+  }
+
+  async function setWelcomeCoupon(id) {
+    // Clear existing welcome flag, then set on chosen coupon
+    await db.from('coupons').update({ is_welcome_coupon: false }).eq('is_welcome_coupon', true);
+    await db.from('coupons').update({ is_welcome_coupon: true }).eq('id', id);
+    loadCoupons();
+  }
+
+  function openCouponModal() {
+    // Default expiry: 1 year from today
+    const d = new Date(); d.setFullYear(d.getFullYear() + 1);
+    document.getElementById('cpn-expires').value = d.toISOString().split('T')[0];
+    document.getElementById('cpn-code').value = '';
+    document.getElementById('cpn-discount').value = '10';
+    document.getElementById('cpn-welcome').checked = false;
+    document.getElementById('cpn-firstonly').value = 'true';
+    document.getElementById('coupon-modal').style.display = 'flex';
+  }
+
+  async function saveCoupon() {
+    const code = document.getElementById('cpn-code').value.trim().toUpperCase();
+    const discount = parseFloat(document.getElementById('cpn-discount').value);
+    const expires = document.getElementById('cpn-expires').value;
+    const isWelcome = document.getElementById('cpn-welcome').checked;
+    const firstOnly = document.getElementById('cpn-firstonly').value === 'true';
+
+    if (!code || !discount || !expires) { alert('Please fill all fields.'); return; }
+
+    // If setting as welcome coupon, clear the flag on others first
+    if (isWelcome) {
+      await db.from('coupons').update({ is_welcome_coupon: false }).eq('is_welcome_coupon', true);
+    }
+
+    const { error } = await db.from('coupons').insert({
+      code,
+      discount_type: 'percentage',
+      discount_value: discount,
+      first_order_only: firstOnly,
+      times_used: 0,
+      status: 'active',
+      is_welcome_coupon: isWelcome,
+      valid_from: new Date().toISOString(),
+      expires_on: new Date(expires).toISOString()
+    });
+
+    if (error) { alert('Error: ' + error.message); return; }
+    document.getElementById('coupon-modal').style.display = 'none';
     loadCoupons();
   }
 
@@ -1563,8 +1942,10 @@
   function openModal(id) { document.getElementById(id).classList.add('show'); }
   function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 
+  // modal-product uses the same closeModal pattern (class-based)
+
   // Close modals on backdrop click
-  ['ceiling-modal','campaign-modal','review-modal','payout-modal','sample-modal','modal-edit-weborder','modal-set-password','modal-add-rep','modal-add-outlet-bp'].forEach(id => {
+  ['ceiling-modal','campaign-modal','review-modal','payout-modal','sample-modal','modal-edit-weborder','modal-set-password','modal-add-rep','modal-add-outlet-bp','modal-product'].forEach(id => {
     document.getElementById(id).addEventListener('click', e => {
       if (e.target.id === id) closeModal(id);
     });
@@ -1600,14 +1981,14 @@
 
     updateWOStats(orders);
     tbody.innerHTML = orders.map(o => {
-      const itemSummary = (o.items || []).map(i => `${i.name}${i.qty > 1 ? ' ×'+i.qty : ''}`).join(', ');
+      const itemSummary = (o.items || []).map(i => `${i.name || i.pack || '—'}${i.qty > 1 ? ' ×'+i.qty : ''}`).join(', ') || '—';
       const time = new Date(o.created_at).toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
       const nextStatus = WO_STATUS_NEXT[o.status];
       const nextBtn = nextStatus
         ? `<button class="action-btn" onclick="advanceWOStatus('${o.id}','${nextStatus}')">${WO_STATUS_BTN[o.status]}</button>`
         : '';
-      const canCancel = ['new','confirmed'].includes(o.status);
-      return `<tr>
+      return `<tr id="row-${o.id}">
+        <td><input type="checkbox" class="order-chk" value="${o.id}" onchange="onOrderCheck()" style="cursor:pointer"/></td>
         <td style="font-weight:700;color:#4ADE80;font-size:.78rem">${o.order_ref||'—'}</td>
         <td style="font-size:.75rem;color:#64748B">${time}</td>
         <td>${o.customer_name}</td>
@@ -1618,7 +1999,6 @@
         <td style="display:flex;gap:6px;flex-wrap:wrap">
           ${nextBtn}
           <button class="action-btn" style="background:#1E40AF22;color:#60A5FA" onclick="openEditWO('${o.id}')">Edit</button>
-          ${canCancel ? `<button class="action-btn" style="background:#7F1D1D22;color:#F87171" onclick="cancelWO('${o.id}')">Cancel</button>` : ''}
         </td>
       </tr>`;
     }).join('');
@@ -1642,6 +2022,44 @@
   async function cancelWO(id) {
     if (!confirm('Cancel this order?')) return;
     await db.from('web_orders').update({ status: 'cancelled' }).eq('id', id);
+    loadWebOrders('today');
+  }
+
+  // ── Bulk selection ───────────────────────────────────────────
+  function getSelectedIds() {
+    return [...document.querySelectorAll('.order-chk:checked')].map(c => c.value);
+  }
+
+  function onOrderCheck() {
+    const ids = getSelectedIds();
+    const bar = document.getElementById('bulk-bar');
+    document.getElementById('bulk-count').textContent = `${ids.length} selected`;
+    bar.style.display = ids.length > 0 ? 'flex' : 'none';
+    const all = document.getElementById('select-all-orders');
+    const total = document.querySelectorAll('.order-chk').length;
+    if (all) all.checked = ids.length === total && total > 0;
+  }
+
+  function toggleSelectAll(cb) {
+    document.querySelectorAll('.order-chk').forEach(c => c.checked = cb.checked);
+    onOrderCheck();
+  }
+
+  function clearSelection() {
+    document.querySelectorAll('.order-chk').forEach(c => c.checked = false);
+    const all = document.getElementById('select-all-orders');
+    if (all) all.checked = false;
+    onOrderCheck();
+  }
+
+  async function bulkStatus(newStatus) {
+    const ids = getSelectedIds();
+    if (!ids.length) return;
+    if (!confirm(`Change ${ids.length} order(s) to "${newStatus}"?`)) return;
+    await Promise.all(ids.map(id =>
+      db.from('web_orders').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('id', id)
+    ));
+    clearSelection();
     loadWebOrders('today');
   }
 
@@ -1688,6 +2106,204 @@
   // Init cutoff display from localStorage
   const _storedHour = localStorage.getItem('aff_cutoff_hour');
   if (_storedHour) document.getElementById('cutoff-time-input').value = _storedHour.padStart(2,'0') + ':00';
+
+  // ── Products ─────────────────────────────────────────────────
+  let allProducts = [];
+  const TIER_LABELS = ['MRP/D2C','Enterprise','Mega Store','Supermarket','Retail'];
+  const TIER_COLORS = ['#F472B6','#A78BFA','#60A5FA','#34D399','#FBBF24'];
+
+  async function loadProducts() {
+    const tbody = document.getElementById('products-body');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:#475569">Loading…</td></tr>';
+    const { data, error } = await db.from('products').select('*').order('name');
+    allProducts = data || [];
+    if (error || !allProducts.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:#475569">No products yet. Add one above.</td></tr>';
+      return;
+    }
+    // Fetch all tier prices
+    const ids = allProducts.map(p => p.id);
+    const { data: prices } = await db.from('product_prices').select('*').in('product_id', ids);
+    const priceMap = {};
+    (prices||[]).forEach(pp => {
+      if (!priceMap[pp.product_id]) priceMap[pp.product_id] = {};
+      priceMap[pp.product_id][pp.tier] = pp.price;
+    });
+
+    // Update thead
+    const thead = tbody.closest('table').querySelector('thead tr');
+    thead.innerHTML = `<th>Product</th><th>Unit</th><th style="color:#F472B6">MRP/D2C</th><th style="color:#A78BFA">T1 Enterprise</th><th style="color:#60A5FA">T2 Mega</th><th style="color:#34D399">T3 Super</th><th style="color:#FBBF24">T4 Retail</th><th>Actions</th>`;
+
+    tbody.innerHTML = allProducts.map(p => {
+      const tp = priceMap[p.id] || {};
+      return `<tr>
+        <td style="font-weight:600;color:#F1F5F9">${p.name} <span style="font-size:.7rem;color:${p.is_active?'#4ADE80':'#78716C'}">${p.is_active?'●':'○'}</span></td>
+        <td style="color:#94A3B8">${p.unit||'kg'}</td>
+        ${[0,1,2,3,4].map(t=>`<td style="color:${TIER_COLORS[t]}">₹${(+(tp[t]||0)).toFixed(2)}</td>`).join('')}
+        <td style="white-space:nowrap">
+          <button onclick="openEditProduct('${p.id}')" style="background:#1E2A3A;border:none;color:#7DD3FC;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:.75rem;margin-right:4px">Edit</button>
+          <button onclick="toggleProduct('${p.id}',${!p.is_active})" style="background:#1A1A1A;border:none;color:${p.is_active?'#F87171':'#4ADE80'};border-radius:6px;padding:4px 10px;cursor:pointer;font-size:.75rem">${p.is_active?'Deactivate':'Activate'}</button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  function openAddProduct() {
+    document.getElementById('product-modal-title').textContent = 'Add Product';
+    document.getElementById('product-id').value = '';
+    document.getElementById('product-name').value = '';
+    document.getElementById('product-unit').value = 'kg';
+    [0,1,2,3,4].forEach(t => { document.getElementById(`product-price-${t}`).value = ''; });
+    document.getElementById('product-err').style.display = 'none';
+    openModal('modal-product');
+    document.getElementById('product-name').focus();
+  }
+
+  async function openEditProduct(id) {
+    const p = allProducts.find(x => x.id === id);
+    if (!p) return;
+    document.getElementById('product-modal-title').textContent = 'Edit Product';
+    document.getElementById('product-id').value = p.id;
+    document.getElementById('product-name').value = p.name;
+    document.getElementById('product-unit').value = p.unit || 'kg';
+    document.getElementById('product-err').style.display = 'none';
+    const { data: prices } = await db.from('product_prices').select('tier,price').eq('product_id', id);
+    [0,1,2,3,4].forEach(t => {
+      const match = (prices||[]).find(x => x.tier === t);
+      document.getElementById(`product-price-${t}`).value = match ? match.price : '';
+    });
+    openModal('modal-product');
+  }
+
+  async function saveProduct() {
+    const id   = document.getElementById('product-id').value;
+    const name = document.getElementById('product-name').value.trim();
+    const unit = document.getElementById('product-unit').value;
+    const errEl = document.getElementById('product-err');
+    const tierPrices = [0,1,2,3,4].map(t => ({
+      tier: t,
+      price: parseFloat(document.getElementById(`product-price-${t}`).value) || 0
+    }));
+    if (!name) { errEl.textContent = 'Product name is required.'; errEl.style.display='block'; return; }
+
+    let productId = id;
+    let error;
+    const base_price = tierPrices[4].price; // T4 retail = base
+    const mrp        = tierPrices[0].price; // T0 = MRP
+
+    if (id) {
+      ({ error } = await db.from('products').update({ name, unit, base_price, mrp }).eq('id', id));
+    } else {
+      const { data: inserted, error: e } = await db.from('products').insert({ name, unit, base_price, mrp, is_active: true }).select('id').single();
+      error = e;
+      if (inserted) productId = inserted.id;
+    }
+    if (error) { errEl.textContent = 'Error: ' + error.message; errEl.style.display='block'; return; }
+
+    const upserts = tierPrices.map(tp => ({ product_id: productId, tier: tp.tier, price: tp.price }));
+    await db.from('product_prices').upsert(upserts, { onConflict: 'product_id,tier' });
+
+    closeModal('modal-product');
+    loadProducts();
+  }
+
+  async function toggleProduct(id, newState) {
+    await db.from('products').update({ is_active: newState }).eq('id', id);
+    loadProducts();
+  }
+
+  // ── Pending Signup Requests ──────────────────────────────────
+  async function loadPendingRequests() {
+    const tbody = document.getElementById('requests-body');
+    const badge = document.getElementById('pending-count-badge');
+    if (!tbody) return;
+    const { data } = await db.from('staff_requests').select('*').eq('status','pending').order('created_at');
+    const rows = data || [];
+    if (badge) {
+      badge.textContent = rows.length;
+      badge.style.display = rows.length ? 'inline' : 'none';
+    }
+    if (!rows.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="7">No pending requests 🎉</td></tr>';
+      return;
+    }
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td style="font-weight:600;color:#F1F5F9">${r.name}</td>
+        <td style="color:#94A3B8">${r.email||'—'}</td>
+        <td style="color:#94A3B8">${r.phone||'—'}</td>
+        <td><span style="background:#0A1929;color:#7DD3FC;border:1px solid #0C2A3E;border-radius:5px;padding:2px 8px;font-size:.72rem;font-weight:600">${r.role_requested||'rep'}</span></td>
+        <td style="color:#94A3B8">${r.area||'—'}</td>
+        <td style="color:#475569;font-size:.78rem">${r.created_at?new Date(r.created_at).toLocaleDateString('en-IN'):'-'}</td>
+        <td style="display:flex;gap:6px">
+          <button onclick="approveRequest('${r.id}','${esc(r.name)}','${r.email||''}','${r.phone||''}','${r.role_requested||'rep'}','${r.area||''}')"
+            style="background:#052e16;border:1px solid #166534;color:#4ADE80;border-radius:6px;padding:5px 12px;cursor:pointer;font-size:.75rem;font-weight:600">✅ Approve</button>
+          <button onclick="rejectRequest('${r.id}')"
+            style="background:#1A0000;border:1px solid #3A0000;color:#F87171;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:.75rem">✗</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function genTempPassword() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+    return Array.from(crypto.getRandomValues(new Uint8Array(8)))
+      .map(b => chars[b % chars.length]).join('');
+  }
+
+  async function approveRequest(reqId, name, email, phone, role, area) {
+    if (!confirm(`Approve ${name} as ${role}?\nA temporary password will be auto-generated and emailed to them.`)) return;
+
+    const tempPw = genTempPassword();
+    const hash   = await sha256(tempPw);
+
+    // Create user account
+    const { error } = await db.from('users').insert({
+      name, email: email||null, phone: phone||null,
+      role, area: area||null,
+      password_hash: hash,
+      is_active: true
+    });
+    if (error) { alert('Error creating account: ' + error.message); return; }
+
+    // Mark ALL requests for this email as approved (handles duplicate signups)
+    await db.from('staff_requests').update({ status: 'approved' }).eq('email', email||'__none__');
+    await db.from('staff_requests').update({ status: 'approved' }).eq('id', reqId);
+
+    const loginId = email || phone;
+
+    // 1. Notify admin
+    fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        access_key: 'e15ea46f-4d94-4d42-8677-36642692d1e1',
+        subject: `✅ Approved: ${name} (${role}) — Absolute Fresh`,
+        from_name: 'Absolute Fresh Portal',
+        message: `You approved ${name} as ${role}.\n\nLogin: ${loginId}\nTemp Password: ${tempPw}\nArea: ${area||'—'}`
+      })
+    }).catch(()=>{});
+
+    // 2. Open pre-filled email to rep (one-click send)
+    if (email) {
+      const repSubject = encodeURIComponent('Welcome to Absolute Fresh — Your login details');
+      const repBody = encodeURIComponent(
+        `Hi ${name},\n\nYour account has been approved! Here are your login details:\n\nPortal: https://sales.absolutefreshfood.com/login.html\nLogin ID: ${loginId}\nTemporary Password: ${tempPw}\n\nPlease log in with the above password.\nRole: ${role} | Area: ${area||'—'}\n\nWelcome to the team!\n— Absolute Fresh`
+      );
+      window.open(`mailto:${email}?subject=${repSubject}&body=${repBody}`, '_blank');
+    }
+
+    alert(`✅ ${name} approved!\nTemp password: ${tempPw}\n\n${email ? 'Your email app opened — just hit Send to notify them.' : 'No email on file — share the password via phone: ' + phone}`);
+    loadPendingRequests();
+    loadSalesReps();
+  }
+
+  async function rejectRequest(reqId) {
+    if (!confirm('Reject and remove this request?')) return;
+    await db.from('staff_requests').update({ status: 'rejected' }).eq('id', reqId);
+    loadPendingRequests();
+  }
 
   // ── Sales Reps ───────────────────────────────────────────────
   let allReps = [];
