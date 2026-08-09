@@ -1415,9 +1415,9 @@ function getOrderPrices() {
 
   if (_appliedCoupon) {
     if (_appliedCoupon.discount_type === 'bogo') {
-      // Each ordered item gets one free (same pack, same qty)
+      // Customer pays for what they ordered; gets same qty FREE on top
       freeItems = items.map(i => ({ ...i, free: true }));
-      saving = freeItems.reduce((s, i) => s + i.price * i.qty, 0);
+      saving = 0; // no price reduction — they pay full, just get extra packs
     } else {
       disc = _appliedCoupon.discount_value || 0;
       saving = base > 0 ? Math.round(base * disc / 100) : 0;
@@ -1425,11 +1425,12 @@ function getOrderPrices() {
   }
 
   const final = base - saving;
-  return { base, disc, saving, final, items, freeItems };
+  const freeValue = freeItems.reduce((s, i) => s + i.price * i.qty, 0);
+  return { base, disc, saving, final, items, freeItems, freeValue };
 }
 
 function updateOrderSummary() {
-  const { base, disc, saving, final, items } = getOrderPrices();
+  const { base, disc, saving, final, items, freeItems, freeValue } = getOrderPrices();
   const box = document.getElementById('order-summary');
   const hasItems = items.length > 0 || _wantSubscription;
   if (!hasItems) { box.style.display = 'none'; return; }
@@ -1456,10 +1457,16 @@ function updateOrderSummary() {
   document.getElementById('sum-subtotal-row').style.display = items.length > 1 ? 'flex' : 'none';
   document.getElementById('sum-base').textContent = `₹${base}`;
 
-  if (saving > 0) {
+  if (isBogo && freeValue > 0) {
     document.getElementById('sum-discount-row').style.display = 'flex';
-    document.getElementById('sum-discount-label').textContent = isBogo ? '🇮🇳 BOGO — free packs' : `Coupon (${disc}% off)`;
+    document.getElementById('sum-discount-label').textContent = `🇮🇳 You get FREE packs worth`;
+    document.getElementById('sum-discount').textContent = `₹${freeValue}`;
+    document.getElementById('sum-discount').style.color = '#15803d';
+  } else if (saving > 0) {
+    document.getElementById('sum-discount-row').style.display = 'flex';
+    document.getElementById('sum-discount-label').textContent = `Coupon (${disc}% off)`;
     document.getElementById('sum-discount').textContent = `−₹${saving}`;
+    document.getElementById('sum-discount').style.color = '#16a34a';
   } else {
     document.getElementById('sum-discount-row').style.display = 'none';
   }
@@ -1518,7 +1525,7 @@ async function sendWA(e){
   checkPin();
   if (!_pinValid) { document.getElementById('f-pin').focus(); return; }
 
-  const { base, disc, saving, final, items, freeItems } = getOrderPrices();
+  const { base, disc, saving, final, items, freeItems, freeValue } = getOrderPrices();
   if (items.length === 0 && !_wantSubscription) { alert('Please add at least one pack to your order.'); return; }
 
   btn.disabled = true;
@@ -1533,11 +1540,11 @@ async function sendWA(e){
   let couponLine  = '';
   if (_appliedCoupon && saving > 0) {
     couponLine = isBogo
-      ? `%0ACoupon: ${_appliedCoupon.code} (Buy 1 Get 1 FREE — saved ₹${saving})`
+      ? `%0ACoupon: ${_appliedCoupon.code} (Buy 1 Get 1 FREE — ₹${freeValue} worth of packs added free)`
       : `%0ACoupon: ${_appliedCoupon.code} (${disc}% off — saved ₹${saving})`;
     _db.from('coupons').update({ times_used: (_appliedCoupon.times_used || 0) + 1 }).eq('id', _appliedCoupon.id).then(() => {});
   }
-  const totalLine = base > 0 ? `%0ATotal: ₹${final}${saving > 0 ? ` (saved ₹${saving})` : ''}` : '';
+  const totalLine = base > 0 ? `%0ATotal: ₹${final}${isBogo && freeValue > 0 ? ` + FREE packs worth ₹${freeValue}` : saving > 0 ? ` (saved ₹${saving})` : ''}` : '';
 
   // ── 1. Save to Supabase ──────────────────────────────────────
   try {
