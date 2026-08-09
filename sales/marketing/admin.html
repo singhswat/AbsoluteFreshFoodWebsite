@@ -1139,7 +1139,7 @@
 
   // ── Tab switching ────────────────────────────────────────────
   function switchTab(name, btn) {
-    ['home','influencers','coupons','campaigns','samples','reviews','payouts','analytics','weborders','products','salesreps','beatplans','salesdash'].forEach(t => {
+    ['home','influencers','coupons','campaigns','samples','reviews','payouts','analytics','weborders','products','salesreps','beatplans','salesdash','serviceareas'].forEach(t => {
       document.getElementById('tab-' + t).style.display = t === name ? 'block' : 'none';
     });
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
