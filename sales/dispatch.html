@@ -223,11 +223,13 @@
       const sCls    = {new:'s-new',pending:'s-new',confirmed:'s-confirmed',out_for_delivery:'s-out'}[status]||'s-new';
       const mapsUrl = `https://maps.google.com/?q=${encodeURIComponent((o.customer_address||'')+' '+(o.customer_pincode||''))}`;
 
-      let paidQty=0, freeQty=0;
-      items.forEach(i=>{
-        const q=parseFloat(i.qty||i.quantity||i.packs||0);
-        if(i.free) freeQty+=q; else paidQty+=q;
-      });
+      const itemLines = items.map(i => {
+        const name = i.name||i.product||'Item';
+        const q    = parseFloat(i.qty||i.quantity||i.packs||0);
+        return i.free
+          ? `<div><span class="free-badge">FREE</span> ${name} × ${q}</div>`
+          : `<div><span class="qty-badge">${q} pk${q>1?'s':''}</span> ${name}</div>`;
+      }).join('') || '—';
 
       return `<tr id="row-${o.id}">
         <td>
@@ -238,10 +240,7 @@
           <a class="call-btn" href="tel:${o.customer_phone||''}">📞 ${o.customer_phone||'—'}</a>
           <a class="map-btn" href="${mapsUrl}" target="_blank">🗺 Map</a>
         </td>
-        <td>
-          ${paidQty>0?`<span class="qty-badge">${paidQty} pk${paidQty>1?'s':''}</span>`:''}
-          ${freeQty>0?`<span class="free-badge">${freeQty} FREE</span>`:''}
-        </td>
+        <td style="line-height:1.8">${itemLines}</td>
         <td class="total-cell">₹${o.total||0}</td>
         <td>
           <select class="status-sel ${sCls}" onchange="updateStatus('${o.id}',this)">
