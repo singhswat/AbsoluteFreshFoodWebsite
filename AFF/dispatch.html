@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dispatch — Absolute Fresh</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F0FDF4;color:#1f2937;min-height:100vh}
+
+    /* ── PIN screen ── */
+    #pin-screen{
+      min-height:100vh;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;padding:24px;
+      background:linear-gradient(160deg,#052e16 0%,#14532d 100%);
+    }
+    .pin-logo{font-size:2.8rem;margin-bottom:6px}
+    .pin-brand{font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:4px}
+    .pin-sub{font-size:.78rem;color:#86efac;margin-bottom:28px}
+    .pin-box{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:24px 20px;width:100%;max-width:320px}
+    .pin-label{font-size:.72rem;font-weight:700;color:#86efac;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+    .pin-input{
+      width:100%;background:rgba(0,0,0,.3);border:1.5px solid rgba(255,255,255,.2);
+      color:#fff;border-radius:10px;padding:14px;font-size:1.4rem;letter-spacing:.3em;
+      text-align:center;outline:none;font-family:monospace;
+    }
+    .pin-input:focus{border-color:#4ade80}
+    .pin-err{color:#fca5a5;font-size:.78rem;text-align:center;margin-top:8px;min-height:18px}
+    .pin-btn{
+      width:100%;background:#16a34a;color:#fff;border:none;border-radius:10px;
+      padding:14px;font-size:.95rem;font-weight:700;cursor:pointer;margin-top:14px;
+    }
+    .pin-btn:active{background:#15803d}
+
+    /* ── App ── */
+    #app{display:none}
+    .top-bar{
+      background:#16a34a;padding:12px 14px;
+      display:flex;align-items:center;gap:10px;
+      position:sticky;top:0;z-index:40;
+    }
+    .top-bar-brand{font-weight:800;color:#fff;font-size:.95rem;flex:1}
+    .top-bar-date{font-size:.72rem;color:#bbf7d0;font-weight:600}
+    .refresh-btn{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;padding:6px 12px;font-size:.72rem;cursor:pointer;font-weight:600}
+
+    .summary-bar{
+      background:#fff;border-bottom:1px solid #d1fae5;
+      padding:10px 14px;display:flex;gap:16px;overflow-x:auto;
+    }
+    .s-chip{text-align:center;min-width:60px}
+    .s-chip .val{font-size:1.2rem;font-weight:800;color:#15803d}
+    .s-chip .lbl{font-size:.62rem;color:#6b7280;text-transform:uppercase;letter-spacing:.04em}
+
+    .filter-bar{
+      background:#fff;border-bottom:1px solid #e5e7eb;
+      padding:8px 12px;display:flex;gap:6px;overflow-x:auto;
+    }
+    .f-btn{
+      border:1.5px solid #d1d5db;border-radius:20px;padding:5px 14px;
+      font-size:.75rem;font-weight:600;cursor:pointer;background:#fff;color:#374151;
+      white-space:nowrap;
+    }
+    .f-btn.active{background:#15803d;border-color:#15803d;color:#fff}
+
+    .orders-list{padding:10px 10px 80px}
+    .empty{text-align:center;padding:3rem 1rem;color:#6b7280;font-size:.88rem}
+
+    /* ── Order Card ── */
+    .order-card{
+      background:#fff;border-radius:14px;
+      box-shadow:0 1px 6px rgba(0,0,0,.07);
+      margin-bottom:10px;overflow:hidden;
+    }
+    .card-header{
+      padding:12px 14px 8px;display:flex;align-items:flex-start;gap:10px;
+    }
+    .order-num{
+      background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;
+      padding:4px 10px;font-size:.72rem;font-weight:800;color:#15803d;
+      white-space:nowrap;
+    }
+    .customer-name{font-weight:700;color:#111827;font-size:.95rem;flex:1}
+    .status-badge{
+      border-radius:20px;padding:3px 10px;font-size:.65rem;font-weight:700;
+      white-space:nowrap;
+    }
+    .badge-new      {background:#fef9c3;color:#854d0e}
+    .badge-confirmed{background:#dbeafe;color:#1e40af}
+    .badge-out      {background:#fff7ed;color:#c2410c}
+    .badge-delivered{background:#dcfce7;color:#15803d}
+    .badge-cancelled{background:#fee2e2;color:#b91c1c}
+
+    .card-body{padding:0 14px 12px}
+
+    .info-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:6px}
+    .info-icon{font-size:.9rem;margin-top:1px;flex-shrink:0}
+    .info-text{font-size:.82rem;color:#374151;line-height:1.4}
+    .info-text a{color:#15803d;font-weight:600;text-decoration:none}
+
+    .items-box{
+      background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;
+      padding:8px 10px;margin:8px 0;
+    }
+    .item-row{display:flex;justify-content:space-between;font-size:.8rem;padding:2px 0}
+    .item-name{color:#374151}
+    .item-qty{font-weight:700;color:#15803d}
+    .item-free{color:#7c3aed;font-size:.72rem;font-weight:700}
+
+    .total-row{
+      display:flex;justify-content:space-between;align-items:center;
+      border-top:1px solid #e5e7eb;padding-top:8px;margin-top:8px;
+    }
+    .total-label{font-size:.78rem;color:#6b7280;font-weight:600}
+    .total-val{font-size:1rem;font-weight:800;color:#111827}
+
+    .card-actions{
+      padding:8px 14px 12px;display:flex;gap:8px;flex-wrap:wrap;
+    }
+    .action-btn{
+      flex:1;border:none;border-radius:9px;padding:10px 8px;
+      font-size:.78rem;font-weight:700;cursor:pointer;text-align:center;
+      min-width:80px;
+    }
+    .btn-call{background:#dbeafe;color:#1e40af}
+    .btn-map {background:#fef3c7;color:#92400e}
+    .btn-out {background:#fff7ed;color:#c2410c;border:1.5px solid #fed7aa}
+    .btn-done{background:#dcfce7;color:#15803d;border:1.5px solid #bbf7d0}
+    .btn-done.completed{background:#15803d;color:#fff}
+
+    .notes-box{
+      background:#fffbeb;border-left:3px solid #fbbf24;
+      border-radius:0 6px 6px 0;padding:6px 10px;
+      font-size:.75rem;color:#92400e;margin:0 14px 10px;
+      line-height:1.4;
+    }
+
+    .footer-note{text-align:center;padding:12px;font-size:.68rem;color:#9ca3af}
+  </style>
+</head>
+<body>
+
+<!-- PIN Screen -->
+<div id="pin-screen">
+  <div class="pin-logo">🥬</div>
+  <div class="pin-brand">Absolute Fresh</div>
+  <div class="pin-sub">Dispatch Board</div>
+  <div class="pin-box">
+    <div class="pin-label">Enter PIN to continue</div>
+    <input id="pin-inp" class="pin-input" type="password" inputmode="numeric"
+      maxlength="6" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPin()"/>
+    <div class="pin-err" id="pin-err"></div>
+    <button class="pin-btn" onclick="checkPin()">Open Dispatch Board</button>
+  </div>
+</div>
+
+<!-- App -->
+<div id="app">
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-brand">🥬 Dispatch Board</div>
+      <div class="top-bar-date" id="top-date"></div>
+    </div>
+    <button class="refresh-btn" onclick="loadOrders()">↻ Refresh</button>
+  </div>
+
+  <div class="summary-bar" id="summary-bar">
+    <div class="s-chip"><div class="val" id="s-total">—</div><div class="lbl">Total</div></div>
+    <div class="s-chip"><div class="val" id="s-new" style="color:#854d0e">—</div><div class="lbl">New</div></div>
+    <div class="s-chip"><div class="val" id="s-out" style="color:#c2410c">—</div><div class="lbl">Out</div></div>
+    <div class="s-chip"><div class="val" id="s-done" style="color:#15803d">—</div><div class="lbl">Delivered</div></div>
+    <div class="s-chip"><div class="val" id="s-kg" style="color:#7c3aed">—</div><div class="lbl">Kg Today</div></div>
+  </div>
+
+  <div class="filter-bar">
+    <button class="f-btn active" onclick="setFilter('all',this)">All</button>
+    <button class="f-btn" onclick="setFilter('new',this)">New</button>
+    <button class="f-btn" onclick="setFilter('confirmed',this)">Confirmed</button>
+    <button class="f-btn" onclick="setFilter('out_for_delivery',this)">Out for Delivery</button>
+    <button class="f-btn" onclick="setFilter('delivered',this)">Delivered</button>
+  </div>
+
+  <div class="orders-list" id="orders-list">
+    <div class="empty">Loading orders…</div>
+  </div>
+  <div class="footer-note">Auto-refreshes every 90 seconds · <span id="last-refresh"></span></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = 'https://fbfopgzblqmsflkfejwa.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZiZm9wZ3pibHFtc2Zsa2ZlandhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzExOTksImV4cCI6MjA5MTQwNzE5OX0.IL23Wfgq4kMW1UYQNM4gieCL7rLCTTUtAAWwVwUH6kY';
+  const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const DISPATCH_PIN = '786786'; // Change this to your preferred PIN
+
+  let allOrders = [];
+  let currentFilter = 'all';
+
+  function checkPin() {
+    const val = document.getElementById('pin-inp').value.trim();
+    if (val === DISPATCH_PIN) {
+      document.getElementById('pin-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      initApp();
+    } else {
+      document.getElementById('pin-err').textContent = 'Wrong PIN. Try again.';
+      document.getElementById('pin-inp').value = '';
+    }
+  }
+
+  function initApp() {
+    const now = new Date();
+    document.getElementById('top-date').textContent =
+      now.toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    loadOrders();
+    setInterval(loadOrders, 90000);
+  }
+
+  async function loadOrders() {
+    const today = new Date().toISOString().split('T')[0];
+    const { data, error } = await db
+      .from('web_orders')
+      .select('*')
+      .eq('delivery_date', today)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      document.getElementById('orders-list').innerHTML =
+        `<div class="empty">Error loading orders: ${error.message}</div>`;
+      return;
+    }
+
+    allOrders = data || [];
+    document.getElementById('last-refresh').textContent =
+      'Last updated ' + new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
+    updateSummary();
+    renderOrders();
+  }
+
+  function updateSummary() {
+    const total = allOrders.length;
+    const newC  = allOrders.filter(o => o.status === 'new' || !o.status).length;
+    const out   = allOrders.filter(o => o.status === 'out_for_delivery').length;
+    const done  = allOrders.filter(o => o.status === 'delivered').length;
+    let kg = 0;
+    allOrders.forEach(o => {
+      try {
+        const items = typeof o.items === 'string' ? JSON.parse(o.items) : (o.items || []);
+        items.forEach(i => { kg += parseFloat(i.qty || i.quantity || 0); });
+      } catch(e) {}
+    });
+    document.getElementById('s-total').textContent = total;
+    document.getElementById('s-new').textContent   = newC;
+    document.getElementById('s-out').textContent   = out;
+    document.getElementById('s-done').textContent  = done;
+    document.getElementById('s-kg').textContent    = kg.toFixed(1) + ' kg';
+  }
+
+  function setFilter(f, btn) {
+    currentFilter = f;
+    document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderOrders();
+  }
+
+  function renderOrders() {
+    const list = document.getElementById('orders-list');
+    let orders = allOrders;
+    if (currentFilter !== 'all') {
+      orders = allOrders.filter(o => {
+        const s = o.status || 'new';
+        return currentFilter === 'new' ? (s === 'new' || s === 'pending' || !o.status) : s === currentFilter;
+      });
+    }
+
+    if (!orders.length) {
+      list.innerHTML = '<div class="empty">No orders' + (currentFilter !== 'all' ? ' in this category' : ' for today') + '</div>';
+      return;
+    }
+
+    list.innerHTML = orders.map(o => renderCard(o)).join('');
+  }
+
+  function renderCard(o) {
+    // Parse items
+    let items = [];
+    try { items = typeof o.items === 'string' ? JSON.parse(o.items) : (o.items || []); } catch(e) {}
+
+    const status = o.status || 'new';
+    const badgeClass = {
+      new:'badge-new', pending:'badge-new', confirmed:'badge-confirmed',
+      out_for_delivery:'badge-out', delivered:'badge-delivered', cancelled:'badge-cancelled'
+    }[status] || 'badge-new';
+    const badgeLabel = {
+      new:'New', pending:'New', confirmed:'Confirmed',
+      out_for_delivery:'Out for Delivery', delivered:'✓ Delivered', cancelled:'Cancelled'
+    }[status] || 'New';
+
+    const mapsUrl = `https://maps.google.com/?q=${encodeURIComponent((o.customer_address||'') + ' ' + (o.customer_pincode||''))}`;
+    const callUrl = `tel:${o.customer_phone}`;
+
+    const itemsHtml = items.map(i => {
+      const name = i.name || i.product || i.item || '—';
+      const qty  = i.qty || i.quantity || i.packs || 0;
+      const isFree = i.free === true;
+      return `<div class="item-row">
+        <span class="item-name">${name}${isFree ? ' <span class="item-free">FREE</span>' : ''}</span>
+        <span class="item-qty">${qty} ${isFree ? 'FREE' : 'pks'}</span>
+      </div>`;
+    }).join('') || '<div class="item-row"><span class="item-name" style="color:#9ca3af">No item details</span></div>';
+
+    const notesHtml = o.admin_notes
+      ? `<div class="notes-box">📝 ${o.admin_notes}</div>` : '';
+
+    const isDone = status === 'delivered';
+    const isCancelled = status === 'cancelled';
+
+    return `<div class="order-card" id="card-${o.id}">
+      <div class="card-header">
+        <div class="order-num">#${o.order_ref || o.id.slice(0,6).toUpperCase()}</div>
+        <div class="customer-name">${o.customer_name || '—'}</div>
+        <span class="status-badge ${badgeClass}">${badgeLabel}</span>
+      </div>
+      <div class="card-body">
+        <div class="info-row">
+          <span class="info-icon">📍</span>
+          <div class="info-text">
+            ${o.customer_address || '—'}${o.customer_pincode ? ' — ' + o.customer_pincode : ''}
+          </div>
+        </div>
+        <div class="info-row">
+          <span class="info-icon">📞</span>
+          <div class="info-text"><a href="${callUrl}">${o.customer_phone || '—'}</a></div>
+        </div>
+        ${o.delivery_slot ? `<div class="info-row"><span class="info-icon">⏰</span><div class="info-text">${o.delivery_slot}</div></div>` : ''}
+        <div class="items-box">${itemsHtml}
+          <div class="total-row">
+            <span class="total-label">${o.coupon_code ? '🎟 ' + o.coupon_code + ' applied' : 'Total'}</span>
+            <span class="total-val">₹${o.total || 0}</span>
+          </div>
+        </div>
+      </div>
+      ${notesHtml}
+      ${!isCancelled ? `<div class="card-actions">
+        <button class="action-btn btn-call" onclick="window.location='${callUrl}'">📞 Call</button>
+        <button class="action-btn btn-map" onclick="window.open('${mapsUrl}','_blank')">🗺 Map</button>
+        ${!isDone ? `<button class="action-btn btn-out" onclick="updateStatus('${o.id}','out_for_delivery')">🚚 Out</button>
+        <button class="action-btn btn-done" onclick="updateStatus('${o.id}','delivered')">✓ Delivered</button>` :
+        `<button class="action-btn btn-done completed" disabled>✓ Delivered</button>`}
+      </div>` : ''}
+    </div>`;
+  }
+
+  async function updateStatus(id, newStatus) {
+    await db.from('web_orders').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('id', id);
+    // Update locally for instant UI feedback
+    const order = allOrders.find(o => o.id === id);
+    if (order) { order.status = newStatus; updateSummary(); renderOrders(); }
+  }
+</script>
+</body>
+</html>
