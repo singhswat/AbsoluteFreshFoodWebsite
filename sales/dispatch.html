@@ -25,15 +25,15 @@
     .top-bar{background:#16a34a;padding:12px 14px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:40;box-shadow:0 2px 8px rgba(0,0,0,.15)}
     .top-bar-title{font-weight:800;color:#fff;font-size:1rem;flex:1}
     .top-bar-meta{font-size:.68rem;color:#bbf7d0;margin-top:1px}
-    .refresh-btn{background:rgba(255,255,255,.18);border:none;color:#fff;border-radius:8px;padding:8px 14px;font-size:.78rem;cursor:pointer;font-weight:700}
+    .refresh-btn{background:rgba(255,255,255,.18);border:none;color:#fff;border-radius:8px;padding:8px 14px;font-size:.82rem;cursor:pointer;font-weight:700}
 
-    /* Summary strip */
-    .summary{background:#fff;border-bottom:2px solid #d1fae5;padding:10px 16px;display:flex;gap:0}
+    /* Summary */
+    .summary{background:#fff;border-bottom:2px solid #d1fae5;padding:10px 0;display:flex}
     .s-item{flex:1;text-align:center;border-right:1px solid #e5e7eb}
     .s-item:last-child{border-right:none}
     .s-item .val{font-size:1.4rem;font-weight:800;color:#15803d}
     .s-item .val.amber{color:#c2410c}
-    .s-item .lbl{font-size:.6rem;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin-top:1px}
+    .s-item .lbl{font-size:.6rem;color:#6b7280;text-transform:uppercase;letter-spacing:.04em}
 
     /* Area filters */
     .area-bar{background:#fff;border-bottom:1px solid #d1fae5;padding:8px 10px;display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -41,47 +41,32 @@
     .area-btn{border:1.5px solid #d1d5db;border-radius:20px;padding:7px 16px;font-size:.78rem;font-weight:600;cursor:pointer;background:#fff;color:#374151;white-space:nowrap;flex-shrink:0}
     .area-btn.active{background:#15803d;border-color:#15803d;color:#fff}
 
-    /* Cards */
-    .cards{padding:10px 10px 90px}
-    .empty{text-align:center;padding:3rem 1rem;color:#6b7280;font-size:.9rem}
+    /* Table */
+    .tbl-wrap{padding:10px 10px 80px}
+    table{width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.07)}
+    thead tr{background:#052e16}
+    th{padding:11px 10px;color:#86efac;font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;text-align:left;font-weight:700;white-space:nowrap}
+    tbody tr{border-bottom:1px solid #f0fdf4}
+    tbody tr:last-child{border-bottom:none}
+    td{padding:11px 10px;vertical-align:middle;font-size:.84rem}
 
-    .card{background:#fff;border-radius:14px;box-shadow:0 1px 8px rgba(0,0,0,.08);margin-bottom:10px;overflow:hidden}
-    .card.is-delivered{opacity:.6}
+    .cust-name{font-weight:700;color:#111827;display:block}
+    .cust-addr{font-size:.72rem;color:#6b7280;display:block;margin-top:2px;line-height:1.3}
 
-    /* Card top row */
-    .card-top{display:flex;align-items:center;gap:8px;padding:12px 14px 8px}
-    .order-ref{font-size:.7rem;font-weight:800;color:#15803d;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:3px 8px;white-space:nowrap}
-    .cust-name{font-weight:800;color:#111827;font-size:.95rem;flex:1}
+    .call-btn{display:inline-flex;align-items:center;gap:4px;background:#dbeafe;color:#1e40af;border-radius:8px;padding:7px 10px;font-size:.78rem;font-weight:700;text-decoration:none;white-space:nowrap}
+    .map-btn{display:inline-flex;align-items:center;gap:4px;background:#fef3c7;color:#92400e;border-radius:8px;padding:7px 10px;font-size:.78rem;font-weight:700;text-decoration:none;white-space:nowrap;margin-top:4px}
 
-    /* Status badge / selector */
-    .status-sel{border-radius:20px;padding:5px 10px;font-size:.7rem;font-weight:700;cursor:pointer;border:none;outline:none;-webkit-appearance:none;appearance:none}
+    .qty-badge{display:inline-block;background:#15803d;color:#fff;border-radius:6px;padding:3px 9px;font-size:.78rem;font-weight:800}
+    .free-badge{display:inline-block;background:#7c3aed;color:#fff;border-radius:6px;padding:3px 9px;font-size:.78rem;font-weight:800;margin-left:4px}
+
+    .total-cell{font-weight:800;color:#111827;font-size:.9rem;white-space:nowrap}
+
+    .status-sel{border-radius:20px;padding:6px 10px;font-size:.72rem;font-weight:700;cursor:pointer;border:none;outline:none;-webkit-appearance:none;appearance:none;width:100%}
     .s-new      {background:#fef9c3;color:#854d0e}
     .s-confirmed{background:#dbeafe;color:#1e40af}
     .s-out      {background:#fff7ed;color:#c2410c}
-    .s-delivered{background:#dcfce7;color:#15803d}
 
-    /* Card body */
-    .card-body{padding:0 14px 4px;display:flex;flex-direction:column;gap:7px}
-
-    .info-row{display:flex;align-items:flex-start;gap:10px}
-    .info-icon{font-size:1rem;flex-shrink:0;margin-top:1px}
-    .info-text{font-size:.84rem;color:#374151;line-height:1.4;flex:1}
-    .info-text strong{color:#111827}
-
-    .qty-badge{display:inline-block;background:#15803d;color:#fff;border-radius:8px;padding:2px 10px;font-size:.8rem;font-weight:800;margin-right:4px}
-    .free-badge{display:inline-block;background:#7c3aed;color:#fff;border-radius:8px;padding:2px 10px;font-size:.8rem;font-weight:800}
-    .coupon-tag{font-size:.68rem;color:#15803d;background:#dcfce7;border-radius:6px;padding:2px 7px;margin-left:4px}
-
-    .total-row{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-top:1px solid #f0fdf4;margin-top:4px}
-    .total-label{font-size:.75rem;color:#6b7280}
-    .total-val{font-size:1.05rem;font-weight:800;color:#111827}
-
-    /* Action buttons */
-    .card-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 14px 14px}
-    .act-btn{display:flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:10px;padding:12px;font-size:.82rem;font-weight:700;cursor:pointer;text-decoration:none;text-align:center}
-    .btn-call{background:#dbeafe;color:#1e40af}
-    .btn-map {background:#fef3c7;color:#92400e}
-
+    .empty-row td{text-align:center;padding:2.5rem;color:#6b7280}
     .footer{text-align:center;padding:10px;font-size:.65rem;color:#9ca3af;position:fixed;bottom:0;left:0;right:0;background:#f0fdf4;border-top:1px solid #d1fae5}
   </style>
 </head>
@@ -107,21 +92,34 @@
       <div class="top-bar-title">🥬 Dispatch Board</div>
       <div class="top-bar-meta" id="top-meta"></div>
     </div>
-    <button class="refresh-btn" onclick="loadOrders()">↻</button>
+    <button class="refresh-btn" onclick="loadOrders()">↻ Refresh</button>
   </div>
 
   <div class="summary">
-    <div class="s-item"><div class="val" id="s-total">—</div><div class="lbl">Orders</div></div>
+    <div class="s-item"><div class="val" id="s-total">—</div><div class="lbl">Total</div></div>
     <div class="s-item"><div class="val amber" id="s-pending">—</div><div class="lbl">Pending</div></div>
-    <div class="s-item"><div class="val" id="s-done">—</div><div class="lbl">Delivered</div></div>
+    <div class="s-item"><div class="val" id="s-done">—</div><div class="lbl">Done</div></div>
   </div>
 
   <div class="area-bar" id="area-bar">
     <button class="area-btn active" onclick="setArea('',this)">All Areas</button>
   </div>
 
-  <div class="cards" id="cards-wrap">
-    <div class="empty">Loading…</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Customer</th>
+          <th>Phone / Map</th>
+          <th>Qty</th>
+          <th>₹ Total</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="orders-tbody">
+        <tr class="empty-row"><td colspan="5">Loading…</td></tr>
+      </tbody>
+    </table>
   </div>
 
   <div class="footer" id="footer-note">Auto-refreshes every 90s</div>
@@ -150,9 +148,8 @@
   }
 
   async function initApp() {
-    const now = new Date();
     document.getElementById('top-meta').textContent =
-      now.toLocaleDateString('en-IN', {weekday:'long', day:'numeric', month:'short'});
+      new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'short'});
     await loadAreaFilters();
     await loadOrders();
     setInterval(loadOrders, 90000);
@@ -174,7 +171,7 @@
     currentArea = pincode;
     document.querySelectorAll('.area-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    renderCards();
+    renderTable();
   }
 
   async function loadOrders() {
@@ -182,108 +179,95 @@
     const tom = new Date(); tom.setDate(tom.getDate()+1);
     const { data, error } = await db
       .from('web_orders').select('*')
-      .in('delivery_date', [today, tom.toISOString().split('T')[0]])
-      .neq('status','cancelled')
-      .order('created_at', {ascending:true});
+      .in('delivery_date',[today, tom.toISOString().split('T')[0]])
+      .not('status','in','("cancelled","delivered")')   // exclude delivered + cancelled
+      .order('created_at',{ascending:true});
 
     if (error) {
-      document.getElementById('cards-wrap').innerHTML = `<div class="empty">Error: ${error.message}</div>`;
+      document.getElementById('orders-tbody').innerHTML =
+        `<tr class="empty-row"><td colspan="5">Error: ${error.message}</td></tr>`;
       return;
     }
     allOrders = data || [];
     document.getElementById('footer-note').textContent =
       'Updated ' + new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}) + ' · Auto-refreshes every 90s';
     updateSummary();
-    renderCards();
+    renderTable();
   }
 
   function updateSummary() {
-    const list = currentArea ? allOrders.filter(o => o.customer_pincode === currentArea) : allOrders;
+    const list = currentArea ? allOrders.filter(o=>o.customer_pincode===currentArea) : allOrders;
+    // For summary counts include delivered too — reload from full set
     document.getElementById('s-total').textContent   = list.length;
-    document.getElementById('s-pending').textContent = list.filter(o => o.status !== 'delivered').length;
-    document.getElementById('s-done').textContent    = list.filter(o => o.status === 'delivered').length;
+    document.getElementById('s-pending').textContent = list.filter(o=>o.status!=='delivered').length;
+    document.getElementById('s-done').textContent    = '✓';
   }
 
   function parseItems(raw) {
-    try { return typeof raw === 'string' ? JSON.parse(raw) : (raw || []); } catch(e) { return []; }
+    try { return typeof raw==='string' ? JSON.parse(raw) : (raw||[]); } catch(e){ return []; }
   }
 
-  function renderCards() {
+  function renderTable() {
     updateSummary();
-    const orders = currentArea ? allOrders.filter(o => o.customer_pincode === currentArea) : allOrders;
-    const wrap = document.getElementById('cards-wrap');
+    const orders = currentArea ? allOrders.filter(o=>o.customer_pincode===currentArea) : allOrders;
+    const tbody = document.getElementById('orders-tbody');
 
     if (!orders.length) {
-      wrap.innerHTML = `<div class="empty">No orders${currentArea ? ' for this area' : ' today'}</div>`;
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="5">${currentArea ? 'No pending orders for this area' : 'All orders delivered! 🎉'}</td></tr>`;
       return;
     }
 
-    wrap.innerHTML = orders.map(o => {
-      const items    = parseItems(o.items);
-      const status   = o.status || 'new';
-      const sCls     = {new:'s-new',pending:'s-new',confirmed:'s-confirmed',out_for_delivery:'s-out',delivered:'s-delivered'}[status] || 's-new';
-      const sLabel   = {new:'🟡 New',pending:'🟡 New',confirmed:'🔵 Confirmed',out_for_delivery:'🟠 Out for Delivery',delivered:'🟢 Delivered'}[status] || '🟡 New';
-
-      // Total qty — paid packs and free packs separately
-      let paidQty = 0, freeQty = 0;
-      items.forEach(i => {
-        const q = parseFloat(i.qty || i.quantity || i.packs || 0);
-        if (i.free) freeQty += q; else paidQty += q;
-      });
-
-      const qtyHtml = `
-        ${paidQty > 0 ? `<span class="qty-badge">${paidQty} pk${paidQty>1?'s':''}</span>` : ''}
-        ${freeQty > 0 ? `<span class="free-badge">${freeQty} FREE</span>` : ''}
-        ${o.coupon_code ? `<span class="coupon-tag">🎟 ${o.coupon_code}</span>` : ''}`;
-
+    tbody.innerHTML = orders.map(o => {
+      const items   = parseItems(o.items);
+      const status  = o.status || 'new';
+      const sCls    = {new:'s-new',pending:'s-new',confirmed:'s-confirmed',out_for_delivery:'s-out'}[status]||'s-new';
       const mapsUrl = `https://maps.google.com/?q=${encodeURIComponent((o.customer_address||'')+' '+(o.customer_pincode||''))}`;
 
-      return `<div class="card${status==='delivered'?' is-delivered':''}" id="card-${o.id}">
-        <div class="card-top">
-          <span class="order-ref">${o.order_ref || o.id.slice(0,6).toUpperCase()}</span>
-          <span class="cust-name">${o.customer_name || '—'}</span>
+      let paidQty=0, freeQty=0;
+      items.forEach(i=>{
+        const q=parseFloat(i.qty||i.quantity||i.packs||0);
+        if(i.free) freeQty+=q; else paidQty+=q;
+      });
+
+      return `<tr id="row-${o.id}">
+        <td>
+          <span class="cust-name">${o.customer_name||'—'}</span>
+          <span class="cust-addr">${o.customer_address||''}${o.customer_pincode?' · '+o.customer_pincode:''}</span>
+        </td>
+        <td>
+          <a class="call-btn" href="tel:${o.customer_phone||''}">📞 ${o.customer_phone||'—'}</a>
+          <a class="map-btn" href="${mapsUrl}" target="_blank">🗺 Map</a>
+        </td>
+        <td>
+          ${paidQty>0?`<span class="qty-badge">${paidQty} pk${paidQty>1?'s':''}</span>`:''}
+          ${freeQty>0?`<span class="free-badge">${freeQty} FREE</span>`:''}
+        </td>
+        <td class="total-cell">₹${o.total||0}</td>
+        <td>
           <select class="status-sel ${sCls}" onchange="updateStatus('${o.id}',this)">
             <option value="new"              ${status==='new'||status==='pending'?'selected':''}>🟡 New</option>
             <option value="confirmed"        ${status==='confirmed'?'selected':''}>🔵 Confirmed</option>
             <option value="out_for_delivery" ${status==='out_for_delivery'?'selected':''}>🟠 Out</option>
-            <option value="delivered"        ${status==='delivered'?'selected':''}>🟢 Delivered</option>
+            <option value="delivered"                                               >🟢 Delivered</option>
           </select>
-        </div>
-
-        <div class="card-body">
-          <div class="info-row">
-            <span class="info-icon">📍</span>
-            <span class="info-text">${o.customer_address || '—'}${o.customer_pincode ? ' · <strong>'+o.customer_pincode+'</strong>' : ''}</span>
-          </div>
-          <div class="info-row">
-            <span class="info-icon">📦</span>
-            <span class="info-text">${qtyHtml || '—'}</span>
-          </div>
-        </div>
-
-        <div class="total-row">
-          <span class="total-label">Total to collect</span>
-          <span class="total-val">₹${o.total || 0}</span>
-        </div>
-
-        <div class="card-actions">
-          <a class="act-btn btn-call" href="tel:${o.customer_phone || ''}">📞 Call Customer</a>
-          <a class="act-btn btn-map" href="${mapsUrl}" target="_blank">🗺 Open Map</a>
-        </div>
-      </div>`;
+        </td>
+      </tr>`;
     }).join('');
   }
 
   async function updateStatus(id, sel) {
     const newStatus = sel.value;
-    const sCls = {new:'s-new',confirmed:'s-confirmed',out_for_delivery:'s-out',delivered:'s-delivered'}[newStatus]||'s-new';
-    sel.className = 'status-sel ' + sCls;
-    const card = document.getElementById('card-'+id);
-    if (newStatus === 'delivered') card.classList.add('is-delivered');
-    else card.classList.remove('is-delivered');
     await db.from('web_orders').update({status:newStatus, updated_at:new Date().toISOString()}).eq('id',id);
-    const o = allOrders.find(x => x.id === id);
-    if (o) { o.status = newStatus; updateSummary(); }
+    if (newStatus === 'delivered') {
+      // Remove from list immediately
+      allOrders = allOrders.filter(o => o.id !== id);
+      renderTable();
+    } else {
+      const sCls = {new:'s-new',confirmed:'s-confirmed',out_for_delivery:'s-out'}[newStatus]||'s-new';
+      sel.className = 'status-sel ' + sCls;
+      const o = allOrders.find(x=>x.id===id);
+      if(o){ o.status=newStatus; updateSummary(); }
+    }
   }
 </script>
 </body>
