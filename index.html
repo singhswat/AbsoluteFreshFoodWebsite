@@ -1555,7 +1555,7 @@ async function sendWA(e){
     couponLine = isBogo
       ? `%0ACoupon: ${_appliedCoupon.code} (Buy 1 Get 1 FREE — ₹${freeValue} worth of packs added free)`
       : `%0ACoupon: ${_appliedCoupon.code} (${disc}% off — saved ₹${saving})`;
-    _db.from('coupons').update({ times_used: (_appliedCoupon.times_used || 0) + 1 }).eq('id', _appliedCoupon.id).then(() => {});
+    _db.rpc('increment_coupon_usage', { coupon_id: _appliedCoupon.id }).then(() => {});
   }
   const totalLine = base > 0 ? `%0ATotal: ₹${final}${isBogo && freeValue > 0 ? ` + FREE packs worth ₹${freeValue}` : saving > 0 ? ` (saved ₹${saving})` : ''}` : '';
 
