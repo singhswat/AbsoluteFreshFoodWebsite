@@ -1362,6 +1362,9 @@
       (repData||[]).forEach(r => repMap[r.id] = r.name);
     }
     document.getElementById('outlets-count').textContent = `${data.length} outlet${data.length!==1?'s':''}`;
+    // Cache by id for safe edit access
+    window._outletCache = {};
+    data.forEach(o => window._outletCache[o.id] = o);
     tbody.innerHTML = data.map(o => `
       <tr>
         <td class="bold">${o.name||'—'}</td>
@@ -1373,14 +1376,14 @@
         <td><span class="pill ${o.status==='active'?'pill-approved':'pill-rejected'}">${o.status||'—'}</span></td>
         <td style="font-size:.75rem;color:#64748B">${o.created_at ? new Date(o.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '—'}</td>
         <td style="white-space:nowrap">
-          <button onclick="openEditOutlet(${JSON.stringify(JSON.stringify(o))})" style="padding:3px 10px;border-radius:6px;border:none;background:#1E293B;color:#94A3B8;font-size:.75rem;cursor:pointer;margin-right:4px">✏️ Edit</button>
-          <button onclick="deleteOutlet('${o.id}','${(o.name||'').replace(/'/g,"\\'")}')" style="padding:3px 10px;border-radius:6px;border:none;background:#3D1A1A;color:#F87171;font-size:.75rem;cursor:pointer">🗑 Delete</button>
+          <button onclick="openEditOutlet('${o.id}')" style="padding:3px 10px;border-radius:6px;border:none;background:#1E293B;color:#94A3B8;font-size:.75rem;cursor:pointer;margin-right:4px">✏️ Edit</button>
+          <button onclick="deleteOutlet('${o.id}')" style="padding:3px 10px;border-radius:6px;border:none;background:#3D1A1A;color:#F87171;font-size:.75rem;cursor:pointer">🗑 Delete</button>
         </td>
       </tr>`).join('');
   }
 
-  function openEditOutlet(jsonStr) {
-    const o = JSON.parse(jsonStr);
+  function openEditOutlet(id) {
+    const o = window._outletCache[id];
     document.getElementById('oe-id').value     = o.id;
     document.getElementById('oe-name').value   = o.name||'';
     document.getElementById('oe-area').value   = o.area||'';
@@ -1407,7 +1410,8 @@
     loadOutlets();
   }
 
-  async function deleteOutlet(id, name) {
+  async function deleteOutlet(id) {
+    const name = (window._outletCache[id]||{}).name || id;
     if (!confirm(`Delete outlet "${name}"? This will also remove it from any beat plans. Cannot be undone.`)) return;
     // Remove from beat plans first
     const { error: bpErr } = await db.from('monthly_beat_items').delete().eq('outlet_id', id);
