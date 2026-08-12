@@ -502,7 +502,7 @@ button{font-family:'Poppins',sans-serif}
 <div id="prog"></div>
 
 <!-- HUEL-STYLE TOP BANNER -->
-<div class="ann">🌿 <b>Currently piloting in Lucknow only.</b> Join <b>500+ families</b> enjoying South India's freshest batter delivered daily. &nbsp;·&nbsp; COD available &nbsp;·&nbsp; Cancel anytime</div>
+<div class="ann">🌿 <b>Currently piloting in Lucknow only.</b> Join <b>500+ families</b> enjoying South India's freshest batter delivered daily. &nbsp;·&nbsp; COD available </div>
 
 <!-- NAV -->
 <nav class="nav" id="navbar">
@@ -517,7 +517,7 @@ button{font-family:'Poppins',sans-serif}
       <li><a href="#products">Packs</a></li>
       <li><a href="#subscribe">Subscribe</a></li>
       <li><a href="#our-pack">Our Pack</a></li><li><a href="#faqs">FAQs</a></li>
-      <li><a href="#order" class="nav-cta">Reserve Fresh Batch</a></li>
+      <li><a href="#order" class="nav-cta">Order Now</a></li>
     </ul>
     <div class="hamburger">☰</div>
   </div>
@@ -1086,7 +1086,7 @@ function setSubPack(size) {
 <!-- ORDER -->
 <section class="sec order-sec" id="order">
   <div class="sec-inner">
-    <div class="sec-label rev">Reserve Fresh Batch</div>
+    <div class="sec-label rev">Order Now</div>
     <h2 class="sec-h2 rev">Tomorrow's breakfast,<br><em>sorted tonight.</em></h2>
     <div class="order-inner">
       <div class="order-form-card rev-l">
@@ -1145,6 +1145,9 @@ function setSubPack(size) {
           <!-- Order Summary -->
           <div id="order-summary" style="display:none;background:#f0faf4;border:1.5px solid #86efac;border-radius:12px;padding:14px 16px;font-size:.88rem;color:#14532d">
             <div id="sum-items-list"></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:.83rem;color:#7c3aed;font-weight:700">
+              <span>🎁 FREE Podi Chutney 30g (worth ₹45)</span><span style="color:#7c3aed">FREE</span>
+            </div>
             <div style="display:flex;justify-content:space-between;margin-bottom:6px;color:#14532d" id="sum-subtotal-row">
               <span>Subtotal</span><span id="sum-base">—</span>
             </div>
@@ -1498,7 +1501,7 @@ function checkPin() {
   if (_serviceAreas.length === 0) { _pinValid = true; el.innerHTML = ''; return; } // no restrictions set
   const area = _serviceAreas.find(a => a.pincode === pin);
   if (area) {
-    el.innerHTML = `<span style="color:#15803d;font-weight:600">✓ We deliver to ${area.area_name || pin}!</span>`;
+    el.innerHTML = `<span style="color:#15803d;font-weight:700;font-size:.85rem">🎉 Woo-hoo! We've started serving in your area — ${area.area_name || pin}!</span>`;
     _pinValid = true;
   } else {
     el.innerHTML = `<span style="color:#b91c1c">Sorry, we don't deliver to this area yet. <a href="https://wa.me/918318767689" style="color:#b91c1c;text-decoration:underline;font-weight:600">WhatsApp us</a> to check.</span>`;
