@@ -1408,7 +1408,10 @@
   }
 
   async function deleteOutlet(id, name) {
-    if (!confirm(`Delete outlet "${name}"? This cannot be undone.`)) return;
+    if (!confirm(`Delete outlet "${name}"? This will also remove it from any beat plans. Cannot be undone.`)) return;
+    // Remove from beat plans first
+    const { error: bpErr } = await db.from('monthly_beat_items').delete().eq('outlet_id', id);
+    if (bpErr) { alert('Failed to remove from beat plans: ' + bpErr.message); return; }
     const { error } = await db.from('outlets').delete().eq('id', id);
     if (error) { alert('Delete failed: ' + error.message); return; }
     loadOutlets();
