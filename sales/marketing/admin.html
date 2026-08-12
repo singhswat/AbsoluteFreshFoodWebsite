@@ -1313,16 +1313,28 @@
     const repId  = document.getElementById('outlets-rep-filter').value;
     const status = document.getElementById('outlets-status-filter').value;
 
-    let q = db.from('outlets').select('*, users(name)').order('created_at', { ascending: false });
+    let q = db.from('outlets').select('id,name,area,owner_name,phone,rep_id,avg_kg_day,status,created_at').order('created_at', { ascending: false });
     if (repId)  q = q.eq('rep_id', repId);
     if (status) q = q.eq('status', status);
 
     const { data, error } = await q;
     const tbody = document.getElementById('outlets-tbody');
-    if (error || !data?.length) {
+    if (error) {
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="8">Error: ${error.message}</td></tr>`;
+      document.getElementById('outlets-count').textContent = '';
+      return;
+    }
+    if (!data?.length) {
       tbody.innerHTML = '<tr class="empty-row"><td colspan="8">No outlets found</td></tr>';
       document.getElementById('outlets-count').textContent = '';
       return;
+    }
+    // Fetch rep names separately
+    const repIds = [...new Set(data.map(o => o.rep_id).filter(Boolean))];
+    const repMap = {};
+    if (repIds.length) {
+      const { data: repData } = await db.from('users').select('id,name').in('id', repIds);
+      (repData||[]).forEach(r => repMap[r.id] = r.name);
     }
     document.getElementById('outlets-count').textContent = `${data.length} outlet${data.length!==1?'s':''}`;
     tbody.innerHTML = data.map(o => `
@@ -1331,7 +1343,7 @@
         <td>${o.area||'—'}</td>
         <td>${o.owner_name||'—'}</td>
         <td>${o.phone||'—'}</td>
-        <td>${o.users?.name||'—'}</td>
+        <td>${repMap[o.rep_id]||'—'}</td>
         <td class="mono">${parseFloat(o.avg_kg_day||0).toFixed(1)}</td>
         <td><span class="pill ${o.status==='active'?'pill-approved':'pill-rejected'}">${o.status||'—'}</span></td>
         <td style="font-size:.75rem;color:#64748B">${o.created_at ? new Date(o.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '—'}</td>
