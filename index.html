@@ -1524,8 +1524,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // whatsapp + supabase hybrid order
 const WA='918318767689';
+let _orderSubmitting = false;
 async function sendWA(e){
   e.preventDefault();
+  if (_orderSubmitting) return;
+  _orderSubmitting = true;
   const btn = e.target.querySelector('button[type="submit"]');
   const n  = document.getElementById('f-name').value.trim();
   const ph = document.getElementById('f-phone').value.trim().replace(/[\s\-]/g,'').replace(/^\+91/,'').replace(/^0/,'');
@@ -1591,8 +1594,12 @@ async function sendWA(e){
   const msg = `Hi Absolute Fresh! 🌿%0A%0AName: ${encodeURIComponent(n)}%0APhone: +91${ph}%0AAddress: ${encodeURIComponent(ad)} - ${pin}%0ADelivery Date: ${_tomorrow.display}%0A%0AOrder:${itemLines}${freeLines}${subLine}${couponLine}${totalLine}%0APayment: COD / UPI%0A%0APlease confirm availability and delivery slot.`;
   window.open(`https://wa.me/${WA}?text=${msg}`, '_blank');
 
-  btn.disabled = false;
-  btn.innerHTML = '<i class="fa-brands fa-whatsapp"></i> Confirm order on WhatsApp';
+  // Keep button disabled for 5 seconds after submission to prevent duplicates
+  setTimeout(() => {
+    _orderSubmitting = false;
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-brands fa-whatsapp"></i> Confirm order on WhatsApp';
+  }, 5000);
 }
 </script>
 <!-- EMAIL SIGNUP POPUP -->
