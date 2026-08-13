@@ -524,6 +524,16 @@
     <!-- ═══════════ WEB ORDERS ═══════════ -->
     <div id="tab-weborders" style="display:none">
 
+      <!-- Dispatch WhatsApp -->
+      <div style="background:#0F1F13;border:1px solid #1E3A22;border-radius:10px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <span style="font-size:1.2rem">📤</span>
+        <div style="flex:1">
+          <div style="font-size:.82rem;font-weight:700;color:#4ADE80">Send Dispatch Messages</div>
+          <div style="font-size:.73rem;color:#64748B;margin-top:2px">Opens WhatsApp for each rep with their tomorrow's orders + route link</div>
+        </div>
+        <button onclick="sendDispatchMessages()" style="padding:8px 18px;background:#22c55e;color:#000;border:none;border-radius:8px;font-weight:700;font-size:.82rem;cursor:pointer">Send to Reps 🚀</button>
+      </div>
+
       <!-- Cutoff setting -->
       <div style="background:#1E293B;border:1px solid #334155;border-radius:10px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
         <span style="font-size:.78rem;font-weight:700;color:#94A3B8;letter-spacing:.06em;text-transform:uppercase">Order Cutoff Time</span>
@@ -686,8 +696,8 @@
       </div>
       <p style="color:#94A3B8;font-size:.8rem;margin-bottom:12px">These are the pincodes where you currently deliver. Customers must enter a matching pincode to place an order.</p>
       <table class="tbl">
-        <thead><tr><th>Pincode</th><th>Area Name</th><th>Status</th><th>Added</th><th>Actions</th></tr></thead>
-        <tbody id="areas-tbody"><tr><td colspan="5" style="text-align:center;color:#64748B;padding:20px">Loading…</td></tr></tbody>
+        <thead><tr><th>Pincode</th><th>Area Name</th><th>Assigned Rep</th><th>Status</th><th>Added</th><th>Actions</th></tr></thead>
+        <tbody id="areas-tbody"><tr><td colspan="6" style="text-align:center;color:#64748B;padding:20px">Loading…</td></tr></tbody>
       </table>
     </div>
 
@@ -1422,17 +1432,29 @@
   }
 
   // ── Service Areas ────────────────────────────────────────────
+  let _areaReps = [];
   async function loadServiceAreas() {
-    const { data, error } = await db.from('service_areas').select('*').order('created_at', { ascending: false });
+    const [{ data, error }, { data: reps }] = await Promise.all([
+      db.from('service_areas').select('*').order('created_at', { ascending: false }),
+      db.from('users').select('id,name').eq('is_active', true).order('name')
+    ]);
+    _areaReps = reps || [];
     const tb = document.getElementById('areas-tbody');
     if (error || !data?.length) {
-      tb.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#64748B;padding:20px">${error ? error.message : 'No service areas yet. Add your first pincode.'}</td></tr>`;
+      tb.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#64748B;padding:20px">${error ? error.message : 'No service areas yet. Add your first pincode.'}</td></tr>`;
       return;
     }
+    const repOptions = _areaReps.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
     tb.innerHTML = data.map(a => `
       <tr>
         <td style="font-weight:700;font-size:.95rem">${a.pincode}</td>
         <td>${a.area_name || '—'}</td>
+        <td>
+          <select onchange="assignAreaRep('${a.id}',this.value)" class="sinp" style="font-size:.75rem;padding:4px 8px">
+            <option value="">— Unassigned —</option>
+            ${_areaReps.map(r => `<option value="${r.id}" ${a.rep_id===r.id?'selected':''}>${r.name}</option>`).join('')}
+          </select>
+        </td>
         <td><span style="padding:3px 10px;border-radius:999px;font-size:.72rem;font-weight:600;background:${a.is_active ? '#14532d' : '#3D1A1A'};color:${a.is_active ? '#4ADE80' : '#F87171'}">${a.is_active ? 'Active' : 'Paused'}</span></td>
         <td style="color:#64748B;font-size:.78rem">${new Date(a.created_at).toLocaleDateString('en-IN')}</td>
         <td>
@@ -1440,6 +1462,10 @@
           <button onclick="deleteArea('${a.id}')" style="padding:3px 10px;border-radius:6px;border:none;background:#3D1A1A;color:#F87171;font-size:.75rem;cursor:pointer">Delete</button>
         </td>
       </tr>`).join('');
+  }
+
+  async function assignAreaRep(areaId, repId) {
+    await db.from('service_areas').update({ rep_id: repId || null }).eq('id', areaId);
   }
 
   function openAreaModal() {
@@ -2172,6 +2198,78 @@
     if (error) { alert('Save failed: ' + error.message); return; }
     closeModal('modal-edit-weborder');
     loadWebOrders('today');
+  }
+
+  async function sendDispatchMessages() {
+    // Get tomorrow's date
+    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowISO = tomorrow.toISOString().split('T')[0];
+    const tomorrowLabel = tomorrow.toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'short' });
+
+    // Fetch tomorrow's active orders
+    const { data: orders, error: oErr } = await db.from('web_orders')
+      .select('*')
+      .eq('delivery_date', tomorrowISO)
+      .not('status', 'in', '("cancelled","delivered")')
+      .order('created_at');
+    if (oErr) { alert('Error fetching orders: ' + oErr.message); return; }
+    if (!orders?.length) { alert('No orders found for tomorrow (' + tomorrowLabel + ').'); return; }
+
+    // Fetch service areas with rep assignments
+    const { data: areas } = await db.from('service_areas').select('pincode,area_name,rep_id');
+    const pinToRep = {};
+    (areas||[]).forEach(a => { if (a.rep_id) pinToRep[a.pincode] = a.rep_id; });
+
+    // Fetch active reps
+    const { data: reps } = await db.from('users').select('id,name,phone').eq('is_active', true);
+    const repMap = {};
+    (reps||[]).forEach(r => repMap[r.id] = r);
+
+    // Group orders by rep
+    const repOrders = {};
+    const unassigned = [];
+    orders.forEach(o => {
+      const repId = pinToRep[o.customer_pincode];
+      if (!repId) { unassigned.push(o); return; }
+      if (!repOrders[repId]) repOrders[repId] = [];
+      repOrders[repId].push(o);
+    });
+
+    if (unassigned.length) {
+      alert(`⚠️ ${unassigned.length} order(s) have pincodes not assigned to any rep. Go to Areas tab and assign reps first.\n\nUnassigned pincodes: ${[...new Set(unassigned.map(o=>o.customer_pincode))].join(', ')}`);
+    }
+
+    const repIds = Object.keys(repOrders);
+    if (!repIds.length) { alert('No orders have assigned reps. Go to Areas tab and assign reps to pincodes first.'); return; }
+
+    // Open WhatsApp for each rep
+    let opened = 0;
+    repIds.forEach((repId, idx) => {
+      const rep = repMap[repId];
+      if (!rep?.phone) return;
+      const repOrderList = repOrders[repId];
+
+      // Format order list
+      const orderLines = repOrderList.map((o, i) => {
+        const itemSummary = (o.items||[]).map(it => `${it.name} ×${it.qty}`).join(', ');
+        return `${i+1}. ${o.customer_name}%0A   📍 ${o.customer_address}%0A   🛍 ${itemSummary} | ₹${o.total}%0A   📞 ${o.customer_phone}`;
+      }).join('%0A%0A');
+
+      // Google Maps route link
+      const stops = repOrderList.map(o => encodeURIComponent(o.customer_address + ', Lucknow')).join('/');
+      const mapsLink = `https://www.google.com/maps/dir/${stops}`;
+
+      const totalAmt = repOrderList.reduce((s,o) => s + parseFloat(o.total||0), 0);
+      const msg = `🌿 *Absolute Fresh — Delivery for ${tomorrowLabel}*%0A%0AHi ${rep.name}! Here are your ${repOrderList.length} deliveries:%0A%0A${orderLines}%0A%0A💰 Total collection: ₹${totalAmt}%0A%0A🗺️ Route: ${mapsLink}%0A%0AAll COD — collect payment at door. Reply DONE when finished. ✅`;
+
+      // Stagger to avoid popup blockers
+      setTimeout(() => {
+        window.open(`https://wa.me/91${rep.phone.replace(/\D/g,'')}?text=${msg}`, '_blank');
+      }, idx * 800);
+      opened++;
+    });
+
+    if (opened) alert(`✅ Opening WhatsApp for ${opened} rep(s). Click Send in each tab.`);
   }
 
   function saveCutoffTime() {
