@@ -20,6 +20,7 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Serif+Tamil:wght@400;600&family=Noto+Serif+Telugu:wght@400;600&family=Noto+Serif+Kannada:wght@400;600&family=Noto+Serif+Malayalam:wght@400;600&family=Noto+Serif+Devanagari:wght@400;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Tamil:wght@400;600&family=Noto+Serif+Telugu:wght@400;600&family=Noto+Serif+Kannada:wght@400;600&family=Noto+Serif+Malayalam:wght@400;600&family=Noto+Serif+Devanagari:wght@400;600&display=swap" rel="stylesheet"></noscript>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <!-- Inline only the FA icons we actually use (WhatsApp, Instagram, Facebook, YouTube, X) -->
 <style>
 .fa-brands{display:inline-block;font-style:normal;line-height:1}
@@ -1172,12 +1173,13 @@ function setSubPack(size) {
               <span>You pay</span><span id="sum-final" style="color:#15803d">—</span>
             </div>
             <div style="font-size:.72rem;color:#4ade80;margin-top:6px;text-align:center">💵 Cash or UPI on delivery</div>
-            <!-- UPI QR -->
-            <div style="margin-top:12px;background:#fff;border-radius:14px;padding:14px;text-align:center;border:1.5px solid #86efac">
+            <!-- UPI QR — dynamic, updates with order total -->
+            <div id="upi-qr-box" style="display:none;margin-top:12px;background:#fff;border-radius:14px;padding:14px;text-align:center;border:1.5px solid #86efac">
               <div style="font-size:.72rem;font-weight:700;color:#1B5E35;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Pay via UPI</div>
-              <img src="images/upi-qr.png" alt="UPI QR Code" width="140" height="140" style="display:block;margin:0 auto;border-radius:8px"/>
-              <div style="margin-top:8px;font-size:.75rem;color:#374151;font-weight:600">absolutefreshfood@ptyes</div>
-              <div style="font-size:.68rem;color:#6B7280;margin-top:2px">Scan with any UPI app · PhonePe · GPay · Paytm</div>
+              <canvas id="upi-qr-canvas" style="display:block;margin:0 auto;border-radius:8px;width:160px;height:160px"></canvas>
+              <div style="margin-top:8px;font-size:.8rem;color:#374151;font-weight:700" id="upi-qr-amount">—</div>
+              <div style="font-size:.68rem;color:#6B7280;margin-top:2px">Scan · PhonePe · GPay · Paytm · BHIM</div>
+              <a id="upi-pay-btn" href="#" style="display:block;margin-top:10px;padding:9px;background:#1B5E35;color:#fff;border-radius:9px;font-size:.8rem;font-weight:700;text-decoration:none">📲 Tap to Pay on Phone</a>
             </div>
           </div>
 
@@ -1504,6 +1506,23 @@ function updateOrderSummary() {
     document.getElementById('sum-discount-row').style.display = 'none';
   }
   document.getElementById('sum-final').textContent = base > 0 ? `₹${final}` : 'To be quoted';
+  updateUpiQr(final > 0 ? final : null);
+}
+
+function updateUpiQr(amount) {
+  const box = document.getElementById('upi-qr-box');
+  if (!amount) { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  const ref = window._pendingOrderRef || (window._pendingOrderRef = 'AFF-' + Date.now().toString(36).toUpperCase());
+  const upiUrl = `upi://pay?pa=absolutefreshfood@ptyes&pn=AbsoluteFresh&am=${amount}&tn=${ref}&cu=INR`;
+  document.getElementById('upi-qr-amount').textContent = `₹${amount} · Ref: ${ref}`;
+  document.getElementById('upi-pay-btn').href = upiUrl;
+  if (window.QRCode) {
+    QRCode.toCanvas(document.getElementById('upi-qr-canvas'), upiUrl, {
+      width: 160, margin: 1,
+      color: { dark: '#1B5E35', light: '#ffffff' }
+    }, function(err) { if (err) console.warn('QR error', err); });
+  }
 }
 
 // ── Serviceable areas ──────────────────────────────────────────
