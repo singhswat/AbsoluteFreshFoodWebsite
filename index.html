@@ -1180,6 +1180,13 @@ function setSubPack(size) {
               <div style="margin-top:8px;font-size:.8rem;color:#374151;font-weight:700" id="upi-qr-amount">—</div>
               <div style="font-size:.68rem;color:#6B7280;margin-top:2px">Scan · PhonePe · GPay · Paytm · BHIM</div>
               <a id="upi-pay-btn" href="#" style="display:block;margin-top:10px;padding:9px;background:#1B5E35;color:#fff;border-radius:9px;font-size:.8rem;font-weight:700;text-decoration:none">📲 Tap to Pay on Phone</a>
+              <!-- Paid confirmation toggle -->
+              <button type="button" id="upi-paid-btn" onclick="toggleUpiPaid()" style="display:block;width:100%;margin-top:8px;padding:9px;background:#f0fdf4;color:#15803d;border:2px solid #86efac;border-radius:9px;font-size:.8rem;font-weight:700;cursor:pointer">
+                ✅ I've paid via UPI — mark as paid
+              </button>
+              <div id="upi-paid-badge" style="display:none;margin-top:8px;background:#14532d;color:#4ade80;border-radius:8px;padding:7px;font-size:.78rem;font-weight:700">
+                ✅ Payment confirmed · Ref included in your WhatsApp order
+              </div>
             </div>
           </div>
 
@@ -1359,6 +1366,7 @@ const _db = supabase.createClient(_SB_URL, _SB_KEY);
 
 // State: applied coupon
 let _appliedCoupon = null; // { id, code, discount_value }
+let _upiPaid = false;
 
 async function applyCoupon() {
   const code = document.getElementById('f-coupon').value.trim().toUpperCase();
@@ -1569,6 +1577,25 @@ document.addEventListener('DOMContentLoaded', () => {
 // whatsapp + supabase hybrid order
 const WA='918318767689';
 let _orderSubmitting = false;
+
+function toggleUpiPaid() {
+  _upiPaid = !_upiPaid;
+  const btn = document.getElementById('upi-paid-btn');
+  const badge = document.getElementById('upi-paid-badge');
+  if (_upiPaid) {
+    btn.style.background = '#14532d';
+    btn.style.color = '#4ade80';
+    btn.style.borderColor = '#4ade80';
+    btn.textContent = '✅ Marked as paid — tap to undo';
+    badge.style.display = 'block';
+  } else {
+    btn.style.background = '#f0fdf4';
+    btn.style.color = '#15803d';
+    btn.style.borderColor = '#86efac';
+    btn.textContent = "✅ I've paid via UPI — mark as paid";
+    badge.style.display = 'none';
+  }
+}
 async function sendWA(e){
   e.preventDefault();
   if (_orderSubmitting) return;
@@ -1628,14 +1655,18 @@ async function sendWA(e){
       customer_pincode: pin,
       status:           'new',
       source:           'website',
-      delivery_date:    _tomorrow.iso
+      delivery_date:    _tomorrow.iso,
+      admin_notes:      _upiPaid ? `✅ PAID via UPI · Ref: ${window._pendingOrderRef}` : null
     });
   } catch(err) {
     console.warn('Order save failed (non-blocking):', err);
   }
 
   // ── 2. WhatsApp ──────────────────────────────────────────────
-  const msg = `Hi Absolute Fresh! 🌿%0A%0AName: ${encodeURIComponent(n)}%0APhone: +91${ph}%0AAddress: ${encodeURIComponent(ad)} - ${pin}%0ADelivery Date: ${_tomorrow.display}%0A%0AOrder:${itemLines}${freeLines}${subLine}${couponLine}${totalLine}%0APayment: COD / UPI%0A%0APlease confirm availability and delivery slot.`;
+  const paymentLine = _upiPaid
+    ? `✅ PAID via UPI · Ref: ${window._pendingOrderRef || '—'}`
+    : `COD / UPI on delivery`;
+  const msg = `Hi Absolute Fresh! 🌿%0A%0AName: ${encodeURIComponent(n)}%0APhone: +91${ph}%0AAddress: ${encodeURIComponent(ad)} - ${pin}%0ADelivery Date: ${_tomorrow.display}%0A%0AOrder:${itemLines}${freeLines}${subLine}${couponLine}${totalLine}%0APayment: ${encodeURIComponent(paymentLine)}%0A%0APlease confirm availability and delivery slot.`;
   window.open(`https://wa.me/${WA}?text=${msg}`, '_blank');
 
   // Keep button disabled for 5 seconds after submission to prevent duplicates
