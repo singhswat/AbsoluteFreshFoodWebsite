@@ -19,28 +19,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Serif+Tamil:wght@400;600&family=Noto+Serif+Telugu:wght@400;600&family=Noto+Serif+Kannada:wght@400;600&family=Noto+Serif+Malayalam:wght@400;600&family=Noto+Serif+Devanagari:wght@400;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Tamil:wght@400;600&family=Noto+Serif+Telugu:wght@400;600&family=Noto+Serif+Kannada:wght@400;600&family=Noto+Serif+Malayalam:wght@400;600&family=Noto+Serif+Devanagari:wght@400;600&display=swap" rel="stylesheet"></noscript>
-<!-- Supabase deferred — loaded only when order form is needed -->
-<script>
-(function(){
-  var loaded=false;
-  function loadSupabase(){
-    if(loaded)return; loaded=true;
-    var s=document.createElement('script');
-    s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-    s.onload=function(){ if(window._supabaseReady) window._supabaseReady(); };
-    document.head.appendChild(s);
-  }
-  // Load when order section scrolls into view
-  var observer=new IntersectionObserver(function(entries){
-    if(entries[0].isIntersecting){ loadSupabase(); observer.disconnect(); }
-  },{rootMargin:'400px'});
-  document.addEventListener('DOMContentLoaded',function(){
-    var el=document.getElementById('order');
-    if(el) observer.observe(el); else loadSupabase();
-  });
-  window._loadSupabase=loadSupabase;
-})();
-</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- Inline only the FA icons we actually use (WhatsApp, Instagram, Facebook, YouTube, X) -->
 <style>
 .fa-brands{display:inline-block;font-style:normal;line-height:1}
@@ -1364,15 +1343,10 @@ function toggleFaq(btn){
   if(!isOpen)item.classList.add('open');
 }
 
-// ─── SUPABASE (deferred load) ───
+// ─── SUPABASE ───
 const _SB_URL = 'https://fbfopgzblqmsflkfejwa.supabase.co';
 const _SB_KEY = 'sb_publishable_r7mYhsyIKtBjBKzxH8St9g_OHjTU-RQ';
-let _db = null;
-window._supabaseReady = function() {
-  _db = supabase.createClient(_SB_URL, _SB_KEY);
-};
-// If Supabase already loaded (e.g. user scrolled slow), init immediately
-if (window.supabase) window._supabaseReady();
+const _db = supabase.createClient(_SB_URL, _SB_KEY);
 
 // State: applied coupon
 let _appliedCoupon = null; // { id, code, discount_value }
