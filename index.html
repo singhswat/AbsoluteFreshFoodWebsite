@@ -15,9 +15,43 @@
 <title>Absolute Fresh — South India's Freshest Batter</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Poppins:wght@300;400;500;600;700&family=Noto+Serif+Tamil:wght@400;600&family=Noto+Serif+Telugu:wght@400;600&family=Noto+Serif+Kannada:wght@400;600&family=Noto+Serif+Malayalam:wght@400;600&family=Noto+Serif+Devanagari:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Critical fonts only — regional scripts loaded after page is interactive -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Serif+Tamil:wght@400;600&family=Noto+Serif+Telugu:wght@400;600&family=Noto+Serif+Kannada:wght@400;600&family=Noto+Serif+Malayalam:wght@400;600&family=Noto+Serif+Devanagari:wght@400;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Tamil:wght@400;600&family=Noto+Serif+Telugu:wght@400;600&family=Noto+Serif+Kannada:wght@400;600&family=Noto+Serif+Malayalam:wght@400;600&family=Noto+Serif+Devanagari:wght@400;600&display=swap" rel="stylesheet"></noscript>
+<!-- Supabase deferred — loaded only when order form is needed -->
+<script>
+(function(){
+  var loaded=false;
+  function loadSupabase(){
+    if(loaded)return; loaded=true;
+    var s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+    s.onload=function(){ if(window._supabaseReady) window._supabaseReady(); };
+    document.head.appendChild(s);
+  }
+  // Load when order section scrolls into view
+  var observer=new IntersectionObserver(function(entries){
+    if(entries[0].isIntersecting){ loadSupabase(); observer.disconnect(); }
+  },{rootMargin:'400px'});
+  document.addEventListener('DOMContentLoaded',function(){
+    var el=document.getElementById('order');
+    if(el) observer.observe(el); else loadSupabase();
+  });
+  window._loadSupabase=loadSupabase;
+})();
+</script>
+<!-- Inline only the FA icons we actually use (WhatsApp, Instagram, Facebook, YouTube, X) -->
+<style>
+.fa-brands{display:inline-block;font-style:normal;line-height:1}
+</style>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <symbol id="ico-wa" viewBox="0 0 448 512"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></symbol>
+  <symbol id="ico-ig" viewBox="0 0 448 512"><path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/></symbol>
+  <symbol id="ico-fb" viewBox="0 0 320 512"><path d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z"/></symbol>
+  <symbol id="ico-yt" viewBox="0 0 576 512"><path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"/></symbol>
+  <symbol id="ico-x" viewBox="0 0 512 512"><path d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8l164.9-188.5L26.8 48h145.6l100.5 132.9L389.2 48zm-24.8 373.8h39.1L151.1 88h-42l255.3 333.8z"/></symbol>
+</svg>
 <style>
 :root{
   --leaf:#1B5E35; --leaf-dark:#0E3620; --leaf-mid:#2D7A4B; --leaf-lt:rgba(27,94,53,.07);
@@ -574,7 +608,7 @@ button{font-family:'Poppins',sans-serif}
     </div>
     <div class="hero-visual">
       <div class="hero-pack-wrap">
-        <img src="images/hero-pack-v2.png" alt="Absolute Fresh 500g Idli & Dosa Batter Pack" class="hero-pack-img"/>
+        <img src="images/hero-pack-v2.webp" alt="Absolute Fresh 500g Idli & Dosa Batter Pack" class="hero-pack-img"/>
         <div class="purity-seal"><div class="purity-seal-inner"><span>Purity</span><span>Assured</span></div></div>
         <div class="hero-float hf-a">🕔 Ready by 7am</div>
         <div class="hero-float hf-b"><div class="big">5</div><div class="small">Ingredients<br>Only</div></div>
@@ -805,7 +839,7 @@ button{font-family:'Poppins',sans-serif}
     </div>
     <div class="prod-grid" id="prod-grid">
       <div class="prod-card featured rev" data-cat="home">
-        <div class="prod-img" style="height:240px;background:#f5f0e8;padding:0;overflow:hidden"><span class="prod-tag hot">Most Popular</span><img src="images/product-500g.png" alt="500g Family Pack" style="height:100%;width:100%;object-fit:cover;object-position:center top"/></div>
+        <div class="prod-img" style="height:240px;background:#f5f0e8;padding:0;overflow:hidden"><span class="prod-tag hot">Most Popular</span><img src="images/product-500g.webp" alt="500g Family Pack" loading="lazy" style="height:100%;width:100%;object-fit:cover;object-position:center top"/></div>
         <div class="prod-body">
           <div class="prod-size">500g</div>
           <div class="prod-name">Family Pack</div>
@@ -817,7 +851,7 @@ button{font-family:'Poppins',sans-serif}
       <div class="prod-card rev" data-cat="subscribe" style="position:relative;border:3px solid var(--gold);background:linear-gradient(160deg,#fffdf5 55%,#fff8e0);box-shadow:0 20px 60px rgba(200,121,10,.22);transform:scale(1.03);z-index:5">
         <div class="prod-img" style="height:240px;background:#f5f0e8;padding:0;overflow:hidden;position:relative;">
           <span class="prod-tag hot" style="background:var(--terra);color:#fff;font-weight:800;letter-spacing:.06em;font-size:11px">⭐ BEST VALUE</span>
-          <img src="images/product-1kg.jpg" alt="1kg Subscriber Pack" style="height:100%;width:100%;object-fit:cover;object-position:center top"/>
+          <img src="images/product-1kg.jpg" alt="1kg Subscriber Pack" loading="lazy" style="height:100%;width:100%;object-fit:cover;object-position:center top"/>
         </div>
         <div class="prod-body">
           <div style="background:linear-gradient(90deg,var(--gold),var(--gold-lt));color:var(--ink);font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;padding:5px 14px;border-radius:999px;display:inline-block;margin-bottom:8px">✦ 9 out of 10 customers choose this</div>
@@ -857,7 +891,7 @@ button{font-family:'Poppins',sans-serif}
           <div class="prod-price">Custom Pricing · Min. 5 kg/day</div>
         </div>
         <div class="bulk-ctas">
-          <button class="btn btn-gold" style="border-radius:14px;width:100%;justify-content:center" onclick="window.open('https://wa.me/918318767689?text=Hi%2C%20I%20need%20bulk%20batter%20supply%20for%20my%20hotel%2Frestaurant.','_blank')"><i class="fa-brands fa-whatsapp"></i> WhatsApp for Quote</button>
+          <button class="btn btn-gold" style="border-radius:14px;width:100%;justify-content:center" onclick="window.open('https://wa.me/918318767689?text=Hi%2C%20I%20need%20bulk%20batter%20supply%20for%20my%20hotel%2Frestaurant.','_blank')"><svg width="16" height="16" viewBox="0 0 448 512" fill="currentColor" style="display:inline-block;vertical-align:-.2em"><use href="#ico-wa"/></svg> WhatsApp for Quote</button>
           <a class="btn-alt" href="#order">Request Free Sample</a>
         </div>
       </div>
@@ -1019,7 +1053,7 @@ function setSubPack(size) {
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start" class="rev">
       <div>
-        <img src="images/pack-review.webp" alt="Absolute Fresh 500g Idli & Dosa Batter — Front & Back" style="width:100%;border-radius:20px;box-shadow:0 24px 60px rgba(27,94,53,.14);"/>
+        <img src="images/pack-review.webp" alt="Absolute Fresh 500g Idli & Dosa Batter — Front & Back" loading="lazy" style="width:100%;border-radius:20px;box-shadow:0 24px 60px rgba(27,94,53,.14);"/>
         <p style="font-size:12px;color:var(--muted2);text-align:center;margin-top:12px;font-style:italic">500g Family Pack · Front &amp; Back</p>
       </div>
       <div style="display:flex;flex-direction:column;gap:20px;padding-top:8px">
@@ -1164,7 +1198,7 @@ function setSubPack(size) {
           <div id="delivery-date-row" style="background:#f0faf4;border:1.5px solid #86efac;border-radius:10px;padding:10px 14px;font-size:.85rem;color:#14532d;display:flex;align-items:center;gap:8px">
             🚚 <span>Delivery: <strong id="delivery-date-text">Tomorrow</strong></span>
           </div>
-          <button class="form-wa-btn" type="submit"><i class="fa-brands fa-whatsapp"></i> Confirm order on WhatsApp</button>
+          <button class="form-wa-btn" type="submit"><svg width="16" height="16" viewBox="0 0 448 512" fill="currentColor" style="display:inline-block;vertical-align:-.2em"><use href="#ico-wa"/></svg> Confirm order on WhatsApp</button>
         </form>
       </div>
       <div class="rev-r">
@@ -1195,7 +1229,7 @@ function setSubPack(size) {
      target="_blank" 
      rel="noopener noreferrer" 
      title="Instagram">
-    <i class="fa-brands fa-instagram"></i>
+    <svg width="16" height="16" viewBox="0 0 448 512" fill="currentColor" style="display:inline-block;vertical-align:-.2em"><use href="#ico-ig"/></svg>
   </a>
 
   <a class="social-link fb" 
@@ -1203,7 +1237,7 @@ function setSubPack(size) {
      target="_blank" 
      rel="noopener noreferrer" 
      title="Facebook">
-    <i class="fa-brands fa-facebook-f"></i>
+    <svg width="16" height="16" viewBox="0 0 320 512" fill="currentColor" style="display:inline-block;vertical-align:-.2em"><use href="#ico-fb"/></svg>
   </a>
 
   <a class="social-link wa" 
@@ -1211,7 +1245,7 @@ function setSubPack(size) {
      target="_blank" 
      rel="noopener noreferrer" 
      title="WhatsApp">
-    <i class="fa-brands fa-whatsapp"></i>
+    <svg width="16" height="16" viewBox="0 0 448 512" fill="currentColor" style="display:inline-block;vertical-align:-.2em"><use href="#ico-wa"/></svg>
   </a>
 
   <a class="social-link yt" 
@@ -1219,7 +1253,7 @@ function setSubPack(size) {
      target="_blank" 
      rel="noopener noreferrer" 
      title="YouTube">
-    <i class="fa-brands fa-youtube"></i>
+    <svg width="16" height="16" viewBox="0 0 576 512" fill="currentColor" style="display:inline-block;vertical-align:-.2em"><use href="#ico-yt"/></svg>
   </a>
 
   <a class="social-link tw" 
@@ -1227,7 +1261,7 @@ function setSubPack(size) {
      target="_blank" 
      rel="noopener noreferrer" 
      title="X / Twitter">
-    <i class="fa-brands fa-x-twitter"></i>
+    <svg width="16" height="16" viewBox="0 0 512 512" fill="currentColor" style="display:inline-block;vertical-align:-.2em"><use href="#ico-x"/></svg>
   </a>
 </div>
     </div>
@@ -1330,10 +1364,15 @@ function toggleFaq(btn){
   if(!isOpen)item.classList.add('open');
 }
 
-// ─── SUPABASE (affiliate coupon tracking) ───
+// ─── SUPABASE (deferred load) ───
 const _SB_URL = 'https://fbfopgzblqmsflkfejwa.supabase.co';
 const _SB_KEY = 'sb_publishable_r7mYhsyIKtBjBKzxH8St9g_OHjTU-RQ';
-const _db = supabase.createClient(_SB_URL, _SB_KEY);
+let _db = null;
+window._supabaseReady = function() {
+  _db = supabase.createClient(_SB_URL, _SB_KEY);
+};
+// If Supabase already loaded (e.g. user scrolled slow), init immediately
+if (window.supabase) window._supabaseReady();
 
 // State: applied coupon
 let _appliedCoupon = null; // { id, code, discount_value }
@@ -1598,7 +1637,7 @@ async function sendWA(e){
   setTimeout(() => {
     _orderSubmitting = false;
     btn.disabled = false;
-    btn.innerHTML = '<i class="fa-brands fa-whatsapp"></i> Confirm order on WhatsApp';
+    btn.innerHTML = 'Confirm order on WhatsApp';
   }, 5000);
 }
 </script>
