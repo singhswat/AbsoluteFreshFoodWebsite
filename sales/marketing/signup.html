@@ -190,6 +190,13 @@
           <label class="form-label">YouTube / Facebook (optional)</label>
           <input id="youtube" class="form-input" placeholder="Channel or page URL"/>
         </div>
+        <div class="form-group">
+          <label class="form-label">Sample Reels / Posts <span class="req">*</span></label>
+          <div style="font-size:.78rem;color:#6B7280;margin-bottom:8px">Share at least 3 links to your best food content (Instagram reels, YouTube Shorts, etc.)</div>
+          <input id="sample-reel-1" class="form-input" placeholder="Reel / post link #1" required style="margin-bottom:8px"/>
+          <input id="sample-reel-2" class="form-input" placeholder="Reel / post link #2" required style="margin-bottom:8px"/>
+          <input id="sample-reel-3" class="form-input" placeholder="Reel / post link #3" required/>
+        </div>
       </div>
 
       <div class="form-section">
@@ -293,6 +300,11 @@
           password_hash: passwordHash,
           instagram_handle: document.getElementById('instagram').value.trim(),
           youtube_url: document.getElementById('youtube').value.trim() || null,
+          sample_reels: [
+            document.getElementById('sample-reel-1').value.trim(),
+            document.getElementById('sample-reel-2').value.trim(),
+            document.getElementById('sample-reel-3').value.trim()
+          ].filter(Boolean),
           follower_count: parseInt(document.getElementById('followers').value) || 0,
           content_category: document.getElementById('category').value,
           city: document.getElementById('city').value.trim(),
