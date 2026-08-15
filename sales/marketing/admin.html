@@ -367,11 +367,11 @@
           </div>
           <!-- Influencer field — shown for free_sample only -->
           <div id="cpn-influencer-row" style="display:none">
-            <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Assign to Influencer</label>
-            <select id="cpn-influencer" style="width:100%;background:#0F172A;border:1.5px solid #7c3aed;color:#fff;border-radius:8px;padding:10px 12px;font-size:.95rem">
-              <option value="">— Select approved influencer —</option>
-            </select>
-            <div style="margin-top:8px;background:#1a0533;border:1px solid #7c3aed;border-radius:8px;padding:10px;font-size:.75rem;color:#c4b5fd;line-height:1.6">
+            <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Influencer Name</label>
+            <input id="cpn-influencer-name" style="width:100%;background:#0F172A;border:1.5px solid #7c3aed;color:#fff;border-radius:8px;padding:10px 12px;font-size:.95rem;margin-bottom:8px" placeholder="e.g. Priya Sharma"/>
+            <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Instagram Handle</label>
+            <input id="cpn-influencer-handle" style="width:100%;background:#0F172A;border:1.5px solid #7c3aed;color:#fff;border-radius:8px;padding:10px 12px;font-size:.95rem;margin-bottom:8px" placeholder="@priyasharama"/>
+            <div style="background:#1a0533;border:1px solid #7c3aed;border-radius:8px;padding:10px;font-size:.75rem;color:#c4b5fd;line-height:1.6">
               📋 <strong>Free Sample Rules:</strong> Approved influencers only · 1 pack · Min 3 Reels · Tag @absolutefreshfood · Post within 7 days · Lucknow only · Non-transferable
             </div>
           </div>
@@ -1582,13 +1582,9 @@
     document.getElementById('cpn-firstonly').value = 'true';
     document.getElementById('cpn-type').value = 'standard';
     document.getElementById('cpn-maxuses').value = '1';
+    document.getElementById('cpn-influencer-name').value = '';
+    document.getElementById('cpn-influencer-handle').value = '';
     onCouponTypeChange();
-    // Populate influencer dropdown
-    db.from('influencers').select('id,name').eq('status','approved').order('name').then(({ data }) => {
-      const sel = document.getElementById('cpn-influencer');
-      sel.innerHTML = '<option value="">— Select approved influencer —</option>';
-      (data||[]).forEach(i => { const o = document.createElement('option'); o.value = i.id; o.textContent = i.name; sel.appendChild(o); });
-    });
     document.getElementById('coupon-modal').style.display = 'flex';
   }
 
@@ -1612,12 +1608,13 @@
     const isWelcome  = document.getElementById('cpn-welcome').checked;
     const firstOnly  = document.getElementById('cpn-firstonly').value === 'true';
     const isSample   = type === 'free_sample';
-    const influencerId = document.getElementById('cpn-influencer').value || null;
+    const influencerName   = (document.getElementById('cpn-influencer-name').value || '').trim();
+    const influencerHandle = (document.getElementById('cpn-influencer-handle').value || '').trim();
     const maxUses    = document.getElementById('cpn-maxuses').value ? parseInt(document.getElementById('cpn-maxuses').value) : null;
     const discount   = isSample ? 100 : parseFloat(document.getElementById('cpn-discount').value);
 
     if (!code || !expires) { alert('Please fill all fields.'); return; }
-    if (isSample && !influencerId) { alert('Please select an influencer for this free sample coupon.'); return; }
+    if (isSample && !influencerName) { alert('Please enter the influencer name.'); return; }
 
     if (isWelcome) {
       await db.from('coupons').update({ is_welcome_coupon: false }).eq('is_welcome_coupon', true);
@@ -1634,7 +1631,8 @@
       valid_from: new Date().toISOString(),
       expires_on: new Date(expires).toISOString(),
       coupon_type: type,
-      influencer_id: influencerId,
+      influencer_name: isSample ? influencerName : null,
+      influencer_handle: isSample ? influencerHandle : null,
       max_uses: maxUses
     });
 
