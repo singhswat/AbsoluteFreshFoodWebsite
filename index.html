@@ -1105,6 +1105,17 @@ function setSubPack(size) {
     <h2 class="sec-h2 rev">Tomorrow's breakfast,<br><em>sorted tonight.</em></h2>
     <div class="order-inner">
       <div class="order-form-card rev-l">
+        <!-- ── Order success screen (hidden until submitted) ── -->
+        <div id="order-success" style="display:none;text-align:center;padding:24px 8px">
+          <div style="font-size:3rem;margin-bottom:10px">🎉</div>
+          <h3 style="color:#15803D;margin-bottom:6px">Order Received!</h3>
+          <p style="font-size:.88rem;color:#374151;margin-bottom:14px">Your order has been saved. WhatsApp should open automatically — if it didn't, tap below.</p>
+          <div id="order-ref-badge" style="background:#F0FDF4;border:1.5px solid #86EFAC;border-radius:10px;padding:10px 16px;font-size:.82rem;color:#15803D;font-weight:700;margin-bottom:16px;letter-spacing:.04em"></div>
+          <a id="order-wa-fallback" href="#" target="_blank" style="display:inline-block;background:#25D366;color:#fff;font-weight:700;border-radius:10px;padding:11px 20px;font-size:.9rem;text-decoration:none;margin-bottom:12px">📲 Open WhatsApp to confirm</a>
+          <br/>
+          <button onclick="document.getElementById('order-success').style.display='none';document.getElementById('order-form-inner').style.display='block'" style="background:none;border:none;color:#6B7280;font-size:.8rem;cursor:pointer;margin-top:4px">Place another order</button>
+        </div>
+        <div id="order-form-inner">
         <h3>Send Your Order</h3>
         <p class="order-sub">We confirm availability, delivery slot and COD/UPI on WhatsApp.</p>
         <form class="form" onsubmit="sendWA(event)">
@@ -1195,6 +1206,7 @@ function setSubPack(size) {
           </div>
           <button class="form-wa-btn" type="submit"><svg width="16" height="16" viewBox="0 0 448 512" fill="currentColor" style="display:inline-block;vertical-align:-.2em"><use href="#ico-wa"/></svg> Confirm order on WhatsApp</button>
         </form>
+        </div><!-- /order-form-inner -->
       </div>
       <div class="rev-r">
         <div class="order-info">
@@ -1639,31 +1651,43 @@ async function sendWA(e){
   }
   const totalLine = base > 0 ? `%0ATotal: ₹${final}${isBogo && freeValue > 0 ? ` + FREE packs worth ₹${freeValue}` : saving > 0 ? ` (saved ₹${saving})` : ''}` : '';
 
-  // ── 1. Save to Supabase ──────────────────────────────────────
+  // ── 1. Save to Supabase (deduplicated) ──────────────────────
+  let orderRef = 'WEB-' + Date.now().toString(36).toUpperCase();
   try {
-    const ref = 'WEB-' + Date.now().toString(36).toUpperCase();
-    const allItems = [
-      ...items,
-      ...(isBogo ? freeItems.map(i => ({ ...i, name: `FREE ${i.name}`, price: 0 })) : []),
-      ...(_wantSubscription ? [{ name: 'Subscription/Bulk', qty: 1, price: 0 }] : [])
-    ];
-    await _db.from('web_orders').insert({
-      order_ref:        ref,
-      customer_name:    n,
-      customer_phone:   ph,
-      customer_address: ad,
-      items:            allItems,
-      coupon_code:      _appliedCoupon ? _appliedCoupon.code : null,
-      coupon_id:        _appliedCoupon ? _appliedCoupon.id   : null,
-      subtotal:         base   || null,
-      discount_amount:  saving || null,
-      total:            final  || null,
-      customer_pincode: pin,
-      status:           'new',
-      source:           'website',
-      delivery_date:    _tomorrow.iso,
-      admin_notes:      _upiPaid ? `✅ PAID via UPI · Ref: ${window._pendingOrderRef}` : null
-    });
+    // Check for duplicate: same phone + delivery date placed in last 10 minutes
+    const tenMinAgo = new Date(Date.now() - 10*60*1000).toISOString();
+    const { data: existing } = await _db.from('web_orders')
+      .select('order_ref')
+      .eq('customer_phone', ph)
+      .eq('delivery_date', _tomorrow.iso)
+      .gte('created_at', tenMinAgo)
+      .limit(1);
+    if (existing && existing.length > 0) {
+      orderRef = existing[0].order_ref; // reuse existing ref, skip insert
+    } else {
+      const allItems = [
+        ...items,
+        ...(isBogo ? freeItems.map(i => ({ ...i, name: `FREE ${i.name}`, price: 0 })) : []),
+        ...(_wantSubscription ? [{ name: 'Subscription/Bulk', qty: 1, price: 0 }] : [])
+      ];
+      await _db.from('web_orders').insert({
+        order_ref:        orderRef,
+        customer_name:    n,
+        customer_phone:   ph,
+        customer_address: ad,
+        items:            allItems,
+        coupon_code:      _appliedCoupon ? _appliedCoupon.code : null,
+        coupon_id:        _appliedCoupon ? _appliedCoupon.id   : null,
+        subtotal:         base   || null,
+        discount_amount:  saving || null,
+        total:            final  || null,
+        customer_pincode: pin,
+        status:           'new',
+        source:           'website',
+        delivery_date:    _tomorrow.iso,
+        admin_notes:      _upiPaid ? `✅ PAID via UPI · Ref: ${window._pendingOrderRef}` : null
+      });
+    }
   } catch(err) {
     console.warn('Order save failed (non-blocking):', err);
   }
@@ -1672,15 +1696,17 @@ async function sendWA(e){
   const paymentLine = _upiPaid
     ? `✅ PAID via UPI · Ref: ${window._pendingOrderRef || '—'}`
     : `COD / UPI on delivery`;
-  const msg = `Hi Absolute Fresh! 🌿%0A%0AName: ${encodeURIComponent(n)}%0APhone: +91${ph}%0AAddress: ${encodeURIComponent(ad)} - ${pin}%0ADelivery Date: ${_tomorrow.display}%0A%0AOrder:${itemLines}${freeLines}${subLine}${couponLine}${totalLine}%0APayment: ${encodeURIComponent(paymentLine)}%0A%0APlease confirm availability and delivery slot.`;
-  window.open(`https://wa.me/${WA}?text=${msg}`, '_blank');
+  const msg = `Hi Absolute Fresh! 🌿%0A%0AName: ${encodeURIComponent(n)}%0APhone: +91${ph}%0AAddress: ${encodeURIComponent(ad)} - ${pin}%0ADelivery Date: ${_tomorrow.display}%0A%0AOrder:${itemLines}${freeLines}${subLine}${couponLine}${totalLine}%0APayment: ${encodeURIComponent(paymentLine)}%0A%0ARef: ${orderRef}`;
+  const waUrl = `https://wa.me/${WA}?text=${msg}`;
+  window.open(waUrl, '_blank');
 
-  // Keep button disabled for 5 seconds after submission to prevent duplicates
-  setTimeout(() => {
-    _orderSubmitting = false;
-    btn.disabled = false;
-    btn.innerHTML = 'Confirm order on WhatsApp';
-  }, 5000);
+  // ── 3. Show confirmation screen ───────────────────────────────
+  document.getElementById('order-form-inner').style.display = 'none';
+  const successEl = document.getElementById('order-success');
+  successEl.style.display = 'block';
+  document.getElementById('order-ref-badge').textContent = `Order ${orderRef} · Delivery ${_tomorrow.display}`;
+  document.getElementById('order-wa-fallback').href = waUrl;
+  _orderSubmitting = false;
 }
 </script>
 <!-- EMAIL SIGNUP POPUP -->
