@@ -1386,7 +1386,7 @@ async function applyCoupon() {
   try {
     const { data: coupon, error } = await _db
       .from('coupons')
-      .select('id, code, discount_value, discount_type, expires_on, status, min_order_value')
+      .select('id, code, discount_value, discount_type, expires_on, status, min_order_value, max_uses, times_used, coupon_type')
       .eq('code', code)
       .single();
 
@@ -1399,11 +1399,17 @@ async function applyCoupon() {
     } else if (new Date(coupon.expires_on) < new Date()) {
       errorEl.textContent = 'This coupon has expired.';
       errorEl.style.display = 'block';
+    } else if (coupon.max_uses && coupon.times_used >= coupon.max_uses) {
+      errorEl.textContent = 'This coupon has already been used and is no longer valid.';
+      errorEl.style.display = 'block';
     } else {
       _appliedCoupon = coupon;
+      const isSample = coupon.coupon_type === 'free_sample';
       const msg = coupon.discount_type === 'bogo'
         ? `🎁 Coupon "${coupon.code}" applied — Buy 1 Get 1 FREE!`
-        : `✅ Coupon "${coupon.code}" applied — ${coupon.discount_value}% off your order!`;
+        : isSample
+          ? `🎁 Free sample coupon "${coupon.code}" applied! Remember: min 3 Reels, tag @absolutefreshfood, post within 7 days.`
+          : `✅ Coupon "${coupon.code}" applied — ${coupon.discount_value}% off your order!`;
       successEl.textContent = msg;
       successEl.style.display = 'block';
       btn.textContent = '✓';

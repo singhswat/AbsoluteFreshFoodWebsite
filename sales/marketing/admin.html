@@ -354,12 +354,36 @@
         <h3 style="color:#F1F5F9;font-size:1.1rem;margin-bottom:20px">Create Coupon</h3>
         <div style="display:flex;flex-direction:column;gap:14px">
           <div>
-            <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Code</label>
-            <input id="cpn-code" style="width:100%;background:#0F172A;border:1.5px solid #334155;color:#fff;border-radius:8px;padding:10px 12px;font-size:.95rem;text-transform:uppercase" placeholder="e.g. READY5MIN" oninput="this.value=this.value.toUpperCase()"/>
+            <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Coupon Type</label>
+            <select id="cpn-type" onchange="onCouponTypeChange()" style="width:100%;background:#0F172A;border:1.5px solid #334155;color:#fff;border-radius:8px;padding:10px 12px;font-size:.95rem">
+              <option value="standard">Standard — % Discount</option>
+              <option value="free_sample">🎁 Influencer Free Sample (100% off, 1 use)</option>
+              <option value="bogo">Buy 1 Get 1 Free</option>
+            </select>
           </div>
           <div>
+            <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Code</label>
+            <input id="cpn-code" style="width:100%;background:#0F172A;border:1.5px solid #334155;color:#fff;border-radius:8px;padding:10px 12px;font-size:.95rem;text-transform:uppercase" placeholder="e.g. SWATI-FREE" oninput="this.value=this.value.toUpperCase()"/>
+          </div>
+          <!-- Influencer field — shown for free_sample only -->
+          <div id="cpn-influencer-row" style="display:none">
+            <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Assign to Influencer</label>
+            <select id="cpn-influencer" style="width:100%;background:#0F172A;border:1.5px solid #7c3aed;color:#fff;border-radius:8px;padding:10px 12px;font-size:.95rem">
+              <option value="">— Select approved influencer —</option>
+            </select>
+            <div style="margin-top:8px;background:#1a0533;border:1px solid #7c3aed;border-radius:8px;padding:10px;font-size:.75rem;color:#c4b5fd;line-height:1.6">
+              📋 <strong>Free Sample Rules:</strong> Approved influencers only · 1 pack · Min 3 Reels · Tag @absolutefreshfood · Post within 7 days · Lucknow only · Non-transferable
+            </div>
+          </div>
+          <!-- Discount % — hidden for free_sample -->
+          <div id="cpn-discount-row">
             <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Discount %</label>
             <input id="cpn-discount" type="number" min="1" max="100" value="10" style="width:100%;background:#0F172A;border:1.5px solid #334155;color:#fff;border-radius:8px;padding:10px 12px;font-size:.95rem"/>
+          </div>
+          <!-- Max uses -->
+          <div id="cpn-maxuses-row" style="display:none">
+            <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Max Uses</label>
+            <input id="cpn-maxuses" type="number" min="1" value="1" style="width:100%;background:#0F172A;border:1.5px solid #334155;color:#fff;border-radius:8px;padding:10px 12px;font-size:.95rem"/>
           </div>
           <div>
             <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Expires On</label>
@@ -1556,33 +1580,62 @@
     document.getElementById('cpn-discount').value = '10';
     document.getElementById('cpn-welcome').checked = false;
     document.getElementById('cpn-firstonly').value = 'true';
+    document.getElementById('cpn-type').value = 'standard';
+    document.getElementById('cpn-maxuses').value = '1';
+    onCouponTypeChange();
+    // Populate influencer dropdown
+    db.from('influencers').select('id,name').eq('status','approved').order('name').then(({ data }) => {
+      const sel = document.getElementById('cpn-influencer');
+      sel.innerHTML = '<option value="">— Select approved influencer —</option>';
+      (data||[]).forEach(i => { const o = document.createElement('option'); o.value = i.id; o.textContent = i.name; sel.appendChild(o); });
+    });
     document.getElementById('coupon-modal').style.display = 'flex';
   }
 
+  function onCouponTypeChange() {
+    const type = document.getElementById('cpn-type').value;
+    const isSample = type === 'free_sample';
+    document.getElementById('cpn-influencer-row').style.display = isSample ? 'block' : 'none';
+    document.getElementById('cpn-discount-row').style.display = isSample ? 'none' : 'block';
+    document.getElementById('cpn-maxuses-row').style.display = (isSample || type === 'bogo') ? 'block' : 'none';
+    if (isSample) {
+      document.getElementById('cpn-discount').value = '100';
+      document.getElementById('cpn-maxuses').value = '1';
+      document.getElementById('cpn-firstonly').value = 'true';
+    }
+  }
+
   async function saveCoupon() {
-    const code = document.getElementById('cpn-code').value.trim().toUpperCase();
-    const discount = parseFloat(document.getElementById('cpn-discount').value);
+    const type    = document.getElementById('cpn-type').value;
+    const code    = document.getElementById('cpn-code').value.trim().toUpperCase();
     const expires = document.getElementById('cpn-expires').value;
-    const isWelcome = document.getElementById('cpn-welcome').checked;
-    const firstOnly = document.getElementById('cpn-firstonly').value === 'true';
+    const isWelcome  = document.getElementById('cpn-welcome').checked;
+    const firstOnly  = document.getElementById('cpn-firstonly').value === 'true';
+    const isSample   = type === 'free_sample';
+    const influencerId = document.getElementById('cpn-influencer').value || null;
+    const maxUses    = document.getElementById('cpn-maxuses').value ? parseInt(document.getElementById('cpn-maxuses').value) : null;
+    const discount   = isSample ? 100 : parseFloat(document.getElementById('cpn-discount').value);
 
-    if (!code || !discount || !expires) { alert('Please fill all fields.'); return; }
+    if (!code || !expires) { alert('Please fill all fields.'); return; }
+    if (isSample && !influencerId) { alert('Please select an influencer for this free sample coupon.'); return; }
 
-    // If setting as welcome coupon, clear the flag on others first
     if (isWelcome) {
       await db.from('coupons').update({ is_welcome_coupon: false }).eq('is_welcome_coupon', true);
     }
 
     const { error } = await db.from('coupons').insert({
       code,
-      discount_type: 'percentage',
+      discount_type: type === 'bogo' ? 'bogo' : 'percentage',
       discount_value: discount,
       first_order_only: firstOnly,
       times_used: 0,
       status: 'active',
       is_welcome_coupon: isWelcome,
       valid_from: new Date().toISOString(),
-      expires_on: new Date(expires).toISOString()
+      expires_on: new Date(expires).toISOString(),
+      coupon_type: type,
+      influencer_id: influencerId,
+      max_uses: maxUses
     });
 
     if (error) { alert('Error: ' + error.message); return; }
