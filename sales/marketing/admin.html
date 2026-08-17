@@ -408,6 +408,40 @@
       </div>
     </div>
 
+    <!-- ── Edit Coupon Modal ── -->
+    <div id="coupon-edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;align-items:center;justify-content:center;padding:16px">
+      <div style="background:#1E293B;border-radius:16px;padding:28px;width:100%;max-width:420px;border:1px solid #334155">
+        <h3 style="color:#F1F5F9;font-size:1.1rem;margin-bottom:4px">Edit Coupon</h3>
+        <div id="edit-cpn-code-label" style="color:#4ADE80;font-size:.8rem;font-family:monospace;margin-bottom:20px"></div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div>
+            <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Discount %</label>
+            <input id="edit-cpn-discount" type="number" min="1" max="100" style="width:100%;background:#0F172A;border:1.5px solid #334155;color:#fff;border-radius:8px;padding:10px 12px;font-size:.95rem"/>
+          </div>
+          <div>
+            <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Expires On</label>
+            <input id="edit-cpn-expires" type="date" style="width:100%;background:#0F172A;border:1.5px solid #334155;color:#fff;border-radius:8px;padding:10px 12px;font-size:.95rem"/>
+          </div>
+          <div>
+            <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Max Uses (blank = unlimited)</label>
+            <input id="edit-cpn-maxuses" type="number" min="1" style="width:100%;background:#0F172A;border:1.5px solid #334155;color:#fff;border-radius:8px;padding:10px 12px;font-size:.95rem"/>
+          </div>
+          <div>
+            <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Status</label>
+            <select id="edit-cpn-status" style="width:100%;background:#0F172A;border:1.5px solid #334155;color:#fff;border-radius:8px;padding:10px 12px;font-size:.95rem">
+              <option value="active">Active</option>
+              <option value="paused">Paused</option>
+              <option value="expired">Expired</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:22px">
+          <button onclick="saveEditCoupon()" style="flex:1;background:#16A34A;color:#fff;border:none;border-radius:8px;padding:11px;font-weight:700;cursor:pointer">Save Changes</button>
+          <button onclick="document.getElementById('coupon-edit-modal').style.display='none'" style="flex:1;background:#1E293B;color:#94A3B8;border:1px solid #334155;border-radius:8px;padding:11px;cursor:pointer">Cancel</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ═══════════ CAMPAIGNS ═══════════ -->
     <div id="tab-campaigns" style="display:none">
       <div class="toolbar">
@@ -1566,21 +1600,35 @@
     loadCoupons();
   }
 
+  let _editCouponId = null;
+
   async function editCoupon(id) {
     const { data: c } = await db.from('coupons').select('*').eq('id', id).single();
     if (!c) return;
-    const newDiscount = prompt(`Edit discount % for ${c.code}:`, c.discount_value);
-    if (newDiscount === null) return;
-    const newExpiry = prompt('Edit expiry date (YYYY-MM-DD):', c.expires_on ? c.expires_on.split('T')[0] : '');
-    if (newExpiry === null) return;
-    const newMaxUses = prompt('Max uses (leave blank for unlimited):', c.max_uses || '');
-    if (newMaxUses === null) return;
-    await db.from('coupons').update({
-      discount_value: parseFloat(newDiscount) || c.discount_value,
-      expires_on: newExpiry ? new Date(newExpiry).toISOString() : c.expires_on,
-      max_uses: newMaxUses ? parseInt(newMaxUses) : null,
-      updated_at: new Date().toISOString()
-    }).eq('id', id);
+    _editCouponId = id;
+    document.getElementById('edit-cpn-code-label').textContent = c.code;
+    document.getElementById('edit-cpn-discount').value = c.discount_value || '';
+    document.getElementById('edit-cpn-expires').value = c.expires_on ? c.expires_on.split('T')[0] : '';
+    document.getElementById('edit-cpn-maxuses').value = c.max_uses || '';
+    document.getElementById('edit-cpn-status').value = c.status || 'active';
+    document.getElementById('coupon-edit-modal').style.display = 'flex';
+  }
+
+  async function saveEditCoupon() {
+    if (!_editCouponId) return;
+    const discount  = parseFloat(document.getElementById('edit-cpn-discount').value);
+    const expires   = document.getElementById('edit-cpn-expires').value;
+    const maxUses   = document.getElementById('edit-cpn-maxuses').value;
+    const status    = document.getElementById('edit-cpn-status').value;
+    const { error } = await db.from('coupons').update({
+      discount_value: isNaN(discount) ? undefined : discount,
+      expires_on:     expires ? new Date(expires).toISOString() : null,
+      max_uses:       maxUses ? parseInt(maxUses) : null,
+      status,
+      updated_at:     new Date().toISOString()
+    }).eq('id', _editCouponId);
+    if (error) { alert('Error: ' + error.message); return; }
+    document.getElementById('coupon-edit-modal').style.display = 'none';
     loadCoupons();
   }
 
