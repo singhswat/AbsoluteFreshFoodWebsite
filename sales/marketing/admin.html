@@ -1548,6 +1548,7 @@
         <td style="color:#94A3B8;font-size:.76rem">${expires}</td>
         <td>${statusPill}</td>
         <td>
+          <button class="act-btn" style="background:#1e40af22;color:#93c5fd;border-color:#1e40af" onclick="editCoupon('${c.id}')">Edit</button>
           ${c.is_welcome_coupon ? '' : `<button class="act-btn approve" onclick="setWelcomeCoupon('${c.id}')">Set Welcome</button>`}
           ${c.status === 'active'
             ? `<button class="act-btn" onclick="toggleCoupon('${c.id}','paused')">Pause</button>`
@@ -1562,6 +1563,24 @@
 
   async function toggleCoupon(id, status) {
     await db.from('coupons').update({ status, updated_at: new Date().toISOString() }).eq('id', id);
+    loadCoupons();
+  }
+
+  async function editCoupon(id) {
+    const { data: c } = await db.from('coupons').select('*').eq('id', id).single();
+    if (!c) return;
+    const newDiscount = prompt(`Edit discount % for ${c.code}:`, c.discount_value);
+    if (newDiscount === null) return;
+    const newExpiry = prompt('Edit expiry date (YYYY-MM-DD):', c.expires_on ? c.expires_on.split('T')[0] : '');
+    if (newExpiry === null) return;
+    const newMaxUses = prompt('Max uses (leave blank for unlimited):', c.max_uses || '');
+    if (newMaxUses === null) return;
+    await db.from('coupons').update({
+      discount_value: parseFloat(newDiscount) || c.discount_value,
+      expires_on: newExpiry ? new Date(newExpiry).toISOString() : c.expires_on,
+      max_uses: newMaxUses ? parseInt(newMaxUses) : null,
+      updated_at: new Date().toISOString()
+    }).eq('id', id);
     loadCoupons();
   }
 
