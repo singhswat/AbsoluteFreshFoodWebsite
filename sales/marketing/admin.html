@@ -2121,12 +2121,20 @@
     tbody.innerHTML = '<tr class="empty-row"><td colspan="8">Loading…</td></tr>';
 
     let query = db.from('web_orders').select('*').order('created_at', { ascending: false });
-    const today = new Date().toISOString().split('T')[0];
+    // IST = UTC+5:30 — shift boundaries so "today" means midnight-to-midnight IST
+    const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+    const nowIST = new Date(Date.now() + IST_OFFSET_MS);
+    const todayIST = nowIST.toISOString().split('T')[0];
     if (range === 'today') {
-      query = query.gte('created_at', today + 'T00:00:00').lte('created_at', today + 'T23:59:59');
+      // IST midnight = UTC 18:30 previous day
+      const startUTC = new Date(todayIST + 'T00:00:00+05:30').toISOString();
+      const endUTC   = new Date(todayIST + 'T23:59:59+05:30').toISOString();
+      query = query.gte('created_at', startUTC).lte('created_at', endUTC);
     } else if (range === 'yesterday') {
-      const y = new Date(Date.now() - 864e5).toISOString().split('T')[0];
-      query = query.gte('created_at', y + 'T00:00:00').lte('created_at', y + 'T23:59:59');
+      const yIST = new Date(Date.now() + IST_OFFSET_MS - 864e5).toISOString().split('T')[0];
+      const startUTC = new Date(yIST + 'T00:00:00+05:30').toISOString();
+      const endUTC   = new Date(yIST + 'T23:59:59+05:30').toISOString();
+      query = query.gte('created_at', startUTC).lte('created_at', endUTC);
     } else {
       query = query.limit(200);
     }
@@ -2141,7 +2149,7 @@
     updateWOStats(orders);
     tbody.innerHTML = orders.map(o => {
       const itemSummary = (o.items || []).map(i => `${i.name || i.pack || '—'}${i.qty > 1 ? ' ×'+i.qty : ''}`).join(', ') || '—';
-      const time = new Date(o.created_at).toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+      const time = new Date(o.created_at).toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', timeZone:'Asia/Kolkata' });
       const nextStatus = WO_STATUS_NEXT[o.status];
       const nextBtn = nextStatus
         ? `<button class="action-btn" onclick="advanceWOStatus('${o.id}','${nextStatus}')">${WO_STATUS_BTN[o.status]}</button>`
