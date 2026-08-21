@@ -1475,6 +1475,7 @@ function toggleSubscription(btn) {
 
 function getOrderItems() {
   return PACKS.map(p => ({
+    id: p.id,
     name: p.name,
     qty: parseInt(document.getElementById(p.id).textContent) || 0,
     price: p.price
