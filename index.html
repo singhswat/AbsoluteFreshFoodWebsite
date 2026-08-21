@@ -1185,9 +1185,6 @@ function setSubPack(size) {
           <!-- Order Summary -->
           <div id="order-summary" style="display:none;background:#f0faf4;border:1.5px solid #86efac;border-radius:12px;padding:14px 16px;font-size:.88rem;color:#14532d">
             <div id="sum-items-list"></div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:.83rem;color:#7c3aed;font-weight:700">
-              <span>🎁 FREE Podi Chutney 30g (worth ₹45)</span><span style="color:#7c3aed">FREE</span>
-            </div>
             <div style="display:flex;justify-content:space-between;margin-bottom:6px;color:#14532d" id="sum-subtotal-row">
               <span>Subtotal</span><span id="sum-base">—</span>
             </div>
@@ -1422,7 +1419,7 @@ async function applyCoupon() {
     } else if (coupon.status !== 'active') {
       errorEl.textContent = 'This coupon is no longer active.';
       errorEl.style.display = 'block';
-    } else if (new Date(coupon.expires_on) < new Date()) {
+    } else if (coupon.expires_on && new Date(coupon.expires_on) < new Date()) {
       errorEl.textContent = 'This coupon has expired.';
       errorEl.style.display = 'block';
     } else if (coupon.max_uses && coupon.times_used >= coupon.max_uses) {
