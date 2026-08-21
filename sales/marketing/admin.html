@@ -1858,7 +1858,7 @@
     const type = document.getElementById('cpn-type').value;
     const isSample = type === 'free_sample';
     document.getElementById('cpn-influencer-row').style.display = isSample ? 'block' : 'none';
-    document.getElementById('cpn-discount-row').style.display = isSample ? 'none' : 'block';
+    document.getElementById('cpn-discount-row').style.display = (isSample || type === 'bogo' || type === 'rakhigift') ? 'none' : 'block';
     document.getElementById('cpn-maxuses-row').style.display = (isSample || type === 'bogo' || type === 'rakhigift') ? 'block' : 'none';
     if (isSample) {
       document.getElementById('cpn-discount').value = '100';
