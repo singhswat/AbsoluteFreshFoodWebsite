@@ -200,6 +200,7 @@
     <button class="tab-btn" onclick="switchTab('beatplans',this)">🗺️ Beat Plans</button>
     <button class="tab-btn" onclick="switchTab('salesdash',this)">📊 Sales Ops</button>
     <button class="tab-btn" onclick="switchTab('outlets',this)">🏪 Outlets</button>
+    <button class="tab-btn" onclick="switchTab('repperf',this)">🏆 Rep Performance</button>
   </div>
 
   <div class="page-wrap">
@@ -806,6 +807,12 @@
       </div>
     </div>
 
+    <!-- ═══════════ REP PERFORMANCE ═══════════ -->
+    <div id="tab-repperf" style="display:none">
+      <div class="toolbar"><button class="t-btn active" onclick="loadRepPerf()">↻ Refresh</button></div>
+      <div id="repperf-body" style="padding:12px 16px"></div>
+    </div>
+
     <!-- ═══════════ BEAT PLANS ═══════════ -->
     <div id="tab-beatplans" style="display:none">
       <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
@@ -1279,6 +1286,7 @@
     if (name === 'coupons') loadCoupons();
     if (name === 'serviceareas') loadServiceAreas();
     if (name === 'outlets') loadOutlets();
+    if (name === 'repperf') loadRepPerf();
     if (name === 'campaigns') loadCampaigns();
     if (name === 'samples') loadSamples();
     if (name === 'reviews') loadContentReviews();
@@ -2982,6 +2990,77 @@
         <td class="mono">₹${fmt(Math.max(0,amt))}</td>
         <td><span style="font-size:.68rem;font-weight:700;color:${color};text-transform:capitalize">${o.status?.replace(/_/g,' ')||'—'}</span></td>
       </tr>`;
+    }).join('');
+  }
+
+  // ── Rep Performance ────────────────────────────────────────────
+  async function loadRepPerf() {
+    const el = document.getElementById('repperf-body');
+    el.innerHTML = '<p style="color:#64748B">Loading…</p>';
+    const { data: reps } = await db.from('users').select('id,name,phone').eq('role','sales_rep').order('name');
+    const { data: outlets } = await db.from('outlets').select('id,name,area,rep_id,avg_kg_day,tier,status').eq('status','active');
+    if (!reps?.length) { el.innerHTML = '<p style="color:#64748B">No reps found.</p>'; return; }
+
+    const TIER_TARGET = { gold: 20, silver: 10, bronze: 5 };
+    const TIER_EMOJI  = { gold: '🥇', silver: '🥈', bronze: '🥉' };
+
+    const outletsByRep = {};
+    (outlets||[]).forEach(o => {
+      if (!outletsByRep[o.rep_id]) outletsByRep[o.rep_id] = [];
+      outletsByRep[o.rep_id].push(o);
+    });
+
+    el.innerHTML = reps.map(rep => {
+      const repOutlets = outletsByRep[rep.id] || [];
+      const totalActual = repOutlets.reduce((s, o) => s + (parseFloat(o.avg_kg_day)||0) * 7, 0);
+      const totalTarget = repOutlets.reduce((s, o) => s + (TIER_TARGET[o.tier||'bronze']), 0);
+      const pct = totalTarget > 0 ? Math.min(100, Math.round(totalActual / totalTarget * 100)) : 0;
+      const barColor = pct >= 80 ? '#22c55e' : pct >= 50 ? '#f59e0b' : '#ef4444';
+
+      const outletRows = repOutlets.map(o => {
+        const actual = (parseFloat(o.avg_kg_day)||0) * 7;
+        const target = TIER_TARGET[o.tier||'bronze'];
+        const opct = target > 0 ? Math.min(100, Math.round(actual/target*100)) : 0;
+        const ocolor = opct >= 80 ? '#22c55e' : opct >= 50 ? '#f59e0b' : '#ef4444';
+        return `<tr>
+          <td style="font-size:.8rem;padding:6px 8px">${TIER_EMOJI[o.tier||'bronze']} ${o.name}</td>
+          <td style="font-size:.75rem;color:#94A3B8;padding:6px 8px">${o.area||'—'}</td>
+          <td style="font-size:.8rem;padding:6px 8px;text-align:center">${actual.toFixed(1)} kg</td>
+          <td style="font-size:.8rem;padding:6px 8px;text-align:center">${target} kg</td>
+          <td style="padding:6px 8px;min-width:80px">
+            <div style="background:#1E293B;border-radius:4px;height:6px">
+              <div style="background:${ocolor};width:${opct}%;height:6px;border-radius:4px"></div>
+            </div>
+            <div style="font-size:.65rem;color:${ocolor};margin-top:2px">${opct}%</div>
+          </td>
+        </tr>`;
+      }).join('');
+
+      return `<div style="background:#1E293B;border:1px solid #334155;border-radius:12px;margin-bottom:16px;overflow:hidden">
+        <div style="padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #334155">
+          <div style="flex:1">
+            <div style="font-weight:700;color:#F1F5F9;font-size:.95rem">${rep.name}</div>
+            <div style="font-size:.75rem;color:#64748B">${rep.phone||''} · ${repOutlets.length} outlets · ${totalActual.toFixed(1)} / ${totalTarget} kg/week</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:1.3rem;font-weight:800;color:${barColor}">${pct}%</div>
+            <div style="font-size:.65rem;color:#475569">of target</div>
+          </div>
+        </div>
+        <div style="background:#1E293B;border-radius:0;height:8px">
+          <div style="background:${barColor};width:${pct}%;height:8px;transition:width .4s"></div>
+        </div>
+        ${repOutlets.length ? `<table style="width:100%;border-collapse:collapse">
+          <thead><tr style="background:#0F172A">
+            <th style="font-size:.65rem;color:#475569;padding:6px 8px;text-align:left;font-weight:600">OUTLET</th>
+            <th style="font-size:.65rem;color:#475569;padding:6px 8px;text-align:left;font-weight:600">AREA</th>
+            <th style="font-size:.65rem;color:#475569;padding:6px 8px;text-align:center;font-weight:600">ACTUAL/WK</th>
+            <th style="font-size:.65rem;color:#475569;padding:6px 8px;text-align:center;font-weight:600">TARGET/WK</th>
+            <th style="font-size:.65rem;color:#475569;padding:6px 8px;font-weight:600">PROGRESS</th>
+          </tr></thead>
+          <tbody>${outletRows}</tbody>
+        </table>` : '<p style="padding:12px 16px;color:#475569;font-size:.8rem">No outlets assigned</p>'}
+      </div>`;
     }).join('');
   }
 </script>
