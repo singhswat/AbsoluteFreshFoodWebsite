@@ -729,7 +729,8 @@
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>
         </select>
-        <span id="outlets-count" style="font-size:.78rem;color:#64748B;margin-left:auto"></span>
+        <button class="add-btn" onclick="openAddOutletModal()" style="margin-left:auto">+ Add Outlet</button>
+        <span id="outlets-count" style="font-size:.78rem;color:#64748B"></span>
       </div>
       <div class="grid-wrap">
         <table>
@@ -887,6 +888,78 @@
       <button onclick="saveOutlet()" style="flex:1;padding:10px;background:#22c55e;color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer">Save</button>
       <button onclick="document.getElementById('outlet-edit-modal').style.display='none'" style="flex:1;padding:10px;background:#1E293B;color:#94A3B8;border:none;border-radius:8px;cursor:pointer">Cancel</button>
     </div>
+  </div>
+</div>
+
+<!-- ── Add Outlet Modal ── -->
+<div class="modal-overlay" id="outlet-add-modal" style="display:none;align-items:center;justify-content:center">
+  <div class="sheet" style="max-width:460px;width:100%">
+    <div class="handle"></div>
+    <h3 style="color:#F1F5F9;margin-bottom:4px">Add Outlet</h3>
+    <div class="sheet-sub">Add a new outlet and assign a sales rep</div>
+    <div style="display:grid;gap:10px;margin-top:14px">
+      <div>
+        <label class="slabel">Outlet Name *</label>
+        <input id="oa-name" class="sinp" placeholder="e.g. Sri Ram Provision Store"/>
+      </div>
+      <div>
+        <label class="slabel">Contact Person</label>
+        <input id="oa-contact" class="sinp" placeholder="Owner name"/>
+      </div>
+      <div>
+        <label class="slabel">Phone</label>
+        <input id="oa-phone" class="sinp" placeholder="9876543210" type="tel"/>
+      </div>
+      <div>
+        <label class="slabel">Address</label>
+        <input id="oa-address" class="sinp" placeholder="Street, Area, City"/>
+      </div>
+      <div>
+        <label class="slabel">Assigned Rep</label>
+        <select id="oa-rep" class="sinp">
+          <option value="">— Unassigned —</option>
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label class="slabel">Tier</label>
+          <select id="oa-tier" class="sinp">
+            <option value="bronze">🥉 Bronze (5 kg/wk)</option>
+            <option value="silver">🥈 Silver (10 kg/wk)</option>
+            <option value="gold">🥇 Gold (20 kg/wk)</option>
+          </select>
+        </div>
+        <div>
+          <label class="slabel">Avg kg/day</label>
+          <input id="oa-avgkg" class="sinp" type="number" step="0.1" placeholder="1.5"/>
+        </div>
+      </div>
+    </div>
+    <div id="oa-err" style="background:#450a0a;border:1px solid #7f1d1d;color:#FCA5A5;border-radius:8px;padding:10px;font-size:.8rem;margin-top:10px;display:none"></div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button onclick="saveNewOutlet()" style="flex:1;padding:10px;background:#22c55e;color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer">Add Outlet</button>
+      <button onclick="document.getElementById('outlet-add-modal').style.display='none'" style="flex:1;padding:10px;background:#1E293B;color:#94A3B8;border:none;border-radius:8px;cursor:pointer">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Visit Notes Modal ── -->
+<div class="modal-overlay" id="visit-notes-modal" style="display:none;align-items:center;justify-content:center">
+  <div class="sheet" style="max-width:520px;width:100%;max-height:85vh;overflow-y:auto">
+    <div class="handle"></div>
+    <h3 style="color:#F1F5F9;margin-bottom:2px">📝 Visit Notes</h3>
+    <div id="vn-outlet-name" style="color:#94A3B8;font-size:.85rem;margin-bottom:14px"></div>
+    <!-- Add note form -->
+    <div style="background:#0f172a;border:1px solid #1e293b;border-radius:10px;padding:14px;margin-bottom:14px">
+      <label class="slabel">New Note</label>
+      <textarea id="vn-note" class="sinp" style="min-height:70px;resize:vertical" placeholder="What happened during this visit?"></textarea>
+      <label class="slabel" style="margin-top:10px">Next Action</label>
+      <input id="vn-next-action" class="sinp" placeholder="e.g. Follow up on payment next Tuesday"/>
+      <button onclick="saveVisitNote()" style="margin-top:10px;width:100%;padding:9px;background:#22c55e;color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer">+ Save Note</button>
+    </div>
+    <!-- Notes list -->
+    <div id="vn-list" style="display:flex;flex-direction:column;gap:10px"></div>
+    <button onclick="document.getElementById('visit-notes-modal').style.display='none'" style="margin-top:16px;width:100%;padding:10px;background:#1E293B;color:#94A3B8;border:none;border-radius:8px;cursor:pointer">Close</button>
   </div>
 </div>
 
@@ -1461,6 +1534,7 @@
         <td style="font-size:.75rem;color:#64748B">${o.created_at ? new Date(o.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '—'}</td>
         <td style="white-space:nowrap">
           <button onclick="openEditOutlet('${o.id}')" style="padding:3px 10px;border-radius:6px;border:none;background:#1E293B;color:#94A3B8;font-size:.75rem;cursor:pointer;margin-right:4px">✏️ Edit</button>
+          <button onclick="openVisitNotes('${o.id}')" style="padding:3px 10px;border-radius:6px;border:none;background:#0f2a1a;color:#4ADE80;font-size:.75rem;cursor:pointer;margin-right:4px">📝 Notes</button>
           <button onclick="deleteOutlet('${o.id}')" style="padding:3px 10px;border-radius:6px;border:none;background:#3D1A1A;color:#F87171;font-size:.75rem;cursor:pointer">🗑 Delete</button>
         </td>
       </tr>`).join('');
@@ -1505,6 +1579,91 @@
     const { error } = await db.from('outlets').delete().eq('id', id);
     if (error) { alert('Delete failed: ' + error.message); return; }
     loadOutlets();
+  }
+
+  // ── Add Outlet ───────────────────────────────────────────────
+  async function openAddOutletModal() {
+    // populate rep dropdown
+    const { data: reps } = await db.from('users').select('id,name').eq('role','sales_rep').order('name');
+    const sel = document.getElementById('oa-rep');
+    sel.innerHTML = '<option value="">— Unassigned —</option>' + (reps||[]).map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
+    // clear fields
+    ['oa-name','oa-contact','oa-phone','oa-address','oa-avgkg'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('oa-tier').value = 'bronze';
+    document.getElementById('oa-err').style.display = 'none';
+    document.getElementById('outlet-add-modal').style.display = 'flex';
+  }
+
+  async function saveNewOutlet() {
+    const name = document.getElementById('oa-name').value.trim();
+    if (!name) { const e=document.getElementById('oa-err'); e.textContent='Outlet name is required'; e.style.display='block'; return; }
+    const payload = {
+      name,
+      owner_name: document.getElementById('oa-contact').value.trim()||null,
+      phone:      document.getElementById('oa-phone').value.trim()||null,
+      area:       document.getElementById('oa-address').value.trim()||null,
+      rep_id:     document.getElementById('oa-rep').value||null,
+      tier:       document.getElementById('oa-tier').value,
+      avg_kg_day: parseFloat(document.getElementById('oa-avgkg').value)||0,
+      status:     'active',
+    };
+    const { error } = await db.from('outlets').insert(payload);
+    if (error) { const e=document.getElementById('oa-err'); e.textContent=error.message; e.style.display='block'; return; }
+    document.getElementById('outlet-add-modal').style.display = 'none';
+    loadOutlets();
+  }
+
+  // ── Visit Notes ──────────────────────────────────────────────
+  let _vnOutletId = null;
+
+  async function openVisitNotes(outletId) {
+    _vnOutletId = outletId;
+    const o = window._outletCache[outletId] || {};
+    document.getElementById('vn-outlet-name').textContent = o.name || outletId;
+    document.getElementById('vn-note').value = '';
+    document.getElementById('vn-next-action').value = '';
+    document.getElementById('visit-notes-modal').style.display = 'flex';
+    await loadVisitNotes();
+  }
+
+  async function loadVisitNotes() {
+    const list = document.getElementById('vn-list');
+    list.innerHTML = '<div style="color:#64748B;font-size:.85rem">Loading...</div>';
+    const { data, error } = await db.from('outlet_visit_notes')
+      .select('*, users(name)')
+      .eq('outlet_id', _vnOutletId)
+      .order('visited_at', { ascending: false });
+    if (error) { list.innerHTML = `<div style="color:#F87171">${error.message}</div>`; return; }
+    if (!data || !data.length) { list.innerHTML = '<div style="color:#64748B;font-size:.85rem;text-align:center;padding:20px">No visit notes yet.</div>'; return; }
+    list.innerHTML = data.map(n=>{
+      const d = new Date(n.visited_at||n.created_at);
+      const dateStr = d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric',timeZone:'Asia/Kolkata'});
+      const timeStr = d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Kolkata'});
+      return `<div style="background:#0f172a;border:1px solid #1e293b;border-radius:10px;padding:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="color:#4ADE80;font-size:.8rem;font-weight:600">${(n.users&&n.users.name)||'Admin'}</span>
+          <span style="color:#475569;font-size:.75rem">${dateStr} · ${timeStr}</span>
+        </div>
+        <div style="color:#CBD5E1;font-size:.88rem;line-height:1.5">${n.note||''}</div>
+        ${n.next_action ? `<div style="margin-top:8px;padding:8px;background:#0d2a1a;border-radius:6px;color:#86efac;font-size:.8rem">→ Next: ${n.next_action}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  async function saveVisitNote() {
+    const note = document.getElementById('vn-note').value.trim();
+    if (!note) { alert('Please write a note before saving.'); return; }
+    const next_action = document.getElementById('vn-next-action').value.trim()||null;
+    const { error } = await db.from('outlet_visit_notes').insert({
+      outlet_id: _vnOutletId,
+      note,
+      next_action,
+      visited_at: new Date().toISOString(),
+    });
+    if (error) { alert('Save failed: ' + error.message); return; }
+    document.getElementById('vn-note').value = '';
+    document.getElementById('vn-next-action').value = '';
+    await loadVisitNotes();
   }
 
   // ── Service Areas ────────────────────────────────────────────
