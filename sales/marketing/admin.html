@@ -184,23 +184,34 @@
   </div>
 
   <!-- Tab Nav -->
-  <div class="tab-nav">
-    <button class="tab-btn active" onclick="switchTab('home',this)">🏠 Home</button>
-    <button class="tab-btn" onclick="switchTab('weborders',this)">🛒 Orders</button>
-    <button class="tab-btn" onclick="switchTab('coupons',this)">🎟️ Coupons</button>
-    <button class="tab-btn" onclick="switchTab('serviceareas',this)">📍 Areas</button>
-    <button class="tab-btn" onclick="switchTab('influencers',this)">👥 Influencers</button>
-    <button class="tab-btn" onclick="switchTab('campaigns',this)">📣 Campaigns</button>
-    <button class="tab-btn" onclick="switchTab('samples',this)">📦 Samples</button>
-    <button class="tab-btn" onclick="switchTab('reviews',this)">📸 Content</button>
-    <button class="tab-btn" onclick="switchTab('payouts',this)">💰 Payouts</button>
-    <button class="tab-btn" onclick="switchTab('analytics',this)">📊 Analytics</button>
-    <button class="tab-btn" onclick="switchTab('products',this)">🥬 Products</button>
-    <button class="tab-btn" onclick="switchTab('salesreps',this)">👷 Reps</button>
-    <button class="tab-btn" onclick="switchTab('beatplans',this)">🗺️ Beat Plans</button>
-    <button class="tab-btn" onclick="switchTab('salesdash',this)">📊 Sales Ops</button>
-    <button class="tab-btn" onclick="switchTab('outlets',this)">🏪 Outlets</button>
-    <button class="tab-btn" onclick="switchTab('repperf',this)">🏆 Rep Performance</button>
+  <div style="background:#0A0A0A;border-bottom:1px solid #1E293B;padding:0 12px">
+    <!-- Section toggle -->
+    <div style="display:flex;gap:0;border-bottom:1px solid #1E293B;margin-bottom:0">
+      <button id="section-admin-btn" onclick="showSection('admin')" style="padding:8px 20px;background:transparent;border:none;border-bottom:2px solid #22c55e;color:#22c55e;font-size:.78rem;font-weight:700;cursor:pointer;letter-spacing:.04em;text-transform:uppercase">⚙️ Admin</button>
+      <button id="section-perf-btn"  onclick="showSection('perf')"  style="padding:8px 20px;background:transparent;border:none;border-bottom:2px solid transparent;color:#475569;font-size:.78rem;font-weight:700;cursor:pointer;letter-spacing:.04em;text-transform:uppercase">📊 Performance</button>
+    </div>
+    <!-- Admin tabs -->
+    <div id="section-admin" class="tab-nav" style="border-bottom:none;padding:4px 0">
+      <button class="tab-btn active" onclick="switchTab('home',this)">🏠 Home</button>
+      <button class="tab-btn" onclick="switchTab('weborders',this)">🛒 Orders</button>
+      <button class="tab-btn" onclick="switchTab('coupons',this)">🎟️ Coupons</button>
+      <button class="tab-btn" onclick="switchTab('influencers',this)">👥 Influencers</button>
+      <button class="tab-btn" onclick="switchTab('campaigns',this)">📣 Campaigns</button>
+      <button class="tab-btn" onclick="switchTab('samples',this)">📦 Samples</button>
+      <button class="tab-btn" onclick="switchTab('reviews',this)">📸 Content</button>
+      <button class="tab-btn" onclick="switchTab('payouts',this)">💰 Payouts</button>
+      <button class="tab-btn" onclick="switchTab('products',this)">🥬 Products</button>
+      <button class="tab-btn" onclick="switchTab('salesreps',this)">👷 Reps</button>
+      <button class="tab-btn" onclick="switchTab('outlets',this)">🏪 Outlets</button>
+      <button class="tab-btn" onclick="switchTab('serviceareas',this)">📍 Areas</button>
+    </div>
+    <!-- Performance tabs -->
+    <div id="section-perf" class="tab-nav" style="border-bottom:none;padding:4px 0;display:none">
+      <button class="tab-btn" onclick="switchTab('analytics',this)">📊 Analytics</button>
+      <button class="tab-btn" onclick="switchTab('salesdash',this)">📊 Sales Ops</button>
+      <button class="tab-btn" onclick="switchTab('beatplans',this)">🗺️ Beat Plans</button>
+      <button class="tab-btn" onclick="switchTab('repperf',this)">🏆 Rep Performance</button>
+    </div>
   </div>
 
   <div class="page-wrap">
@@ -1347,9 +1358,20 @@
     location.href = '../login.html';
   }
 
+  // ── Section toggle (Admin / Performance) ─────────────────────
+  function showSection(sec) {
+    const isAdmin = sec === 'admin';
+    document.getElementById('section-admin').style.display = isAdmin ? 'flex' : 'none';
+    document.getElementById('section-perf').style.display  = isAdmin ? 'none' : 'flex';
+    document.getElementById('section-admin-btn').style.borderBottomColor = isAdmin ? '#22c55e' : 'transparent';
+    document.getElementById('section-admin-btn').style.color = isAdmin ? '#22c55e' : '#475569';
+    document.getElementById('section-perf-btn').style.borderBottomColor  = isAdmin ? 'transparent' : '#22c55e';
+    document.getElementById('section-perf-btn').style.color  = isAdmin ? '#475569' : '#22c55e';
+  }
+
   // ── Tab switching ────────────────────────────────────────────
   function switchTab(name, btn) {
-    ['home','influencers','coupons','campaigns','samples','reviews','payouts','analytics','weborders','products','salesreps','beatplans','salesdash','serviceareas','outlets'].forEach(t => {
+    ['home','influencers','coupons','campaigns','samples','reviews','payouts','analytics','weborders','products','salesreps','beatplans','salesdash','serviceareas','outlets','repperf'].forEach(t => {
       document.getElementById('tab-' + t).style.display = t === name ? 'block' : 'none';
     });
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -2817,6 +2839,7 @@
       <td>
         <button class="act-btn" onclick="openSetPassword('${r.id}','${esc(r.name)}')">Set PW</button>
         <button class="act-btn ${r.is_active ? 'danger' : 'approve'}" onclick="toggleRepActive('${r.id}',${r.is_active})">${r.is_active ? 'Deactivate' : 'Activate'}</button>
+        <button class="act-btn danger" onclick="deleteRep('${r.id}','${esc(r.name)}')">🗑 Delete</button>
       </td>
     </tr>`).join('');
   }
@@ -2865,6 +2888,13 @@
 
   async function toggleRepActive(id, current) {
     await db.from('users').update({ is_active: !current }).eq('id', id);
+    loadSalesReps();
+  }
+
+  async function deleteRep(id, name) {
+    if (!confirm(`Delete "${name}" permanently? This cannot be undone.`)) return;
+    const { error } = await db.from('users').delete().eq('id', id);
+    if (error) { alert('Delete failed: ' + error.message); return; }
     loadSalesReps();
   }
 
