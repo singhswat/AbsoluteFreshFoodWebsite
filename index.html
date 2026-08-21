@@ -876,6 +876,17 @@ button{font-family:'Poppins',sans-serif}
         </div>
       </div>
     </div>
+
+    <!-- Introductory Offer Banner -->
+    <div class="combo-banner rev" style="margin-top:32px">
+      <div style="flex:1">
+        <div style="font-size:.72rem;font-weight:800;color:var(--terra);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px">🎉 Introductory Offer</div>
+        <div style="font-size:1.6rem;font-weight:900;color:var(--ink);line-height:1.15;margin-bottom:8px">Buy <span style="color:var(--leaf-dark)">1 kg</span> · Get <span style="color:var(--gold)">500g FREE</span></div>
+        <div style="font-size:.88rem;color:var(--muted);line-height:1.6;margin-bottom:18px">Order the 1kg pack and we'll add a 500g pack at no extra cost. Use your coupon code at checkout.</div>
+        <button class="btn btn-primary" onclick="document.getElementById('order').scrollIntoView({behavior:'smooth'})" style="border-radius:12px;padding:13px 28px;font-size:.9rem">Order Now &amp; Claim Offer →</button>
+      </div>
+      <div style="font-size:5rem;flex-shrink:0">🎁</div>
+    </div>
   </div>
 </section>
 
@@ -1421,7 +1432,7 @@ async function applyCoupon() {
       _appliedCoupon = coupon;
       const isSample = coupon.coupon_type === 'free_sample';
       const msg = coupon.discount_type === 'bogo'
-        ? `🎁 Coupon "${coupon.code}" applied — Buy 1 Get 1 FREE!`
+        ? `🎁 Coupon "${coupon.code}" applied — Buy 1kg, Get 500g FREE!`
         : isSample
           ? `🎁 Free sample coupon "${coupon.code}" applied! Remember: min 3 Reels, tag @absolutefreshfood, post within 7 days.`
           : `✅ Coupon "${coupon.code}" applied — ${coupon.discount_value}% off your order!`;
@@ -1479,9 +1490,12 @@ function getOrderPrices() {
 
   if (_appliedCoupon) {
     if (_appliedCoupon.discount_type === 'bogo') {
-      // Customer pays for what they ordered; gets same qty FREE on top
-      freeItems = items.map(i => ({ ...i, free: true }));
-      saving = 0; // no price reduction — they pay full, just get extra packs
+      // Buy 1kg → get 500g free
+      const kg1 = items.find(i => i.id === 'qty-1kg');
+      if (kg1 && kg1.qty > 0) {
+        freeItems = [{ id: 'qty-500g', name: '500g Family Pack', price: 75, qty: kg1.qty, free: true }];
+      }
+      saving = 0;
     } else {
       disc = _appliedCoupon.discount_value || 0;
       saving = base > 0 ? Math.round(base * disc / 100) : 0;
@@ -1648,7 +1662,7 @@ async function sendWA(e){
   let couponLine  = '';
   if (_appliedCoupon && saving > 0) {
     couponLine = isBogo
-      ? `%0ACoupon: ${_appliedCoupon.code} (Buy 1 Get 1 FREE — ₹${freeValue} worth of packs added free)`
+      ? `%0ACoupon: ${_appliedCoupon.code} (Buy 1kg Get 500g FREE — ₹${freeValue} worth of packs added free)`
       : `%0ACoupon: ${_appliedCoupon.code} (${disc}% off — saved ₹${saving})`;
     _db.rpc('increment_coupon_usage', { coupon_id: _appliedCoupon.id }).then(() => {});
   }
