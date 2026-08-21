@@ -869,6 +869,13 @@
         <option value="inactive">Inactive</option>
       </select>
     </div>
+    <div class="sfield"><label class="slabel">Tier</label>
+      <select id="oe-tier" class="sinp">
+        <option value="gold">🥇 Gold — Super Store (≥20 kg/week)</option>
+        <option value="silver">🥈 Silver — Mid Store (10–19 kg/week)</option>
+        <option value="bronze">🥉 Bronze — Small Store (5–9 kg/week)</option>
+      </select>
+    </div>
     <div style="display:flex;gap:10px;margin-top:16px">
       <button onclick="saveOutlet()" style="flex:1;padding:10px;background:#22c55e;color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer">Save</button>
       <button onclick="document.getElementById('outlet-edit-modal').style.display='none'" style="flex:1;padding:10px;background:#1E293B;color:#94A3B8;border:none;border-radius:8px;cursor:pointer">Cancel</button>
@@ -1407,7 +1414,7 @@
     const repId  = document.getElementById('outlets-rep-filter').value;
     const status = document.getElementById('outlets-status-filter').value;
 
-    let q = db.from('outlets').select('id,name,area,owner_name,phone,rep_id,avg_kg_day,status,created_at').order('created_at', { ascending: false });
+    let q = db.from('outlets').select('id,name,area,owner_name,phone,rep_id,avg_kg_day,status,tier,created_at').order('created_at', { ascending: false });
     if (repId)  q = q.eq('rep_id', repId);
     if (status) q = q.eq('status', status);
 
@@ -1436,7 +1443,7 @@
     data.forEach(o => window._outletCache[o.id] = o);
     tbody.innerHTML = data.map(o => `
       <tr>
-        <td class="bold">${o.name||'—'}</td>
+        <td class="bold">${o.name||'—'} ${{gold:'🥇',silver:'🥈',bronze:'🥉'}[o.tier]||'🥉'}</td>
         <td>${o.area||'—'}</td>
         <td>${o.owner_name||'—'}</td>
         <td>${o.phone||'—'}</td>
@@ -1460,6 +1467,7 @@
     document.getElementById('oe-phone').value  = o.phone||'';
     document.getElementById('oe-avg').value    = o.avg_kg_day||0;
     document.getElementById('oe-status').value = o.status||'active';
+    document.getElementById('oe-tier').value   = o.tier||'bronze';
     document.getElementById('outlet-edit-modal').style.display = 'flex';
   }
 
@@ -1472,6 +1480,7 @@
       phone:      document.getElementById('oe-phone').value.trim()||null,
       avg_kg_day: parseFloat(document.getElementById('oe-avg').value)||0,
       status:     document.getElementById('oe-status').value,
+      tier:       document.getElementById('oe-tier').value,
     };
     const { error } = await db.from('outlets').update(updates).eq('id', id);
     if (error) { alert('Save failed: ' + error.message); return; }
