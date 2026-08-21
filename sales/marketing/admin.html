@@ -359,6 +359,7 @@
               <option value="standard">Standard — % Discount</option>
               <option value="free_sample">🎁 Influencer Free Sample (100% off, 1 use)</option>
               <option value="bogo">Buy 1 Get 1 Free</option>
+              <option value="rakhigift">🎁 Rakhi Gift — Buy 1kg + 500g Free + Podi Chutney</option>
             </select>
           </div>
           <div>
@@ -1660,7 +1661,7 @@
     const isSample = type === 'free_sample';
     document.getElementById('cpn-influencer-row').style.display = isSample ? 'block' : 'none';
     document.getElementById('cpn-discount-row').style.display = isSample ? 'none' : 'block';
-    document.getElementById('cpn-maxuses-row').style.display = (isSample || type === 'bogo') ? 'block' : 'none';
+    document.getElementById('cpn-maxuses-row').style.display = (isSample || type === 'bogo' || type === 'rakhigift') ? 'block' : 'none';
     if (isSample) {
       document.getElementById('cpn-discount').value = '100';
       document.getElementById('cpn-maxuses').value = '1';
@@ -1689,7 +1690,7 @@
 
     const { error } = await db.from('coupons').insert({
       code,
-      discount_type: type === 'bogo' ? 'bogo' : 'percentage',
+      discount_type: (type === 'bogo' || type === 'rakhigift') ? 'bogo' : 'percentage',
       discount_value: discount,
       first_order_only: firstOnly,
       times_used: 0,

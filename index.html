@@ -1432,7 +1432,9 @@ async function applyCoupon() {
       _appliedCoupon = coupon;
       const isSample = coupon.coupon_type === 'free_sample';
       const msg = coupon.discount_type === 'bogo'
-        ? `🎁 Coupon "${coupon.code}" applied — Buy 1kg, Get 500g FREE!`
+        ? coupon.coupon_type === 'rakhigift'
+          ? `🎁 Coupon "${coupon.code}" applied — Buy 1kg, Get 500g + Podi Chutney FREE! 🪔`
+          : `🎁 Coupon "${coupon.code}" applied — Buy 1kg, Get 500g FREE!`
         : isSample
           ? `🎁 Free sample coupon "${coupon.code}" applied! Remember: min 3 Reels, tag @absolutefreshfood, post within 7 days.`
           : `✅ Coupon "${coupon.code}" applied — ${coupon.discount_value}% off your order!`;
@@ -1490,10 +1492,11 @@ function getOrderPrices() {
 
   if (_appliedCoupon) {
     if (_appliedCoupon.discount_type === 'bogo') {
-      // Buy 1kg → get 500g free
+      const isRakhi = _appliedCoupon.coupon_type === 'rakhigift';
       const kg1 = items.find(i => i.id === 'qty-1kg');
       if (kg1 && kg1.qty > 0) {
         freeItems = [{ id: 'qty-500g', name: '500g Family Pack', price: 75, qty: kg1.qty, free: true }];
+        if (isRakhi) freeItems.push({ id: 'podi', name: 'Podi Chutney 30g', price: 45, qty: kg1.qty, free: true });
       }
       saving = 0;
     } else {
