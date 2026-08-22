@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Absolute Fresh — Ground Tonight. At Your Door By Morning.</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root {
+  --bg:#0A0A08; --bg2:#111110; --bg3:#181815; --bg4:#1e1e1a;
+  --white:#F2EDE4; --muted:#6B6B60; --border:rgba(242,237,228,.08);
+  --green:#3DD68C; --green-d:#1A7A4A; --yellow:#F5C842;
+  --radius:16px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--white);overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+button{font-family:'Space Grotesk',sans-serif}
+img{max-width:100%}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 40px;
+  transition:background .3s,backdrop-filter .3s}
+nav.solid{background:rgba(10,10,8,.97);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+.nav-logo{font-size:16px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.nav-logo span{color:var(--green)}
+.nav-links{display:flex;gap:32px;list-style:none}
+.nav-links a{font-size:13px;color:var(--muted);transition:color .2s}
+.nav-links a:hover{color:var(--white)}
+.nav-cta{background:var(--green);color:#000;font-size:13px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;
+  padding:10px 24px;border:none;border-radius:999px;cursor:pointer;transition:all .2s}
+.nav-cta:hover{background:#50e8a0;transform:scale(1.04)}
+@media(max-width:768px){.nav-links{display:none}.nav{padding:16px 20px}}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end;
+  padding:40px 40px 72px;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 30%,rgba(61,214,140,.1) 0%,transparent 100%),
+    radial-gradient(ellipse 40% 40% at 85% 75%,rgba(245,200,66,.05) 0%,transparent 100%),
+    var(--bg);
+  position:relative;overflow:hidden;
+}
+.hero-watermark{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-family:'Playfair Display',serif;font-weight:900;font-style:italic;
+  font-size:clamp(100px,18vw,280px);color:rgba(61,214,140,.04);
+  white-space:nowrap;pointer-events:none;user-select:none;letter-spacing:-.02em;
+}
+.hero-live{
+  display:inline-flex;align-items:center;gap:8px;margin-bottom:28px;width:fit-content;
+  background:rgba(61,214,140,.08);border:1px solid rgba(61,214,140,.18);
+  color:var(--green);font-size:11px;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;padding:6px 16px;border-radius:999px;
+}
+.hero-live::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);
+  animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.8)}}
+.hero-h1{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(48px,9vw,120px);font-weight:900;line-height:1.0;letter-spacing:-.03em;
+  max-width:1000px;margin-bottom:32px;
+}
+.hero-h1 em{font-style:italic;color:var(--green)}
+.hero-sub{
+  font-size:clamp(15px,1.8vw,19px);color:var(--muted);max-width:540px;
+  line-height:1.7;margin-bottom:52px;
+}
+.hero-sub strong{color:var(--white)}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap}
+.btn-primary{
+  background:var(--green);color:#000;font-size:15px;font-weight:700;
+  padding:16px 36px;border:none;border-radius:999px;cursor:pointer;transition:all .25s;
+}
+.btn-primary:hover{background:#50e8a0;transform:translateY(-2px);box-shadow:0 20px 40px rgba(61,214,140,.25)}
+.btn-ghost{
+  background:transparent;color:var(--white);font-size:15px;font-weight:500;
+  padding:16px 36px;border:1px solid rgba(242,237,228,.2);border-radius:999px;cursor:pointer;transition:all .25s;
+}
+.btn-ghost:hover{border-color:var(--white)}
+@media(max-width:600px){.hero{padding:120px 20px 60px}.hero-btns{flex-direction:column}}
+
+/* ── TICKER ── */
+.ticker{background:var(--green);padding:13px 0;overflow:hidden}
+.ticker-track{display:flex;animation:scroll 22s linear infinite;width:max-content}
+@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.t-item{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#000;padding:0 40px;flex-shrink:0}
+.t-dot{opacity:.35;margin:0 -20px}
+
+/* ── STATS ── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--border)}
+.stat{padding:52px 40px;border-right:1px solid var(--border)}
+.stat:last-child{border-right:none}
+.stat-n{font-family:'Playfair Display',serif;font-size:clamp(48px,5.5vw,80px);font-weight:900;font-style:italic;color:var(--green);line-height:1;margin-bottom:8px}
+.stat-l{font-size:13px;color:var(--muted);line-height:1.5}
+@media(max-width:900px){.stats{grid-template-columns:1fr 1fr}.stat:nth-child(2){border-right:none}}
+@media(max-width:500px){.stats{grid-template-columns:1fr}.stat{border-right:none;border-bottom:1px solid var(--border)}.stat:last-child{border-bottom:none}}
+
+/* ── SECTION ── */
+.sec{padding:100px 40px}
+@media(max-width:768px){.sec{padding:70px 20px}}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--green);margin-bottom:14px}
+.sec-title{font-family:'Playfair Display',serif;font-size:clamp(36px,5vw,72px);font-weight:900;line-height:1.05;letter-spacing:-.02em}
+.sec-title em{font-style:italic}
+
+/* ── PRODUCTS ── */
+.prod-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:60px}
+@media(max-width:700px){.prod-grid{grid-template-columns:1fr}}
+.prod-card{background:var(--bg3);padding:52px 44px;position:relative;overflow:hidden;transition:background .25s}
+.prod-card:hover{background:var(--bg4)}
+.prod-card:first-child{border-radius:var(--radius) 0 0 var(--radius)}
+.prod-card:last-child{border-radius:0 var(--radius) var(--radius) 0}
+@media(max-width:700px){
+  .prod-card:first-child{border-radius:var(--radius) var(--radius) 0 0}
+  .prod-card:last-child{border-radius:0 0 var(--radius) var(--radius)}
+}
+.prod-badge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 12px;border-radius:999px;margin-bottom:32px}
+.prod-badge.green{background:rgba(61,214,140,.12);color:var(--green)}
+.prod-badge.yellow{background:rgba(245,200,66,.12);color:var(--yellow)}
+.prod-size{font-family:'Playfair Display',serif;font-size:clamp(60px,8vw,100px);font-weight:900;font-style:italic;line-height:1;margin-bottom:6px}
+.prod-name{font-size:14px;font-weight:500;color:var(--muted);margin-bottom:28px;letter-spacing:.03em}
+.prod-price-row{display:flex;align-items:baseline;gap:10px;margin-bottom:28px}
+.prod-price{font-size:38px;font-weight:700}
+.prod-per{font-size:13px;color:var(--muted)}
+.prod-feats{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:40px}
+.prod-feats li{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:10px}
+.prod-feats li::before{content:'✓';color:var(--green);font-weight:700;font-size:11px;flex-shrink:0}
+.qty-ctrl{display:flex;align-items:center;background:var(--bg2);border-radius:999px;width:fit-content}
+.qty-btn{width:44px;height:44px;border:none;background:transparent;color:var(--white);font-size:20px;cursor:pointer;border-radius:999px;display:grid;place-items:center;transition:background .2s}
+.qty-btn:hover{background:rgba(255,255,255,.1)}
+.qty-num{width:48px;text-align:center;font-size:18px;font-weight:700}
+.prod-glow{position:absolute;bottom:-60px;right:-60px;width:200px;height:200px;border-radius:50%;pointer-events:none}
+
+/* ── HOW IT WORKS ── */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-top:60px}
+@media(max-width:900px){.steps{grid-template-columns:1fr 1fr}}
+@media(max-width:500px){.steps{grid-template-columns:1fr}}
+.step{background:var(--bg3);padding:40px 32px}
+.step:first-child{border-radius:var(--radius) 0 0 var(--radius)}
+.step:last-child{border-radius:0 var(--radius) var(--radius) 0}
+@media(max-width:900px){
+  .step:first-child{border-radius:var(--radius) 0 0 0}
+  .step:nth-child(2){border-radius:0 var(--radius) 0 0}
+  .step:nth-child(3){border-radius:0 0 0 var(--radius)}
+  .step:last-child{border-radius:0 0 var(--radius) 0}
+}
+@media(max-width:500px){
+  .step,.step:first-child,.step:nth-child(2),.step:nth-child(3),.step:last-child{border-radius:0}
+  .step:first-child{border-radius:var(--radius) var(--radius) 0 0}
+  .step:last-child{border-radius:0 0 var(--radius) var(--radius)}
+}
+.step-bg{font-family:'Playfair Display',serif;font-size:80px;font-weight:900;font-style:italic;color:rgba(61,214,140,.07);line-height:1;margin-bottom:20px}
+.step-ico{font-size:28px;margin-bottom:14px}
+.step-t{font-size:15px;font-weight:700;margin-bottom:8px}
+.step-d{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* ── ORDER SECTION ── */
+.order-sec{padding:100px 40px;background:linear-gradient(160deg,rgba(61,214,140,.05) 0%,transparent 40%)}
+@media(max-width:768px){.order-sec{padding:70px 20px}}
+.order-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:80px;max-width:1200px;margin:0 auto;align-items:start}
+@media(max-width:900px){.order-grid{grid-template-columns:1fr;gap:48px}}
+.order-sticky{position:sticky;top:100px}
+@media(max-width:900px){.order-sticky{position:static}}
+.order-title{font-family:'Playfair Display',serif;font-size:clamp(36px,4.5vw,60px);font-weight:900;line-height:1.05;margin-bottom:24px}
+.order-title em{font-style:italic;color:var(--green)}
+.order-desc{font-size:15px;color:var(--muted);line-height:1.7;margin-bottom:40px}
+.trust-list{display:flex;flex-direction:column;gap:18px}
+.trust-item{display:flex;align-items:center;gap:16px}
+.trust-ico{width:42px;height:42px;background:rgba(61,214,140,.08);border-radius:10px;display:grid;place-items:center;font-size:18px;flex-shrink:0}
+.trust-t{font-size:14px;font-weight:600;margin-bottom:2px}
+.trust-s{font-size:12px;color:var(--muted)}
+
+/* ── FORM CARD ── */
+.form-card{background:var(--bg3);border-radius:24px;padding:40px;border:1px solid var(--border)}
+
+/* --- reuse form fields exactly from live site, re-themed --- */
+.form-card h3{font-size:18px;font-weight:700;margin-bottom:6px}
+.order-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
+.form{display:flex;flex-direction:column;gap:12px}
+.form input,.form textarea{
+  width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--white);
+  font-family:'Space Grotesk',sans-serif;font-size:14px;
+  padding:12px 16px;border-radius:10px;outline:none;transition:border .2s;
+}
+.form input:focus,.form textarea:focus{border-color:var(--green)}
+.form input::placeholder,.form textarea::placeholder{color:var(--muted)}
+.form textarea{min-height:72px;resize:vertical}
+#pin-status{font-size:.78rem;margin-top:4px;margin-bottom:2px;min-height:18px;padding-left:2px}
+.pack-row-new{display:flex;align-items:center;justify-content:space-between;
+  background:var(--bg2);border:1px solid var(--border);
+  padding:12px 16px;border-radius:12px;transition:border-color .2s}
+.pack-row-new:hover{border-color:rgba(61,214,140,.25)}
+.pack-info-new strong{font-size:14px;font-weight:600;display:block;margin-bottom:2px}
+.pack-info-new span{font-size:12px;color:var(--green);font-weight:600}
+.pack-sub{background:rgba(245,200,66,.06);border:1px solid rgba(245,200,66,.2);
+  padding:12px 16px;border-radius:12px;display:flex;align-items:center;justify-content:space-between}
+.pack-sub-l strong{display:block;font-size:14px;font-weight:600;color:var(--yellow);margin-bottom:2px}
+.pack-sub-l span{font-size:12px;color:rgba(245,200,66,.6)}
+.sub-add-btn{background:transparent;border:1.5px solid var(--yellow);color:var(--yellow);
+  font-size:12px;font-weight:700;padding:6px 16px;border-radius:999px;cursor:pointer;transition:all .2s}
+.sub-add-btn:hover,.sub-add-btn.active{background:rgba(245,200,66,.15)}
+.qty-sm{display:flex;align-items:center;background:var(--bg);border-radius:999px}
+.qty-sm-btn{width:36px;height:36px;border:none;background:transparent;color:var(--white);font-size:18px;cursor:pointer;border-radius:999px;display:grid;place-items:center;transition:background .2s}
+.qty-sm-btn:hover{background:rgba(255,255,255,.1)}
+.qty-sm-num{width:34px;text-align:center;font-size:15px;font-weight:700}
+.coupon-row{display:flex;gap:10px}
+.coupon-row input{flex:1;background:var(--bg2);border:1px solid var(--border);color:var(--white);
+  font-family:'Space Grotesk',sans-serif;font-size:13px;letter-spacing:.08em;text-transform:uppercase;
+  padding:11px 16px;border-radius:10px;outline:none;transition:border .2s}
+.coupon-row input:focus{border-color:var(--green)}
+.coupon-row input::placeholder{text-transform:none;letter-spacing:0;color:var(--muted)}
+.coupon-apply{background:rgba(61,214,140,.12);color:var(--green);border:1px solid rgba(61,214,140,.25);
+  font-size:13px;font-weight:700;padding:11px 18px;border-radius:10px;cursor:pointer;white-space:nowrap;transition:all .2s}
+.coupon-apply:hover{background:rgba(61,214,140,.22)}
+.coupon-success{font-size:12px;padding:9px 12px;border-radius:8px;background:rgba(61,214,140,.1);color:var(--green);display:none}
+.coupon-error{font-size:12px;padding:9px 12px;border-radius:8px;background:rgba(239,68,68,.1);color:#f87171;display:none}
+/* Order summary */
+#order-summary{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;font-size:.88rem;color:var(--white)}
+#sum-items-list .sum-line{display:flex;justify-content:space-between;margin-bottom:5px;color:var(--muted);font-size:.83rem}
+#sum-items-list .sum-line.free{color:var(--green);font-weight:700}
+#sum-subtotal-row,#sum-discount-row{display:flex;justify-content:space-between;margin-bottom:6px;font-size:.83rem}
+#sum-discount-row{color:var(--green)}
+.sum-total-row{display:flex;justify-content:space-between;font-weight:800;font-size:1rem;border-top:1px solid var(--border);padding-top:10px;margin-top:4px}
+.sum-cod{font-size:.72rem;color:var(--muted);margin-top:6px;text-align:center}
+/* UPI QR inside summary */
+#upi-qr-box{margin-top:12px;background:var(--bg);border-radius:12px;padding:14px;text-align:center;border:1px solid var(--border)}
+#upi-qr-canvas{display:inline-block;border-radius:8px;overflow:hidden;line-height:0}
+#upi-qr-amount{margin-top:8px;font-size:.8rem;color:var(--white);font-weight:700}
+#upi-pay-btn{display:block;margin-top:10px;padding:10px;background:var(--green);color:#000;border-radius:9px;font-size:.82rem;font-weight:700;text-decoration:none}
+#upi-paid-btn{display:block;width:100%;margin-top:8px;padding:10px;background:var(--bg2);color:var(--muted);border:1.5px solid var(--border);border-radius:9px;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .2s}
+#upi-paid-badge{display:none;margin-top:8px;background:rgba(61,214,140,.1);color:var(--green);border-radius:8px;padding:7px;font-size:.78rem;font-weight:700}
+/* Delivery badge */
+#delivery-date-row{background:rgba(61,214,140,.06);border:1px solid rgba(61,214,140,.15);border-radius:10px;padding:10px 14px;font-size:.85rem;color:var(--muted);display:flex;align-items:center;gap:8px}
+#delivery-date-row strong{color:var(--green)}
+/* WA button */
+.form-wa-btn{
+  width:100%;background:var(--green);color:#000;
+  font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;
+  padding:16px;border:none;border-radius:12px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  transition:all .25s;
+}
+.form-wa-btn:hover{background:#50e8a0;transform:translateY(-1px);box-shadow:0 16px 40px rgba(61,214,140,.3)}
+.form-wa-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+/* Success screen */
+#order-success{text-align:center;padding:32px 16px}
+#order-success h3{font-family:'Playfair Display',serif;font-size:28px;font-weight:900;font-style:italic;color:var(--green);margin-bottom:8px}
+#order-ref-badge{background:rgba(61,214,140,.1);border:1px solid rgba(61,214,140,.2);border-radius:10px;padding:10px 16px;font-size:.82rem;color:var(--green);font-weight:700;margin-bottom:16px;display:inline-block}
+#order-wa-fallback{display:inline-block;background:#25D366;color:#fff;font-weight:700;border-radius:10px;padding:11px 20px;font-size:.9rem;margin-bottom:12px}
+
+/* ── TESTIMONIALS ── */
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-top:60px}
+@media(max-width:800px){.testi-grid{grid-template-columns:1fr}}
+.testi-card{background:var(--bg3);padding:36px 32px}
+.testi-card:first-child{border-radius:var(--radius) 0 0 var(--radius)}
+.testi-card:last-child{border-radius:0 var(--radius) var(--radius) 0}
+@media(max-width:800px){
+  .testi-card,.testi-card:first-child,.testi-card:last-child{border-radius:0}
+  .testi-card:first-child{border-radius:var(--radius) var(--radius) 0 0}
+  .testi-card:last-child{border-radius:0 0 var(--radius) var(--radius)}
+}
+.stars{color:var(--yellow);font-size:13px;letter-spacing:2px;margin-bottom:18px}
+.testi-q{font-size:15px;line-height:1.7;font-style:italic;color:var(--white);margin-bottom:20px}
+.testi-by{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+/* ── FOOTER ── */
+footer{padding:56px 40px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:24px}
+@media(max-width:768px){footer{flex-direction:column;align-items:flex-start;padding:48px 20px}}
+.foot-brand{font-size:14px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}
+.foot-brand span{color:var(--green)}
+.foot-sub{font-size:11px;color:var(--muted)}
+.foot-links{display:flex;gap:28px;flex-wrap:wrap}
+.foot-links a{font-size:13px;color:var(--muted);transition:color .2s}
+.foot-links a:hover{color:var(--white)}
+.foot-copy{font-size:11px;color:var(--muted)}
+
+/* ── WA FAB ── */
+.wa-fab{position:fixed;bottom:24px;right:24px;z-index:50;width:54px;height:54px;
+  background:#25D366;border-radius:50%;display:grid;place-items:center;
+  box-shadow:0 8px 24px rgba(37,211,102,.4);transition:transform .25s;cursor:pointer}
+.wa-fab:hover{transform:scale(1.1)}
+.wa-fab svg{width:26px;height:26px;fill:#fff}
+</style>
+</head>
+<body>
+
+<!-- WA FAB -->
+<a class="wa-fab" href="https://wa.me/917985079797" target="_blank">
+  <svg viewBox="0 0 448 512"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
+</a>
+
+<!-- NAV -->
+<nav id="main-nav">
+  <div class="nav-logo">Absolute <span>Fresh</span></div>
+  <ul class="nav-links">
+    <li><a href="#products">Products</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#order">Order</a></li>
+  </ul>
+  <button class="nav-cta" onclick="document.getElementById('order').scrollIntoView({behavior:'smooth'})">Order Now</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-watermark">Fresh</div>
+  <div class="hero-live">Live · Lucknow delivery</div>
+  <h1 class="hero-h1">Ground <em>tonight.</em><br>At your door<br>by morning.</h1>
+  <p class="hero-sub">Stone-ground, naturally fermented idli &amp; dosa batter. <strong>No preservatives. No compromises.</strong> Made fresh every night for morning delivery.</p>
+  <div class="hero-btns">
+    <button class="btn-primary" onclick="document.getElementById('order').scrollIntoView({behavior:'smooth'})">Order for Tomorrow →</button>
+    <button class="btn-ghost" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">See Packs ↓</button>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-track" id="ticker-track"></div>
+</div>
+
+<!-- STATS -->
+<section class="stats">
+  <div class="stat"><div class="stat-n">500+</div><div class="stat-l">Families served<br>every week</div></div>
+  <div class="stat"><div class="stat-n">0</div><div class="stat-l">Preservatives.<br>Ever.</div></div>
+  <div class="stat"><div class="stat-n">12h</div><div class="stat-l">Natural fermentation<br>every batch</div></div>
+  <div class="stat"><div class="stat-n">6am</div><div class="stat-l">At your door<br>before breakfast</div></div>
+</section>
+
+<!-- PRODUCTS -->
+<section class="sec" id="products">
+  <div class="eyebrow">Our Packs</div>
+  <h2 class="sec-title">Pick your <em>perfect size.</em></h2>
+  <div class="prod-grid">
+    <div class="prod-card">
+      <div class="prod-badge green">Most Popular</div>
+      <div class="prod-size">1 kg</div>
+      <div class="prod-name">Family Pack</div>
+      <div class="prod-price-row"><div class="prod-price">₹140</div><div class="prod-per">per pack</div></div>
+      <ul class="prod-feats">
+        <li>~10 idlis or 6 dosas</li>
+        <li>Families of 3–5</li>
+        <li>Stone-ground, zero additives</li>
+        <li>Cold chain maintained</li>
+      </ul>
+      <div class="qty-ctrl">
+        <button class="qty-btn" onclick="changeQty('qty-1kg',-1)">−</button>
+        <div class="qty-num" id="qty-1kg">0</div>
+        <button class="qty-btn" onclick="changeQty('qty-1kg',1)">+</button>
+      </div>
+      <div class="prod-glow" style="background:radial-gradient(circle,rgba(61,214,140,.08),transparent 70%)"></div>
+    </div>
+    <div class="prod-card">
+      <div class="prod-badge yellow">Try It First</div>
+      <div class="prod-size">500g</div>
+      <div class="prod-name">Starter Pack</div>
+      <div class="prod-price-row"><div class="prod-price">₹75</div><div class="prod-per">per pack</div></div>
+      <ul class="prod-feats">
+        <li>~5 idlis or 3 dosas</li>
+        <li>Great for couples or solo</li>
+        <li>Same stone-ground freshness</li>
+        <li>First order? Start here</li>
+      </ul>
+      <div class="qty-ctrl">
+        <button class="qty-btn" onclick="changeQty('qty-500g',-1)">−</button>
+        <div class="qty-num" id="qty-500g">0</div>
+        <button class="qty-btn" onclick="changeQty('qty-500g',1)">+</button>
+      </div>
+      <div class="prod-glow" style="background:radial-gradient(circle,rgba(245,200,66,.08),transparent 70%)"></div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="sec" id="how" style="background:var(--bg2)">
+  <div class="eyebrow">The Process</div>
+  <h2 class="sec-title">Simple. <em>Seriously.</em></h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-bg">01</div>
+      <div class="step-ico">📱</div>
+      <div class="step-t">Order by tonight</div>
+      <div class="step-d">Place your order by 10pm. We confirm batch size & delivery slot on WhatsApp.</div>
+    </div>
+    <div class="step">
+      <div class="step-bg">02</div>
+      <div class="step-ico">🪨</div>
+      <div class="step-t">Ground overnight</div>
+      <div class="step-d">Stone-ground, naturally fermented. No machines that heat the batter. No shortcuts.</div>
+    </div>
+    <div class="step">
+      <div class="step-bg">03</div>
+      <div class="step-ico">🌅</div>
+      <div class="step-t">Morning delivery</div>
+      <div class="step-d">At your door before breakfast. Cold chain maintained from grinder to you.</div>
+    </div>
+    <div class="step">
+      <div class="step-bg">04</div>
+      <div class="step-ico">💰</div>
+      <div class="step-t">Pay on delivery</div>
+      <div class="step-d">Cash or UPI at the door. No advance needed for your first order.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ORDER -->
+<section class="order-sec" id="order">
+  <div class="order-grid">
+    <!-- Left: info -->
+    <div class="order-sticky">
+      <div class="eyebrow">Place Your Order</div>
+      <h2 class="order-title">Fresh batter,<br><em>tomorrow</em><br>morning.</h2>
+      <p class="order-desc">Fill in your details. We'll confirm availability and delivery time on WhatsApp — usually within minutes.</p>
+      <div class="trust-list">
+        <div class="trust-item">
+          <div class="trust-ico">💳</div>
+          <div><div class="trust-t">Pay on Delivery</div><div class="trust-s">Cash or UPI when it arrives. No advance.</div></div>
+        </div>
+        <div class="trust-item">
+          <div class="trust-ico">📍</div>
+          <div><div class="trust-t">Lucknow Only</div><div class="trust-s">Vrindavan Colony, Ashiyana & nearby areas.</div></div>
+        </div>
+        <div class="trust-item">
+          <div class="trust-ico">✅</div>
+          <div><div class="trust-t">WhatsApp Confirmation</div><div class="trust-s">We'll confirm your slot before 10pm.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: same form as live site -->
+    <div class="form-card">
+      <!-- Success screen -->
+      <div id="order-success" style="display:none">
+        <div style="font-size:3rem;margin-bottom:12px">🎉</div>
+        <h3>Order Received!</h3>
+        <p style="font-size:.88rem;color:var(--muted);margin-bottom:14px">Your order has been saved. WhatsApp should open automatically — if it didn't, tap below.</p>
+        <div id="order-ref-badge"></div>
+        <br/>
+        <a id="order-wa-fallback" href="#" target="_blank">📲 Open WhatsApp to confirm</a>
+        <br/><br/>
+        <button onclick="document.getElementById('order-success').style.display='none';document.getElementById('order-form-inner').style.display='block'" style="background:none;border:none;color:var(--muted);font-size:.82rem;cursor:pointer">Place another order</button>
+      </div>
+
+      <div id="order-form-inner">
+        <h3>Send Your Order</h3>
+        <p class="order-sub">We confirm availability, delivery slot and COD/UPI on WhatsApp.</p>
+        <form class="form" onsubmit="sendWA(event)">
+          <input id="f-name" required placeholder="Your name"/>
+          <input id="f-phone" type="tel" required placeholder="Phone number (e.g. 98765 43210)" inputmode="numeric"/>
+          <textarea id="f-addr" required placeholder="Delivery address · area / landmark"></textarea>
+          <div>
+            <input id="f-pin" type="tel" inputmode="numeric" maxlength="6" required placeholder="Pincode (e.g. 226012)" oninput="this.value=this.value.replace(/\D/g,'')" onblur="checkPin()"/>
+            <div id="pin-status"></div>
+          </div>
+
+          <!-- Pack selector — same IDs as live site -->
+          <div style="font-size:.75rem;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Select Packs</div>
+          <div id="pack-selector" style="display:flex;flex-direction:column;gap:10px;margin-bottom:4px">
+            <div class="pack-row-new">
+              <div class="pack-info-new"><strong>1 kg Pack</strong><span>₹140 per pack</span></div>
+              <div class="qty-sm">
+                <button type="button" class="qty-sm-btn" onclick="changeQty('qty-1kg',-1)">−</button>
+                <div class="qty-sm-num" id="qty-1kg-form">0</div>
+                <button type="button" class="qty-sm-btn" onclick="changeQty('qty-1kg',1)">+</button>
+              </div>
+            </div>
+            <div class="pack-row-new">
+              <div class="pack-info-new"><strong>500g Family Pack</strong><span>₹75 per pack</span></div>
+              <div class="qty-sm">
+                <button type="button" class="qty-sm-btn" onclick="changeQty('qty-500g',-1)">−</button>
+                <div class="qty-sm-num" id="qty-500g-form">0</div>
+                <button type="button" class="qty-sm-btn" onclick="changeQty('qty-500g',1)">+</button>
+              </div>
+            </div>
+            <div class="pack-sub">
+              <div class="pack-sub-l"><strong>Subscription / Bulk</strong><span>Daily · Weekly · Hotel supply</span></div>
+              <button type="button" class="sub-add-btn" id="sub-toggle" onclick="toggleSubscription(this)">Add</button>
+            </div>
+          </div>
+
+          <div class="coupon-row">
+            <input id="f-coupon" placeholder="Have a coupon code?" autocomplete="off" oninput="this.value=this.value.toUpperCase()"/>
+            <button type="button" class="coupon-apply" id="coupon-btn" onclick="applyCoupon()">Apply</button>
+          </div>
+          <div class="coupon-success" id="coupon-success"></div>
+          <div class="coupon-error" id="coupon-error"></div>
+
+          <!-- Order summary — same IDs as live site -->
+          <div id="order-summary" style="display:none">
+            <div id="sum-items-list"></div>
+            <div id="sum-subtotal-row" style="display:none"><span>Subtotal</span><span id="sum-base">—</span></div>
+            <div id="sum-discount-row" style="display:none"><span id="sum-discount-label">Discount</span><span id="sum-discount">—</span></div>
+            <div class="sum-total-row"><span>You pay</span><span id="sum-final" style="color:var(--green)">—</span></div>
+            <div class="sum-cod">💵 Cash or UPI on delivery</div>
+            <div id="upi-qr-box" style="display:none">
+              <div style="font-size:.72rem;font-weight:700;color:var(--green);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Pay via UPI</div>
+              <div id="upi-qr-canvas" style="display:inline-block;border-radius:8px;overflow:hidden;line-height:0"></div>
+              <div id="upi-qr-amount">—</div>
+              <div style="font-size:.68rem;color:var(--muted);margin-top:2px">Scan · PhonePe · GPay · Paytm · BHIM</div>
+              <a id="upi-pay-btn" href="#">📲 Tap to Pay on Phone</a>
+              <button type="button" id="upi-paid-btn" onclick="toggleUpiPaid()">✅ I've paid via UPI — mark as paid</button>
+              <div id="upi-paid-badge">✅ Payment confirmed · Ref included in your WhatsApp order</div>
+            </div>
+          </div>
+
+          <div id="delivery-date-row">🚚 <span>Delivery: <strong id="delivery-date-text">Tomorrow</strong></span></div>
+          <button class="form-wa-btn" type="submit">
+            <svg width="16" height="16" viewBox="0 0 448 512" fill="currentColor"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
+            Confirm order on WhatsApp
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="sec" id="reviews" style="background:var(--bg2)">
+  <div class="eyebrow">What People Say</div>
+  <h2 class="sec-title">Real families.<br><em>Real mornings.</em></h2>
+  <div class="testi-grid">
+    <div class="testi-card">
+      <div class="stars">★★★★★</div>
+      <div class="testi-q">"The batter is genuinely fresh — you can tell the difference immediately. My kids ask for dosas every morning now."</div>
+      <div class="testi-by">Sunita R. · Vrindavan Colony</div>
+    </div>
+    <div class="testi-card">
+      <div class="stars">★★★★★</div>
+      <div class="testi-q">"I've tried 4 batter brands. None of them ferment naturally like this. The idlis are so soft, no comparison."</div>
+      <div class="testi-by">Rajan M. · Ashiyana</div>
+    </div>
+    <div class="testi-card">
+      <div class="stars">★★★★★</div>
+      <div class="testi-q">"Morning delivery is always on time. And the WhatsApp confirmation makes it so easy to trust the process."</div>
+      <div class="testi-by">Preethi K. · Indira Nagar</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div><div class="foot-brand">Absolute <span>Fresh</span></div><div class="foot-sub">Lucknow · Est. 2023 · FSSAI 12724055000349</div></div>
+  <div class="foot-links">
+    <a href="#products">Products</a>
+    <a href="#order">Order</a>
+    <a href="https://wa.me/917985079797" target="_blank">WhatsApp</a>
+    <a href="https://instagram.com/absolutefreshfood" target="_blank">Instagram</a>
+    <a href="https://sales.absolutefreshfood.com/marketing/signup.html" target="_blank">Partner With Us</a>
+  </div>
+  <div class="foot-copy">© 2026 Absolute Fresh Food</div>
+</footer>
+
+<script>
+// ── Ticker ─────────────────────────────────────────────────────
+const words=['Stone Ground','No Preservatives','Naturally Fermented','Morning Delivery','100% Fresh','Lucknow Made','Zero Additives','Pay on Delivery'];
+const t=document.getElementById('ticker-track');
+const html=words.map(w=>`<span class="t-item">${w}</span><span class="t-item t-dot">·</span>`).join('');
+t.innerHTML=html+html;
+
+// ── Nav solid on scroll ────────────────────────────────────────
+window.addEventListener('scroll',()=>{
+  document.getElementById('main-nav').classList.toggle('solid',window.scrollY>60);
+});
+
+// ── SUPABASE ───────────────────────────────────────────────────
+const _SB_URL='https://fbfopgzblqmsflkfejwa.supabase.co';
+const _SB_KEY='sb_publishable_r7mYhsyIKtBjBKzxH8St9g_OHjTU-RQ';
+const _db=supabase.createClient(_SB_URL,_SB_KEY);
+
+// ── State ──────────────────────────────────────────────────────
+let _appliedCoupon=null;
+let _upiPaid=false;
+let _wantSubscription=false;
+let _orderSubmitting=false;
+
+// ── Coupon ─────────────────────────────────────────────────────
+async function applyCoupon(){
+  const code=document.getElementById('f-coupon').value.trim().toUpperCase();
+  const successEl=document.getElementById('coupon-success');
+  const errorEl=document.getElementById('coupon-error');
+  const btn=document.getElementById('coupon-btn');
+  successEl.style.display='none'; errorEl.style.display='none'; _appliedCoupon=null;
+  if(!code){errorEl.textContent='Please enter a coupon code.';errorEl.style.display='block';return;}
+  btn.disabled=true; btn.textContent='…';
+  try{
+    const{data:coupon,error}=await _db.from('coupons')
+      .select('id,code,discount_value,discount_type,expires_on,status,min_order_value,max_uses,times_used,coupon_type')
+      .eq('code',code).single();
+    if(error||!coupon){errorEl.textContent='Coupon not found.';errorEl.style.display='block';}
+    else if(coupon.status!=='active'){errorEl.textContent='This coupon is no longer active.';errorEl.style.display='block';}
+    else if(coupon.expires_on&&new Date(coupon.expires_on)<new Date()){errorEl.textContent='This coupon has expired.';errorEl.style.display='block';}
+    else if(coupon.max_uses&&coupon.times_used>=coupon.max_uses){errorEl.textContent='Coupon is fully used.';errorEl.style.display='block';}
+    else{
+      _appliedCoupon=coupon;
+      const msg=coupon.discount_type==='bogo'
+        ?(coupon.coupon_type==='rakhigift'?`🎁 "${coupon.code}" — Buy 1kg, Get 500g + Podi Chutney FREE! 🪔`:`🎁 "${coupon.code}" — Buy 1kg, Get 500g FREE!`)
+        :`✅ "${coupon.code}" — ${coupon.discount_value}% off!`;
+      successEl.textContent=msg; successEl.style.display='block';
+      btn.textContent='✓'; updateOrderSummary();
+    }
+  }catch(ex){errorEl.textContent='Could not verify coupon.';errorEl.style.display='block';}
+  btn.disabled=false;
+  if(!_appliedCoupon)btn.textContent='Apply';
+}
+
+// ── Packs ──────────────────────────────────────────────────────
+const PACKS=[
+  {id:'qty-1kg',  name:'1 kg Pack',       price:140},
+  {id:'qty-500g', name:'500g Family Pack', price:75}
+];
+
+function changeQty(id,delta){
+  const el=document.getElementById(id);
+  const formEl=document.getElementById(id+'-form');
+  const val=Math.max(0,parseInt(el.textContent||'0')+delta);
+  el.textContent=val;
+  if(formEl)formEl.textContent=val;
+  updateOrderSummary();
+}
+
+function toggleSubscription(btn){
+  _wantSubscription=!_wantSubscription;
+  btn.textContent=_wantSubscription?'✓ Added':'Add';
+  btn.classList.toggle('active',_wantSubscription);
+  updateOrderSummary();
+}
+
+function getOrderItems(){
+  return PACKS.map(p=>({
+    id:p.id,name:p.name,
+    qty:parseInt(document.getElementById(p.id).textContent)||0,
+    price:p.price
+  })).filter(i=>i.qty>0);
+}
+
+function getOrderPrices(){
+  const items=getOrderItems();
+  const base=items.reduce((s,i)=>s+i.price*i.qty,0);
+  let disc=0,saving=0,freeItems=[];
+  if(_appliedCoupon){
+    if(_appliedCoupon.discount_type==='bogo'){
+      const isRakhi=_appliedCoupon.coupon_type==='rakhigift';
+      const kg1=items.find(i=>i.id==='qty-1kg');
+      if(kg1&&kg1.qty>0){
+        freeItems=[{id:'qty-500g',name:'500g Family Pack',price:75,qty:kg1.qty,free:true}];
+        if(isRakhi)freeItems.push({id:'podi',name:'Podi Chutney 30g',price:45,qty:kg1.qty,free:true});
+      }
+    }else{
+      disc=_appliedCoupon.discount_value||0;
+      saving=base>0?Math.round(base*disc/100):0;
+    }
+  }
+  const final=base-saving;
+  const freeValue=freeItems.reduce((s,i)=>s+i.price*i.qty,0);
+  return{base,disc,saving,final,items,freeItems,freeValue};
+}
+
+function updateOrderSummary(){
+  const{base,disc,saving,final,items,freeItems,freeValue}=getOrderPrices();
+  const box=document.getElementById('order-summary');
+  if(!items.length&&!_wantSubscription){box.style.display='none';return;}
+  box.style.display='block';
+  const isBogo=_appliedCoupon&&_appliedCoupon.discount_type==='bogo';
+  const listEl=document.getElementById('sum-items-list');
+  const paidLines=items.map(i=>`<div style="display:flex;justify-content:space-between;margin-bottom:5px;color:var(--muted);font-size:.83rem"><span>${i.name} ×${i.qty}</span><span>₹${i.price*i.qty}</span></div>`).join('');
+  const freeLines=isBogo?freeItems.map(i=>`<div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:.83rem;color:var(--green);font-weight:700"><span>🎁 FREE ${i.name} ×${i.qty}</span><span style="text-decoration:line-through;opacity:.5">₹${i.price*i.qty}</span></div>`).join(''):'';
+  const subLine=_wantSubscription?`<div style="display:flex;justify-content:space-between;margin-bottom:5px;color:var(--yellow);font-size:.83rem"><span>Subscription / Bulk</span><span>Quote on WhatsApp</span></div>`:'';
+  listEl.innerHTML=paidLines+freeLines+subLine;
+  const subRow=document.getElementById('sum-subtotal-row');
+  subRow.style.display=items.length>1?'flex':'none';
+  document.getElementById('sum-base').textContent=`₹${base}`;
+  const discRow=document.getElementById('sum-discount-row');
+  if(isBogo&&freeValue>0){discRow.style.display='flex';document.getElementById('sum-discount-label').textContent='Free packs value';document.getElementById('sum-discount').textContent=`₹${freeValue}`;}
+  else if(saving>0){discRow.style.display='flex';document.getElementById('sum-discount-label').textContent=`Coupon (${disc}% off)`;document.getElementById('sum-discount').textContent=`−₹${saving}`;}
+  else{discRow.style.display='none';}
+  document.getElementById('sum-final').textContent=base>0?`₹${final}`:'To be quoted';
+  updateUpiQr(final>0?final:null);
+}
+
+function updateUpiQr(amount){
+  const box=document.getElementById('upi-qr-box');
+  if(!amount){box.style.display='none';return;}
+  box.style.display='block';
+  const ref=window._pendingOrderRef||(window._pendingOrderRef='AFF-'+Date.now().toString(36).toUpperCase());
+  const upiUrl=`upi://pay?pa=absolutefreshfood@ptyes&pn=AbsoluteFresh&am=${amount}&tn=${ref}&cu=INR`;
+  document.getElementById('upi-qr-amount').textContent=`₹${amount} · Ref: ${ref}`;
+  document.getElementById('upi-pay-btn').href=upiUrl;
+  if(window.QRCode){
+    const c=document.getElementById('upi-qr-canvas');
+    c.innerHTML='';
+    new QRCode(c,{text:upiUrl,width:160,height:160,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.H});
+  }
+}
+
+// ── PIN ────────────────────────────────────────────────────────
+let _serviceAreas=null;
+let _pinValid=false;
+(async()=>{const{data}=await _db.from('service_areas').select('pincode,area_name').eq('is_active',true);_serviceAreas=data||[];})();
+
+function checkPin(){
+  const pin=document.getElementById('f-pin').value.trim();
+  const el=document.getElementById('pin-status');
+  if(pin.length<6){el.innerHTML='';_pinValid=false;return;}
+  if(_serviceAreas===null){el.innerHTML='<span style="color:var(--yellow)">Checking…</span>';return;}
+  if(_serviceAreas.length===0){_pinValid=true;el.innerHTML='';return;}
+  const area=_serviceAreas.find(a=>a.pincode===pin);
+  if(area){el.innerHTML=`<span style="color:var(--green);font-weight:700">🎉 We deliver to ${area.area_name||pin}!</span>`;_pinValid=true;}
+  else{el.innerHTML=`<span style="color:#f87171">Sorry, we don't deliver here yet. <a href="https://wa.me/918318767689" style="color:#f87171;text-decoration:underline">WhatsApp us</a> to check.</span>`;_pinValid=false;}
+}
+
+// ── Delivery date ──────────────────────────────────────────────
+const _tomorrow=(()=>{
+  const d=new Date();d.setDate(d.getDate()+1);
+  return{iso:d.toISOString().split('T')[0],display:d.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'short'})};
+})();
+document.addEventListener('DOMContentLoaded',()=>{
+  const el=document.getElementById('delivery-date-text');
+  if(el)el.textContent=_tomorrow.display;
+});
+
+// ── UPI paid toggle ────────────────────────────────────────────
+function toggleUpiPaid(){
+  _upiPaid=!_upiPaid;
+  const btn=document.getElementById('upi-paid-btn');
+  const badge=document.getElementById('upi-paid-badge');
+  if(_upiPaid){btn.style.background='rgba(61,214,140,.15)';btn.style.color='var(--green)';btn.textContent='✅ Marked as paid — tap to undo';badge.style.display='block';}
+  else{btn.style.background='';btn.style.color='';btn.textContent="✅ I've paid via UPI — mark as paid";badge.style.display='none';}
+}
+
+// ── Send order ─────────────────────────────────────────────────
+const WA='918318767689';
+async function sendWA(e){
+  e.preventDefault();
+  if(_orderSubmitting)return;
+  _orderSubmitting=true;
+  const btn=e.target.querySelector('button[type="submit"]');
+  const n=document.getElementById('f-name').value.trim();
+  const ph=document.getElementById('f-phone').value.trim().replace(/[\s\-]/g,'').replace(/^\+91/,'').replace(/^0/,'');
+  const ad=document.getElementById('f-addr').value.trim();
+  const pin=document.getElementById('f-pin').value.trim();
+  if(!n||!ph||!ad){alert('Please fill your name, phone and address.');_orderSubmitting=false;return;}
+  if(ph.length<10){alert('Please enter a valid 10-digit phone number.');_orderSubmitting=false;return;}
+  if(pin.length<6){alert('Please enter your 6-digit pincode.');document.getElementById('f-pin').focus();_orderSubmitting=false;return;}
+  checkPin();
+  if(!_pinValid){document.getElementById('f-pin').focus();_orderSubmitting=false;return;}
+  const{base,disc,saving,final,items,freeItems,freeValue}=getOrderPrices();
+  if(items.length===0&&!_wantSubscription){alert('Please add at least one pack to your order.');_orderSubmitting=false;return;}
+  btn.disabled=true;btn.textContent='Placing order…';
+  const isBogo=_appliedCoupon&&_appliedCoupon.discount_type==='bogo';
+  const itemLines=items.map(i=>`%0A  • ${i.name} ×${i.qty} = ₹${i.price*i.qty}`).join('');
+  const freeLines=isBogo?freeItems.map(i=>`%0A  🎁 FREE ${i.name} ×${i.qty}`).join(''):'';
+  const subLine=_wantSubscription?'%0A  • Subscription / Bulk (quote needed)':'';
+  let couponLine='';
+  if(_appliedCoupon&&saving>0){
+    couponLine=isBogo
+      ?`%0ACoupon: ${_appliedCoupon.code} (Buy 1kg Get 500g FREE — ₹${freeValue} worth free)`
+      :`%0ACoupon: ${_appliedCoupon.code} (${disc}% off — saved ₹${saving})`;
+    _db.rpc('increment_coupon_usage',{coupon_id:_appliedCoupon.id}).catch(()=>{});
+  }
+  const totalLine=base>0?`%0ATotal: ₹${final}${isBogo&&freeValue>0?` + FREE packs worth ₹${freeValue}`:saving>0?` (saved ₹${saving})`:''}` :'';
+  let orderRef='WEB-'+Date.now().toString(36).toUpperCase();
+  try{
+    const tenMinAgo=new Date(Date.now()-600000).toISOString();
+    const{data:existing}=await _db.from('web_orders').select('order_ref').eq('customer_phone',ph).eq('delivery_date',_tomorrow.iso).gte('created_at',tenMinAgo).limit(1);
+    if(existing&&existing.length){orderRef=existing[0].order_ref;}
+    else{
+      const allItems=[...items,...(isBogo?freeItems.map(i=>({...i,name:`FREE ${i.name}`,price:0})):[])]
+        .concat(_wantSubscription?[{name:'Subscription/Bulk',qty:1,price:0}]:[]);
+      await _db.from('web_orders').insert({
+        order_ref:orderRef,customer_name:n,customer_phone:ph,customer_address:ad,
+        items:allItems,coupon_code:_appliedCoupon?_appliedCoupon.code:null,
+        coupon_id:_appliedCoupon?_appliedCoupon.id:null,
+        subtotal:base||null,discount_amount:saving||null,total:final||null,
+        customer_pincode:pin,status:'new',source:'website_preview',delivery_date:_tomorrow.iso,
+        admin_notes:_upiPaid?`✅ PAID via UPI · Ref: ${window._pendingOrderRef}`:null
+      });
+    }
+  }catch(err){console.warn('Save failed:',err);}
+  const paymentLine=_upiPaid?`✅ PAID via UPI · Ref: ${window._pendingOrderRef||'—'}`:'COD / UPI on delivery';
+  const msg=`Hi Absolute Fresh! 🌿%0A%0AName: ${encodeURIComponent(n)}%0APhone: +91${ph}%0AAddress: ${encodeURIComponent(ad)} - ${pin}%0ADelivery Date: ${_tomorrow.display}%0A%0AOrder:${itemLines}${freeLines}${subLine}${couponLine}${totalLine}%0APayment: ${encodeURIComponent(paymentLine)}%0A%0ARef: ${orderRef}`;
+  const waUrl=`https://wa.me/${WA}?text=${msg}`;
+  window.open(waUrl,'_blank');
+  document.getElementById('order-form-inner').style.display='none';
+  const sc=document.getElementById('order-success');sc.style.display='block';
+  document.getElementById('order-ref-badge').textContent=`Order ${orderRef} · Delivery ${_tomorrow.display}`;
+  document.getElementById('order-wa-fallback').href=waUrl;
+  _orderSubmitting=false;
+}
+</script>
+</body>
+</html>
