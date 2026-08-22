@@ -3,481 +3,500 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Absolute Fresh — Authentic South Indian Batter, Lucknow</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Tiro+Devanagari+Hindi:ital@0;1&display=swap" rel="stylesheet">
+<title>Absolute Fresh — Fresh. Authentic. Ready.</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
-:root {
-  --cream:#FFFBF0; --cream2:#FFF8E7; --cream3:#FEF3D0;
-  --turmeric:#E8900A; --turmeric-l:#F5B842; --turmeric-d:#C67A08;
-  --green:#1B6B2F; --green-l:#2D9142; --green-pale:#E8F5EC;
-  --red:#B5290A; --red-pale:#FDECEA;
-  --text:#1A1208; --text2:#4A3E1A; --muted:#8A7A50;
-  --border:#E8D9A0; --border2:#D4C47A;
-  --white:#FFFFFF;
-  --radius:16px;
+:root{
+  --bg:#F5F0E8; --bg2:#EDE8DC; --white:#FFFFFF;
+  --green:#1A3828; --green2:#2A5C3F; --green-l:#3A7A54; --green-pale:#EAF2EC;
+  --gold:#C8902A; --gold-l:#E8B84B; --gold-pale:#FBF3E2;
+  --text:#1A1A15; --text2:#3D3D30; --muted:#7A7060;
+  --border:#D8D0B8; --border2:#C8BEA0;
+  --radius:12px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:var(--text);overflow-x:hidden}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
 a{text-decoration:none;color:inherit}
-button{font-family:'Plus Jakarta Sans',sans-serif}
+button{font-family:'DM Sans',sans-serif}
+img{max-width:100%}
 
 /* ── NAV ── */
-nav{position:fixed;top:0;left:0;right:0;z-index:200;
+nav{
+  position:sticky;top:0;z-index:200;
+  background:rgba(245,240,232,.97);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
   display:flex;align-items:center;justify-content:space-between;
-  padding:18px 40px;background:rgba(255,251,240,.95);backdrop-filter:blur(12px);
-  border-bottom:2px solid var(--border)}
-.nav-logo{display:flex;flex-direction:column;line-height:1}
-.nav-logo-main{font-size:17px;font-weight:800;color:var(--green);letter-spacing:-.01em}
-.nav-logo-sub{font-size:10px;font-weight:600;color:var(--turmeric);letter-spacing:.14em;text-transform:uppercase}
-.nav-links{display:flex;gap:28px;list-style:none}
-.nav-links a{font-size:13px;font-weight:600;color:var(--text2);transition:color .2s}
-.nav-links a:hover{color:var(--green)}
-.nav-cta{background:var(--turmeric);color:#fff;font-size:13px;font-weight:700;
-  padding:10px 22px;border:none;border-radius:999px;cursor:pointer;transition:all .2s;letter-spacing:.02em}
-.nav-cta:hover{background:var(--turmeric-d);transform:scale(1.04)}
-@media(max-width:768px){.nav-links{display:none}.nav{padding:14px 18px}}
+  padding:0 48px;height:72px;
+}
+.nav-logo{display:flex;flex-direction:column;line-height:1.15;cursor:pointer}
+.nav-logo-main{font-family:'DM Serif Display',serif;font-size:19px;font-weight:400;color:var(--green);letter-spacing:-.02em}
+.nav-logo-tag{font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+.nav-links{display:flex;gap:0;list-style:none}
+.nav-links a{font-size:13.5px;font-weight:500;color:var(--text2);padding:0 18px;height:72px;display:flex;align-items:center;border-bottom:2px solid transparent;transition:all .2s}
+.nav-links a:hover,.nav-links a.active{color:var(--green);border-bottom-color:var(--green)}
+.nav-cta{background:var(--green);color:#fff;font-size:13px;font-weight:600;
+  padding:11px 22px;border:none;border-radius:999px;cursor:pointer;
+  display:flex;align-items:center;gap:8px;transition:all .2s}
+.nav-cta:hover{background:var(--green2);transform:scale(1.03)}
+.nav-cta svg{width:16px;height:16px;fill:#fff;flex-shrink:0}
+@media(max-width:768px){.nav-links{display:none}nav{padding:0 20px;height:60px}}
 
 /* ── HERO ── */
 .hero{
-  min-height:100vh;display:flex;align-items:center;
-  padding:120px 40px 80px;
-  background:
-    radial-gradient(ellipse 55% 45% at 85% 20%,rgba(232,144,10,.12) 0%,transparent 70%),
-    radial-gradient(ellipse 50% 40% at 5% 80%,rgba(27,107,47,.08) 0%,transparent 70%),
-    var(--cream);
-  position:relative;overflow:hidden;
+  display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 72px);
+  background:var(--bg);
 }
-/* Kolam-inspired decorative rings */
-.hero-ring{position:absolute;border-radius:50%;border:1.5px solid rgba(232,144,10,.15);pointer-events:none}
-.hero::before{content:'';position:absolute;top:-80px;right:-80px;width:500px;height:500px;
-  border-radius:50%;background:radial-gradient(circle,rgba(232,144,10,.12) 0%,transparent 70%)}
-.hero-content{max-width:680px;z-index:1;position:relative}
-.hero-badge{
-  display:inline-flex;align-items:center;gap:8px;margin-bottom:24px;
-  background:var(--green-pale);border:1.5px solid rgba(27,107,47,.25);
-  color:var(--green);font-size:12px;font-weight:700;letter-spacing:.1em;
-  text-transform:uppercase;padding:7px 16px;border-radius:999px;
+.hero-left{display:flex;flex-direction:column;justify-content:center;padding:72px 48px 72px 64px}
+.hero-tag{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:20px}
+.hero-h1{font-family:'DM Serif Display',serif;font-size:clamp(40px,5vw,68px);font-weight:400;line-height:1.1;color:var(--green);margin-bottom:6px}
+.hero-h1 em{font-style:italic;color:var(--gold)}
+.hero-sub-h{font-size:clamp(15px,1.6vw,18px);color:var(--text2);line-height:1.7;margin-bottom:36px;max-width:440px}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:36px}
+.btn-primary{background:var(--green);color:#fff;font-size:14px;font-weight:600;
+  padding:14px 28px;border:none;border-radius:999px;cursor:pointer;
+  display:flex;align-items:center;gap:9px;transition:all .25s;
+  box-shadow:0 4px 16px rgba(26,56,40,.25)}
+.btn-primary:hover{background:var(--green2);transform:translateY(-1px);box-shadow:0 8px 24px rgba(26,56,40,.3)}
+.btn-primary svg{width:18px;height:18px;fill:#fff;flex-shrink:0}
+.hero-note{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.hero-note svg{width:14px;height:14px;flex-shrink:0}
+.hero-right{
+  background:var(--green);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;padding:40px;
 }
-.hero-badge::before{content:'🌿'}
-.hero-h1{
-  font-size:clamp(42px,7vw,88px);font-weight:800;line-height:1.05;
-  letter-spacing:-.03em;margin-bottom:8px;color:var(--text);
+.hero-right::before{
+  content:'';position:absolute;top:-80px;right:-80px;width:400px;height:400px;
+  border-radius:50%;background:rgba(255,255,255,.03);
 }
-.hero-h1 .accent{color:var(--turmeric)}
-.hero-h1 .green{color:var(--green)}
-.hero-tagline{
-  font-family:'Tiro Devanagari Hindi',serif;font-style:italic;
-  font-size:clamp(18px,2.5vw,28px);color:var(--turmeric-d);
-  margin-bottom:24px;letter-spacing:.01em;
+.hero-right::after{
+  content:'';position:absolute;bottom:-60px;left:-60px;width:280px;height:280px;
+  border-radius:50%;background:rgba(200,144,42,.08);
 }
-.hero-sub{font-size:16px;color:var(--text2);line-height:1.7;margin-bottom:44px;max-width:520px}
-.hero-btns{display:flex;gap:14px;flex-wrap:wrap}
-.btn-primary{
-  background:var(--green);color:#fff;font-size:15px;font-weight:700;
-  padding:16px 36px;border:none;border-radius:999px;cursor:pointer;
-  transition:all .25s;box-shadow:0 4px 20px rgba(27,107,47,.3);
+.hero-product-img{
+  position:relative;z-index:1;text-align:center;
 }
-.btn-primary:hover{background:var(--green-l);transform:translateY(-2px);box-shadow:0 8px 28px rgba(27,107,47,.35)}
-.btn-ghost{
-  background:transparent;color:var(--green);font-size:15px;font-weight:700;
-  padding:16px 36px;border:2px solid var(--green);border-radius:999px;cursor:pointer;transition:all .25s;
+.hero-pack{
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
+  border-radius:20px;padding:32px 28px 24px;display:inline-block;
+  backdrop-filter:blur(4px);min-width:200px;
 }
-.btn-ghost:hover{background:var(--green-pale)}
-.hero-img-col{
-  position:absolute;right:0;top:0;bottom:0;width:42%;
-  background:linear-gradient(135deg,#2D7A3A 0%,#1B4D24 100%);
-  display:flex;align-items:center;justify-content:center;overflow:hidden;
+.hero-pack-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px}
+.hero-pack-name{font-family:'DM Serif Display',serif;font-size:24px;color:#fff;margin-bottom:2px}
+.hero-pack-sub{font-size:11px;color:rgba(255,255,255,.45);margin-bottom:20px;letter-spacing:.04em;text-transform:uppercase}
+.hero-pack-pill{display:inline-block;background:rgba(200,144,42,.2);border:1px solid rgba(200,144,42,.35);color:var(--gold-l);font-size:11px;font-weight:700;padding:4px 14px;border-radius:999px;margin-bottom:8px}
+.hero-pack-pill2{display:inline-block;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.6);font-size:10px;padding:4px 14px;border-radius:999px}
+.hero-pack-price{font-family:'DM Serif Display',serif;font-size:42px;color:#fff;margin-top:20px;margin-bottom:4px}
+.hero-pack-per{font-size:11px;color:rgba(255,255,255,.4)}
+.hero-pack-stack{display:flex;flex-direction:column;gap:10px;align-items:center}
+.hero-pack-sm{
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  border-radius:14px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;
+  gap:40px;width:100%;
 }
-.hero-img-col::before{content:'';position:absolute;inset:0;
-  background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");}
-.hero-emoji-stack{font-size:80px;text-align:center;line-height:1.3;filter:drop-shadow(0 8px 20px rgba(0,0,0,.3))}
-@media(max-width:900px){.hero-img-col{display:none}.hero{padding:100px 20px 70px}}
-@media(max-width:600px){.hero-btns{flex-direction:column}}
-
-/* ── TICKER ── */
-.ticker{background:var(--green);padding:12px 0;overflow:hidden;border-top:3px solid var(--turmeric);border-bottom:3px solid var(--turmeric)}
-.ticker-track{display:flex;animation:scroll 25s linear infinite;width:max-content}
-@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.t-item{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fff;padding:0 36px;flex-shrink:0}
-.t-dot{opacity:.4;margin:0 -18px;color:var(--turmeric-l)}
+.hero-pack-sm-n{font-size:13px;color:rgba(255,255,255,.75);font-weight:500}
+.hero-pack-sm-p{font-family:'DM Serif Display',serif;font-size:20px;color:#fff}
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr;min-height:auto}
+  .hero-left{padding:56px 20px 40px}
+  .hero-right{padding:40px 20px;min-height:320px}
+}
 
 /* ── SECTION ── */
-.sec{padding:96px 40px}
-@media(max-width:768px){.sec{padding:64px 20px}}
-.eyebrow{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--turmeric);margin-bottom:10px}
-.sec-title{font-size:clamp(32px,4.5vw,60px);font-weight:800;line-height:1.08;letter-spacing:-.02em;color:var(--text)}
-.sec-title .g{color:var(--green)}
-
-/* ── WHY SECTION ── */
-.why-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:56px}
-@media(max-width:900px){.why-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:500px){.why-grid{grid-template-columns:1fr}}
-.why-card{background:var(--white);border:2px solid var(--border);border-radius:20px;padding:32px 28px;transition:all .25s}
-.why-card:hover{border-color:var(--green);transform:translateY(-4px);box-shadow:0 12px 32px rgba(27,107,47,.1)}
-.why-ico{font-size:40px;margin-bottom:16px;display:block}
-.why-t{font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px}
-.why-d{font-size:13px;color:var(--muted);line-height:1.65}
+.sec{padding:80px 64px}
+@media(max-width:900px){.sec{padding:56px 20px}}
+.sec-inner{max-width:1140px;margin:0 auto}
+.eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+.sec-h{font-family:'DM Serif Display',serif;font-size:clamp(30px,3.5vw,48px);font-weight:400;color:var(--green);line-height:1.15;margin-bottom:6px}
+.sec-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:40px;flex-wrap:wrap;gap:12px}
+.view-all{font-size:13px;font-weight:600;color:var(--green);display:flex;align-items:center;gap:4px;transition:gap .2s}
+.view-all:hover{gap:8px}
 
 /* ── PRODUCTS ── */
-.prod-wrap{background:var(--green);border-radius:28px;padding:60px 40px;margin-top:56px;position:relative;overflow:hidden}
-@media(max-width:600px){.prod-wrap{padding:40px 20px}}
-.prod-wrap::before{content:'🍃';position:absolute;font-size:200px;right:-30px;bottom:-40px;opacity:.08;line-height:1}
-.prod-wrap-title{font-size:clamp(28px,3.5vw,44px);font-weight:800;color:#fff;margin-bottom:8px}
-.prod-wrap-sub{font-size:14px;color:rgba(255,255,255,.65);margin-bottom:44px}
-.prod-cards{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-@media(max-width:600px){.prod-cards{grid-template-columns:1fr}}
-.prod-card{background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.15);border-radius:20px;padding:32px 28px;backdrop-filter:blur(8px);transition:all .25s}
-.prod-card.featured{background:var(--turmeric);border-color:var(--turmeric-l)}
-.prod-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.2)}
-.prod-tag{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 14px;border-radius:999px;margin-bottom:24px;display:inline-block}
-.prod-tag.white{background:rgba(255,255,255,.2);color:#fff}
-.prod-tag.dark{background:rgba(0,0,0,.15);color:#fff}
-.prod-kg{font-size:clamp(52px,6vw,80px);font-weight:800;color:#fff;line-height:1;margin-bottom:4px}
-.prod-name{font-size:14px;color:rgba(255,255,255,.7);margin-bottom:20px;font-weight:500}
-.prod-price{font-size:36px;font-weight:800;color:#fff;margin-bottom:24px}
-.prod-feats{list-style:none;display:flex;flex-direction:column;gap:9px;margin-bottom:32px}
-.prod-feats li{font-size:13px;color:rgba(255,255,255,.85);display:flex;align-items:center;gap:9px}
-.prod-feats li::before{content:'✓';font-weight:800;font-size:11px;background:rgba(255,255,255,.25);width:20px;height:20px;border-radius:50%;display:grid;place-items:center;flex-shrink:0}
-.qty-ctrl{display:flex;align-items:center;background:rgba(255,255,255,.15);border-radius:999px;width:fit-content;border:1.5px solid rgba(255,255,255,.3)}
-.qty-btn{width:42px;height:42px;border:none;background:transparent;color:#fff;font-size:20px;cursor:pointer;border-radius:999px;display:grid;place-items:center;transition:background .2s}
-.qty-btn:hover{background:rgba(255,255,255,.2)}
-.qty-num{width:44px;text-align:center;font-size:18px;font-weight:800;color:#fff}
+.cat-label{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);padding:20px 0 14px;border-top:1.5px solid var(--border);margin-top:8px}
+.prod-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px}
+@media(max-width:600px){.prod-grid{grid-template-columns:1fr}}
+.prod-item{background:var(--white);display:flex;align-items:center;gap:20px;padding:20px 24px;transition:background .2s;cursor:default}
+.prod-item:hover{background:#FAFAF6}
+.prod-img{width:88px;height:88px;border-radius:12px;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;position:relative}
+.prod-img-inner{font-size:36px;line-height:1}
+.best-badge{position:absolute;top:-4px;right:-4px;background:var(--gold);color:#fff;font-size:8.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:999px}
+.prod-info{flex:1}
+.prod-n{font-size:15px;font-weight:600;color:var(--text);margin-bottom:3px}
+.prod-d{font-size:12.5px;color:var(--muted);line-height:1.5;margin-bottom:10px}
+.prod-p{font-family:'DM Serif Display',serif;font-size:22px;color:var(--green)}
 
-/* ── HOW IT WORKS ── */
-.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:56px}
-@media(max-width:900px){.steps{grid-template-columns:1fr 1fr}}
-@media(max-width:500px){.steps{grid-template-columns:1fr}}
-.step{position:relative;padding:36px 28px;border-radius:20px;border:2px solid var(--border)}
-.step-num{position:absolute;top:20px;right:20px;font-size:48px;font-weight:800;color:rgba(27,107,47,.08);line-height:1}
-.step-ico{font-size:36px;margin-bottom:16px;display:block}
-.step-t{font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px}
-.step-d{font-size:13px;color:var(--muted);line-height:1.6}
-.step.highlight{background:var(--turmeric);border-color:var(--turmeric-d)}
-.step.highlight .step-num{color:rgba(255,255,255,.15)}
-.step.highlight .step-t,.step.highlight .step-d{color:#fff}
+/* ── TRUST ── */
+.trust-strip{background:var(--green);padding:56px 64px}
+@media(max-width:900px){.trust-strip{padding:48px 20px}}
+.trust-inner{max-width:1140px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:32px}
+@media(max-width:700px){.trust-inner{grid-template-columns:1fr 1fr;gap:28px}}
+.trust-card{text-align:center}
+.trust-ico-wrap{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:22px}
+.trust-t{font-size:14px;font-weight:700;color:#fff;margin-bottom:6px}
+.trust-d{font-size:12px;color:rgba(255,255,255,.55);line-height:1.6}
 
 /* ── ORDER SECTION ── */
-.order-sec{padding:96px 40px;background:var(--cream2)}
-@media(max-width:768px){.order-sec{padding:64px 20px}}
-.order-grid{display:grid;grid-template-columns:1fr 1.15fr;gap:72px;max-width:1160px;margin:0 auto;align-items:start}
-@media(max-width:900px){.order-grid{grid-template-columns:1fr;gap:44px}}
-.order-sticky{position:sticky;top:100px}
-@media(max-width:900px){.order-sticky{position:static}}
-.order-h{font-size:clamp(32px,4vw,52px);font-weight:800;line-height:1.1;margin-bottom:16px}
-.order-h .g{color:var(--green)}
-.order-h .t{color:var(--turmeric)}
-.order-p{font-size:15px;color:var(--text2);line-height:1.7;margin-bottom:36px}
-.trust-list{display:flex;flex-direction:column;gap:16px;margin-bottom:32px}
-.trust-item{display:flex;align-items:center;gap:14px}
-.trust-ico{width:44px;height:44px;background:var(--green-pale);border:1.5px solid rgba(27,107,47,.2);border-radius:12px;display:grid;place-items:center;font-size:20px;flex-shrink:0}
-.trust-t{font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px}
-.trust-s{font-size:12px;color:var(--muted)}
-.social-proof{display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--white);border:2px solid var(--border);border-radius:14px}
-.sp-stars{font-size:15px;color:var(--turmeric);letter-spacing:2px}
-.sp-t{font-size:13px;font-weight:700;color:var(--text)}
-.sp-s{font-size:11px;color:var(--muted)}
+.order-strip{background:var(--bg2);border-top:1px solid var(--border)}
+.order-cta-box{max-width:1140px;margin:0 auto;padding:56px 64px;display:flex;align-items:center;justify-content:space-between;gap:32px;flex-wrap:wrap}
+@media(max-width:900px){.order-cta-box{flex-direction:column;align-items:flex-start;padding:48px 20px}}
+.order-cta-l{display:flex;align-items:center;gap:20px}
+.order-cta-ico{width:56px;height:56px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.order-cta-ico svg{width:28px;height:28px;fill:#fff}
+.order-cta-t{font-family:'DM Serif Display',serif;font-size:26px;color:var(--green)}
+.order-cta-s{font-size:13px;color:var(--muted);margin-top:2px}
+.order-cta-btn{background:var(--green);color:#fff;font-size:14px;font-weight:700;
+  padding:16px 32px;border:none;border-radius:999px;cursor:pointer;
+  display:flex;align-items:center;gap:10px;transition:all .2s;white-space:nowrap}
+.order-cta-btn:hover{background:var(--green2);transform:scale(1.03)}
+.order-cta-btn svg{width:20px;height:20px;fill:#fff}
 
-/* ── FORM CARD ── */
-.form-card{background:var(--white);border-radius:24px;padding:36px;border:2px solid var(--border);box-shadow:0 8px 40px rgba(27,107,47,.08)}
-.form-card h3{font-size:20px;font-weight:800;color:var(--text);margin-bottom:4px}
-.order-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
-.form{display:flex;flex-direction:column;gap:12px}
-.form input,.form textarea{
-  width:100%;background:var(--cream);border:2px solid var(--border);color:var(--text);
-  font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;
-  padding:12px 16px;border-radius:12px;outline:none;transition:border .2s;
+/* ── FORM SECTION ── */
+.form-sec{padding:80px 64px;background:var(--bg)}
+@media(max-width:900px){.form-sec{padding:56px 20px}}
+.form-sec-inner{max-width:1140px;margin:0 auto;display:grid;grid-template-columns:1fr 1.1fr;gap:72px;align-items:start}
+@media(max-width:900px){.form-sec-inner{grid-template-columns:1fr;gap:40px}}
+.form-left-sticky{position:sticky;top:90px}
+@media(max-width:900px){.form-left-sticky{position:static}}
+.form-left-h{font-family:'DM Serif Display',serif;font-size:clamp(28px,3vw,42px);color:var(--green);line-height:1.15;margin-bottom:14px}
+.form-left-h em{font-style:italic;color:var(--gold)}
+.form-left-p{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:28px}
+.fl-trust{display:flex;flex-direction:column;gap:14px}
+.fl-trust-item{display:flex;align-items:center;gap:12px;font-size:13.5px;color:var(--text2);font-weight:500}
+.fl-trust-item::before{content:'✓';width:22px;height:22px;background:var(--green-pale);border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:800;color:var(--green);flex-shrink:0}
+
+/* FORM CARD */
+.form-card{background:var(--white);border-radius:20px;border:1.5px solid var(--border);padding:36px;box-shadow:0 4px 24px rgba(26,56,40,.07)}
+.form-card-h{font-family:'DM Serif Display',serif;font-size:22px;color:var(--green);margin-bottom:4px}
+.form-card-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
+.frm{display:flex;flex-direction:column;gap:12px}
+.frm input,.frm textarea{
+  width:100%;background:var(--bg);border:1.5px solid var(--border);color:var(--text);
+  font-family:'DM Sans',sans-serif;font-size:14px;
+  padding:12px 16px;border-radius:10px;outline:none;transition:border .2s;
 }
-.form input:focus,.form textarea:focus{border-color:var(--green)}
-.form input::placeholder,.form textarea::placeholder{color:var(--muted)}
-.form textarea{min-height:72px;resize:vertical}
-#pin-status{font-size:.78rem;margin-top:4px;min-height:18px;padding-left:2px}
-.pack-row-new{display:flex;align-items:center;justify-content:space-between;
-  background:var(--cream);border:2px solid var(--border);padding:12px 16px;border-radius:12px;transition:border-color .2s}
-.pack-row-new:hover{border-color:var(--green)}
-.pack-info-new strong{font-size:14px;font-weight:700;color:var(--text);display:block;margin-bottom:2px}
-.pack-info-new span{font-size:12px;color:var(--green);font-weight:700}
-.pack-sub{background:rgba(232,144,10,.06);border:2px solid rgba(232,144,10,.25);padding:12px 16px;border-radius:12px;display:flex;align-items:center;justify-content:space-between}
-.pack-sub-l strong{display:block;font-size:14px;font-weight:700;color:var(--turmeric-d);margin-bottom:2px}
-.pack-sub-l span{font-size:12px;color:rgba(200,120,0,.7)}
-.sub-add-btn{background:transparent;border:2px solid var(--turmeric);color:var(--turmeric-d);font-size:12px;font-weight:700;padding:6px 16px;border-radius:999px;cursor:pointer;transition:all .2s}
-.sub-add-btn:hover,.sub-add-btn.active{background:rgba(232,144,10,.12)}
-.qty-sm{display:flex;align-items:center;background:var(--cream2);border-radius:999px;border:1.5px solid var(--border)}
-.qty-sm-btn{width:36px;height:36px;border:none;background:transparent;color:var(--text);font-size:18px;cursor:pointer;border-radius:999px;display:grid;place-items:center;transition:background .2s}
-.qty-sm-btn:hover{background:rgba(27,107,47,.1)}
-.qty-sm-num{width:34px;text-align:center;font-size:15px;font-weight:800;color:var(--text)}
-.coupon-row{display:flex;gap:10px}
-.coupon-row input{flex:1;background:var(--cream);border:2px solid var(--border);color:var(--text);
-  font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;letter-spacing:.08em;text-transform:uppercase;
-  padding:11px 16px;border-radius:12px;outline:none;transition:border .2s}
-.coupon-row input:focus{border-color:var(--turmeric)}
-.coupon-row input::placeholder{text-transform:none;letter-spacing:0;color:var(--muted)}
-.coupon-apply{background:var(--turmeric);color:#fff;border:none;font-size:13px;font-weight:700;padding:11px 18px;border-radius:12px;cursor:pointer;transition:all .2s}
-.coupon-apply:hover{background:var(--turmeric-d)}
-.coupon-success{font-size:12px;padding:9px 12px;border-radius:10px;background:var(--green-pale);color:var(--green);border:1px solid rgba(27,107,47,.2);display:none;font-weight:600}
-.coupon-error{font-size:12px;padding:9px 12px;border-radius:10px;background:var(--red-pale);color:var(--red);border:1px solid rgba(181,41,10,.2);display:none}
-#order-summary{background:var(--cream);border:2px solid var(--border);border-radius:14px;padding:16px;font-size:.88rem}
-#sum-items-list .sum-line{display:flex;justify-content:space-between;margin-bottom:5px;color:var(--text2);font-size:.83rem}
+.frm input:focus,.frm textarea:focus{border-color:var(--green);background:var(--white)}
+.frm input::placeholder,.frm textarea::placeholder{color:var(--muted)}
+.frm textarea{min-height:68px;resize:vertical}
+#pin-status{font-size:.76rem;margin-top:4px;min-height:16px;padding-left:2px}
+.pack-lbl{font-size:.72rem;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.pack-row-f{display:flex;align-items:center;justify-content:space-between;
+  background:var(--bg);border:1.5px solid var(--border);padding:12px 14px;border-radius:10px;transition:border-color .2s}
+.pack-row-f:hover{border-color:var(--green)}
+.pack-f-n{font-size:14px;font-weight:600;color:var(--text);display:block;margin-bottom:2px}
+.pack-f-p{font-size:12px;color:var(--green);font-weight:700}
+.pack-sub-f{background:var(--gold-pale);border:1.5px solid rgba(200,144,42,.25);padding:12px 14px;border-radius:10px;display:flex;align-items:center;justify-content:space-between}
+.pack-sub-f-l strong{display:block;font-size:14px;font-weight:600;color:var(--gold);margin-bottom:2px}
+.pack-sub-f-l span{font-size:11px;color:rgba(160,100,20,.7)}
+.sub-btn{background:transparent;border:1.5px solid var(--gold);color:var(--gold);font-size:12px;font-weight:700;padding:6px 16px;border-radius:999px;cursor:pointer;transition:all .2s}
+.sub-btn:hover,.sub-btn.active{background:var(--gold-pale)}
+.qty-mini{display:flex;align-items:center;background:var(--white);border-radius:999px;border:1.5px solid var(--border)}
+.qty-mini-btn{width:34px;height:34px;border:none;background:transparent;color:var(--text);font-size:16px;cursor:pointer;border-radius:999px;display:grid;place-items:center;transition:background .2s}
+.qty-mini-btn:hover{background:var(--green-pale)}
+.qty-mini-n{width:32px;text-align:center;font-size:14px;font-weight:700;color:var(--text)}
+.cpn-row{display:flex;gap:10px}
+.cpn-row input{flex:1;background:var(--bg);border:1.5px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;letter-spacing:.06em;text-transform:uppercase;padding:11px 14px;border-radius:10px;outline:none;transition:border .2s}
+.cpn-row input:focus{border-color:var(--gold)}
+.cpn-row input::placeholder{text-transform:none;letter-spacing:0;color:var(--muted)}
+.cpn-apply{background:var(--green);color:#fff;border:none;font-size:13px;font-weight:700;padding:11px 18px;border-radius:10px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.cpn-apply:hover{background:var(--green2)}
+.cpn-ok{font-size:12px;padding:9px 12px;border-radius:8px;background:var(--green-pale);color:var(--green);border:1px solid rgba(26,56,40,.15);display:none;font-weight:600}
+.cpn-err{font-size:12px;padding:9px 12px;border-radius:8px;background:#FEF2F2;color:#C0392B;border:1px solid rgba(192,57,43,.15);display:none}
+#order-summary{background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:14px;font-size:.88rem}
+#sum-items-list div{display:flex;justify-content:space-between;margin-bottom:5px;font-size:.83rem;color:var(--text2)}
 #sum-subtotal-row,#sum-discount-row{display:flex;justify-content:space-between;margin-bottom:6px;font-size:.83rem}
-#sum-discount-row{color:var(--green);font-weight:700}
-.sum-total-row{display:flex;justify-content:space-between;font-weight:800;font-size:1rem;border-top:2px solid var(--border);padding-top:10px;margin-top:4px;color:var(--text)}
+#sum-discount-row{color:var(--green-l);font-weight:700}
+.sum-total-row{display:flex;justify-content:space-between;font-weight:800;font-size:1rem;border-top:1.5px solid var(--border);padding-top:10px;margin-top:4px;color:var(--green)}
 .sum-cod{font-size:.72rem;color:var(--muted);margin-top:6px;text-align:center}
-#upi-qr-box{margin-top:12px;background:var(--white);border-radius:12px;padding:14px;text-align:center;border:2px solid var(--border)}
-#upi-qr-canvas{display:inline-block;border-radius:8px;overflow:hidden;line-height:0}
+#upi-qr-box{margin-top:12px;background:var(--white);border-radius:10px;padding:14px;text-align:center;border:1.5px solid var(--border)}
+#upi-qr-canvas{display:inline-block;border-radius:6px;overflow:hidden;line-height:0}
 #upi-qr-amount{margin-top:8px;font-size:.8rem;color:var(--text);font-weight:700}
-#upi-pay-btn{display:block;margin-top:10px;padding:10px;background:var(--green);color:#fff;border-radius:10px;font-size:.82rem;font-weight:700;text-decoration:none}
-#upi-paid-btn{display:block;width:100%;margin-top:8px;padding:10px;background:var(--cream);color:var(--muted);border:2px solid var(--border);border-radius:10px;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .2s}
+#upi-pay-btn{display:block;margin-top:10px;padding:10px;background:var(--green);color:#fff;border-radius:9px;font-size:.82rem;font-weight:700}
+#upi-paid-btn{display:block;width:100%;margin-top:8px;padding:10px;background:var(--bg);color:var(--muted);border:1.5px solid var(--border);border-radius:9px;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .2s}
 #upi-paid-badge{display:none;margin-top:8px;background:var(--green-pale);color:var(--green);border-radius:8px;padding:7px;font-size:.78rem;font-weight:700}
-#delivery-date-row{background:var(--green-pale);border:1.5px solid rgba(27,107,47,.2);border-radius:12px;padding:10px 14px;font-size:.85rem;color:var(--text2);display:flex;align-items:center;gap:8px}
+#delivery-date-row{background:var(--green-pale);border:1.5px solid rgba(26,56,40,.15);border-radius:10px;padding:10px 14px;font-size:.85rem;color:var(--text2);display:flex;align-items:center;gap:8px}
 #delivery-date-row strong{color:var(--green)}
-.form-wa-btn{
-  width:100%;background:var(--green);color:#fff;
-  font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;
-  padding:16px;border:none;border-radius:14px;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;gap:10px;
-  transition:all .25s;box-shadow:0 4px 20px rgba(27,107,47,.25);
+.wa-submit{
+  width:100%;background:var(--green);color:#fff;font-family:'DM Sans',sans-serif;font-size:14.5px;font-weight:700;
+  padding:15px;border:none;border-radius:12px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:10px;transition:all .25s;
+  box-shadow:0 4px 16px rgba(26,56,40,.25);
 }
-.form-wa-btn:hover{background:var(--green-l);transform:translateY(-2px);box-shadow:0 8px 30px rgba(27,107,47,.35)}
-.form-wa-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
-#order-success{text-align:center;padding:28px 12px}
-#order-success h3{font-size:26px;font-weight:800;color:var(--green);margin-bottom:8px}
-#order-ref-badge{background:var(--green-pale);border:1.5px solid rgba(27,107,47,.25);border-radius:10px;padding:10px 16px;font-size:.82rem;color:var(--green);font-weight:700;margin-bottom:16px;display:inline-block}
+.wa-submit:hover{background:var(--green2);transform:translateY(-1px);box-shadow:0 8px 28px rgba(26,56,40,.3)}
+.wa-submit:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.wa-submit svg{width:18px;height:18px;fill:#fff;flex-shrink:0}
+#order-success{text-align:center;padding:28px 8px}
+#order-success h3{font-family:'DM Serif Display',serif;font-size:26px;color:var(--green);margin-bottom:8px}
+#order-ref-badge{background:var(--green-pale);border:1.5px solid rgba(26,56,40,.2);border-radius:10px;padding:10px 16px;font-size:.82rem;color:var(--green);font-weight:700;margin-bottom:16px;display:inline-block}
 #order-wa-fallback{display:inline-block;background:#25D366;color:#fff;font-weight:700;border-radius:10px;padding:11px 20px;font-size:.9rem;margin-bottom:12px}
 
-/* ── TESTIMONIALS ── */
-.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:56px}
-@media(max-width:800px){.testi-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:520px){.testi-grid{grid-template-columns:1fr}}
-.testi-card{background:var(--white);border:2px solid var(--border);border-radius:20px;padding:28px;transition:all .25s}
-.testi-card:hover{border-color:var(--turmeric);box-shadow:0 8px 24px rgba(232,144,10,.12)}
-.stars{color:var(--turmeric);font-size:13px;letter-spacing:2px;margin-bottom:14px}
-.testi-q{font-size:14px;line-height:1.75;color:var(--text2);margin-bottom:16px;font-style:italic}
-.testi-by{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.testi-by span{display:inline-block;width:28px;height:28px;border-radius:50%;background:var(--green);color:#fff;text-align:center;line-height:28px;font-size:14px;margin-right:8px;text-transform:none;font-style:normal;vertical-align:middle}
-
 /* ── FOOTER ── */
-footer{background:var(--green);padding:52px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:24px}
-@media(max-width:768px){footer{flex-direction:column;align-items:flex-start;padding:44px 20px}}
-.foot-brand{font-size:20px;font-weight:800;color:#fff;margin-bottom:4px}
-.foot-sub{font-size:11px;color:rgba(255,255,255,.55)}
-.foot-links{display:flex;gap:24px;flex-wrap:wrap}
-.foot-links a{font-size:13px;color:rgba(255,255,255,.7);font-weight:600;transition:color .2s}
-.foot-links a:hover{color:#fff}
-.foot-copy{font-size:11px;color:rgba(255,255,255,.45)}
+footer{background:var(--white);border-top:1.5px solid var(--border);padding:48px 64px;display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:40px}
+@media(max-width:900px){footer{grid-template-columns:1fr 1fr;padding:40px 20px;gap:32px}}
+@media(max-width:500px){footer{grid-template-columns:1fr}}
+.foot-col-h{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin-bottom:14px}
+.foot-brand-name{font-family:'DM Serif Display',serif;font-size:20px;color:var(--green);margin-bottom:4px}
+.foot-brand-tag{font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+.foot-p{font-size:12.5px;color:var(--muted);line-height:1.65}
+.foot-links{display:flex;flex-direction:column;gap:9px}
+.foot-links a{font-size:13px;color:var(--text2);transition:color .2s}
+.foot-links a:hover{color:var(--green)}
+.foot-bottom{background:var(--bg);border-top:1px solid var(--border);padding:16px 64px;display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);flex-wrap:wrap;gap:8px}
+@media(max-width:768px){.foot-bottom{padding:14px 20px}}
+.foot-bottom-links{display:flex;gap:20px}
+.foot-bottom-links a{color:var(--muted);font-size:11.5px;transition:color .2s}
+.foot-bottom-links a:hover{color:var(--text)}
+.fssai{border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;display:inline-block;margin-top:10px}
+.fssai-label{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px}
+.fssai-num{font-size:11px;color:var(--text);font-weight:600}
 
-/* ── WA FAB ── */
-.wa-fab{position:fixed;bottom:24px;right:24px;z-index:50;width:56px;height:56px;
-  background:#25D366;border-radius:50%;display:grid;place-items:center;
-  box-shadow:0 6px 20px rgba(37,211,102,.45);transition:transform .25s;cursor:pointer}
+/* WA FAB */
+.wa-fab{position:fixed;bottom:24px;right:24px;z-index:100;width:52px;height:52px;background:#25D366;border-radius:50%;display:grid;place-items:center;box-shadow:0 4px 16px rgba(37,211,102,.4);transition:transform .25s}
 .wa-fab:hover{transform:scale(1.1)}
-.wa-fab svg{width:26px;height:26px;fill:#fff}
+.wa-fab svg{width:24px;height:24px;fill:#fff}
 
-/* ── BANNER ── */
-.banner{background:var(--turmeric);padding:14px 40px;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
-@media(max-width:600px){.banner{padding:12px 16px}}
-.banner-t{font-size:14px;font-weight:700;color:#fff;text-align:center}
-.banner-cta{background:#fff;color:var(--turmeric-d);font-size:12px;font-weight:800;padding:6px 18px;border-radius:999px;cursor:pointer;border:none;transition:all .2s;white-space:nowrap}
-.banner-cta:hover{background:var(--cream);transform:scale(1.04)}
+/* HERO qty (big section) */
+.hero-qty{display:flex;align-items:center;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.2);border-radius:999px;width:fit-content;margin-top:20px}
+.hero-qty-btn{width:40px;height:40px;border:none;background:transparent;color:#fff;font-size:18px;cursor:pointer;border-radius:999px;display:grid;place-items:center;transition:background .2s}
+.hero-qty-btn:hover{background:rgba(255,255,255,.15)}
+.hero-qty-n{width:40px;text-align:center;font-size:17px;font-weight:700;color:#fff}
 </style>
 </head>
 <body>
 
 <!-- WA FAB -->
-<a class="wa-fab" href="https://wa.me/917985079797" target="_blank">
+<a class="wa-fab" href="https://wa.me/917985079797" target="_blank" aria-label="WhatsApp">
   <svg viewBox="0 0 448 512"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
 </a>
 
-<!-- BANNER -->
-<div class="banner">
-  <span class="banner-t">🎊 Raksha Bandhan Special — Use code <strong>RAKHIGIFT</strong> for Buy 1kg + Get 500g FREE!</span>
-  <button class="banner-cta" onclick="document.getElementById('f-coupon').value='RAKHIGIFT';document.getElementById('order').scrollIntoView({behavior:'smooth'})">Claim Now</button>
-</div>
-
 <!-- NAV -->
 <nav>
-  <div class="nav-logo">
-    <div class="nav-logo-main">Absolute Fresh</div>
-    <div class="nav-logo-sub">Lucknow · Since 2023</div>
+  <div class="nav-logo" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <div class="nav-logo-main">absolute fresh</div>
+    <div class="nav-logo-tag">Fresh. Authentic. Ready.</div>
   </div>
   <ul class="nav-links">
-    <li><a href="#why">Why Us</a></li>
-    <li><a href="#products">Products</a></li>
-    <li><a href="#how">How It Works</a></li>
+    <li><a href="#products" class="active">Products</a></li>
+    <li><a href="#products">Combos</a></li>
+    <li><a href="#about">About Us</a></li>
     <li><a href="#order">Order</a></li>
   </ul>
-  <button class="nav-cta" onclick="document.getElementById('order').scrollIntoView({behavior:'smooth'})">Order Tomorrow →</button>
+  <button class="nav-cta" onclick="document.getElementById('order').scrollIntoView({behavior:'smooth'})">
+    <svg viewBox="0 0 448 512"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
+    Order on WhatsApp
+  </button>
 </nav>
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-content">
-    <div class="hero-badge">100% Authentic South Indian Batter</div>
-    <h1 class="hero-h1">
-      <span class="green">Stone-Ground.</span><br>
-      <span class="accent">Night-Fresh.</span><br>
-      Morning-Perfect.
-    </h1>
-    <p class="hero-tagline">असली इडली-डोसा बैटर — हर रात ताज़ा</p>
-    <p class="hero-sub">Made the traditional way — stone-ground, naturally fermented for 12 hours, delivered to Lucknow homes before breakfast. No preservatives. Never.</p>
+  <div class="hero-left">
+    <div class="hero-tag">Stone-ground · Naturally fermented · Lucknow</div>
+    <h1 class="hero-h1">Fresh South Indian<br>Breakfast.<br><em>Ready in Minutes.</em></h1>
+    <p class="hero-sub-h">Stone-ground batter, naturally fermented overnight, delivered fresh to your doorstep.</p>
     <div class="hero-btns">
-      <button class="btn-primary" onclick="document.getElementById('order').scrollIntoView({behavior:'smooth'})">Order for Tomorrow 🌿</button>
-      <button class="btn-ghost" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">See Our Packs</button>
+      <button class="btn-primary" onclick="document.getElementById('order').scrollIntoView({behavior:'smooth'})">
+        <svg viewBox="0 0 448 512"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
+        Order on WhatsApp
+      </button>
+    </div>
+    <div class="hero-note">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      Keep Refrigerated 2–5°C
     </div>
   </div>
-  <div class="hero-img-col">
-    <div>
-      <div class="hero-emoji-stack">🫙<br>🍃<br>🥣</div>
-      <div style="color:rgba(255,255,255,.7);text-align:center;font-size:13px;font-weight:700;margin-top:20px;letter-spacing:.06em;text-transform:uppercase">Ground Fresh Nightly</div>
+
+  <div class="hero-right">
+    <div class="hero-product-img">
+      <div class="hero-pack-stack">
+        <!-- Main product card -->
+        <div class="hero-pack" style="min-width:240px">
+          <div class="hero-pack-label">Absolute Fresh</div>
+          <div class="hero-pack-name">Idli &amp; Dosa Batter</div>
+          <div class="hero-pack-sub">Naturally Fermented · Stone-Ground</div>
+          <div><span class="hero-pack-pill">No Preservatives</span></div>
+          <div style="margin-top:6px"><span class="hero-pack-pill2">Keep Refrigerated</span></div>
+          <div class="hero-pack-price">₹140</div>
+          <div class="hero-pack-per">1 kg pack · Family size</div>
+          <div class="hero-qty" style="margin-top:20px">
+            <button class="hero-qty-btn" onclick="changeQty('qty-1kg',-1)">−</button>
+            <div class="hero-qty-n" id="qty-1kg">0</div>
+            <button class="hero-qty-btn" onclick="changeQty('qty-1kg',1)">+</button>
+          </div>
+        </div>
+        <!-- 500g -->
+        <div class="hero-pack-sm">
+          <div>
+            <div class="hero-pack-sm-n">500g Starter Pack</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:2px">Perfect for couples · First order</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="hero-pack-sm-p">₹75</div>
+            <div class="hero-qty" style="margin-top:0;transform:scale(.85);transform-origin:right">
+              <button class="hero-qty-btn" onclick="changeQty('qty-500g',-1)">−</button>
+              <div class="hero-qty-n" id="qty-500g">0</div>
+              <button class="hero-qty-btn" onclick="changeQty('qty-500g',1)">+</button>
+            </div>
+          </div>
+        </div>
+        <button onclick="document.getElementById('order').scrollIntoView({behavior:'smooth'})" style="background:var(--gold);color:#fff;border:none;border-radius:999px;padding:12px 28px;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;width:100%;font-family:'DM Sans',sans-serif" onmouseover="this.style.background='#b07820'" onmouseout="this.style.background='var(--gold)'">
+          Add to order →
+        </button>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- TICKER -->
-<div class="ticker">
-  <div class="ticker-track" id="ticker-track"></div>
+<!-- PRODUCTS GRID -->
+<section class="sec" id="products">
+  <div class="sec-inner">
+    <div class="sec-row">
+      <div>
+        <div class="eyebrow">What We Make</div>
+        <h2 class="sec-h">Our Products</h2>
+      </div>
+      <a class="view-all" href="#order">View All Products →</a>
+    </div>
+
+    <div class="cat-label">Batter</div>
+    <div class="prod-grid">
+      <div class="prod-item">
+        <div class="prod-img"><div class="prod-img-inner">🫙</div></div>
+        <div class="prod-info">
+          <div class="prod-n">Idli &amp; Dosa Batter 500g</div>
+          <div class="prod-d">Perfect texture. Soft &amp; fluffy idlis, crispy dosas.</div>
+          <div class="prod-p">₹75</div>
+        </div>
+      </div>
+      <div class="prod-item">
+        <div class="prod-img"><div class="prod-img-inner">🫙</div><div class="best-badge">BEST SELLER</div></div>
+        <div class="prod-info">
+          <div class="prod-n">Idli &amp; Dosa Batter 1kg</div>
+          <div class="prod-d">Our best seller. Great for families.</div>
+          <div class="prod-p">₹140</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cat-label" style="margin-top:4px">Chutneys</div>
+    <div class="prod-grid">
+      <div class="prod-item">
+        <div class="prod-img" style="background:#E8F5EC"><div class="prod-img-inner">🥥</div></div>
+        <div class="prod-info">
+          <div class="prod-n">Coconut Chutney 200g</div>
+          <div class="prod-d">Fresh coconut, tempered to perfection.</div>
+          <div class="prod-p">₹40</div>
+        </div>
+      </div>
+      <div class="prod-item">
+        <div class="prod-img" style="background:#FEF0EC"><div class="prod-img-inner">🍅</div></div>
+        <div class="prod-info">
+          <div class="prod-n">Tomato Chutney 200g</div>
+          <div class="prod-d">Tangy tomatoes with a hint of spice.</div>
+          <div class="prod-p">₹45</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cat-label" style="margin-top:4px">Combos</div>
+    <div class="prod-grid">
+      <div class="prod-item">
+        <div class="prod-img" style="background:#F5F0E8"><div class="prod-img-inner">🫙🥥</div></div>
+        <div class="prod-info">
+          <div class="prod-n">Couple Combo</div>
+          <div class="prod-d">500g Batter + 200g Chutney. Perfect for a quick breakfast.</div>
+          <div class="prod-p">₹140</div>
+        </div>
+      </div>
+      <div class="prod-item">
+        <div class="prod-img" style="background:#F5F0E8"><div class="prod-img-inner">🫙🥥</div><div class="best-badge" style="background:var(--green)">FAMILY</div></div>
+        <div class="prod-info">
+          <div class="prod-n">Family Combo</div>
+          <div class="prod-d">1kg Batter + 250g Chutney. Complete breakfast for the whole family.</div>
+          <div class="prod-p">₹180</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST STRIP -->
+<div class="trust-strip">
+  <div class="trust-inner">
+    <div class="trust-card">
+      <div class="trust-ico-wrap">🌿</div>
+      <div class="trust-t">No Preservatives</div>
+      <div class="trust-d">Made with natural ingredients, just like home.</div>
+    </div>
+    <div class="trust-card">
+      <div class="trust-ico-wrap">🪨</div>
+      <div class="trust-t">Stone-Ground</div>
+      <div class="trust-d">Better taste, better texture, the traditional way.</div>
+    </div>
+    <div class="trust-card">
+      <div class="trust-ico-wrap">❄️</div>
+      <div class="trust-t">Delivered Fresh</div>
+      <div class="trust-d">Maintained at the right temperature from our kitchen to yours.</div>
+    </div>
+    <div class="trust-card">
+      <div class="trust-ico-wrap">🤍</div>
+      <div class="trust-t">Made with Care</div>
+      <div class="trust-d">Small batches, made daily with love.</div>
+    </div>
+  </div>
 </div>
 
-<!-- WHY -->
-<section class="sec" id="why">
-  <div style="max-width:1160px;margin:0 auto">
-    <div class="eyebrow">Why Absolute Fresh</div>
-    <h2 class="sec-title">The batter your <span class="g">paati would approve.</span></h2>
-    <div class="why-grid">
-      <div class="why-card"><span class="why-ico">🪨</span><div class="why-t">Stone-Ground</div><div class="why-d">Traditional wet grinder, not blenders. The texture, the fermentation — just right.</div></div>
-      <div class="why-card"><span class="why-ico">🌙</span><div class="why-t">Made Every Night</div><div class="why-d">We grind and ferment fresh every single night. No 2-day-old batter. Ever.</div></div>
-      <div class="why-card"><span class="why-ico">🚫</span><div class="why-t">Zero Preservatives</div><div class="why-d">No chemicals, no shelf-life extenders. Just rice, urad dal, salt. That's it.</div></div>
-      <div class="why-card"><span class="why-ico">🚚</span><div class="why-t">6am at Your Door</div><div class="why-d">Before your morning tea. Cold-chain maintained from grinder to your kitchen.</div></div>
-    </div>
-  </div>
-</section>
-
-<!-- PRODUCTS -->
-<section class="sec" id="products" style="padding-top:0">
-  <div style="max-width:1160px;margin:0 auto">
-    <div class="prod-wrap">
-      <div class="eyebrow" style="color:rgba(255,255,255,.6)">Our Packs</div>
-      <div class="prod-wrap-title">Pick your perfect pack</div>
-      <div class="prod-wrap-sub">Both stone-ground, both delivered fresh — pick your size</div>
-      <div class="prod-cards">
-        <div class="prod-card featured">
-          <span class="prod-tag dark">⭐ Most Popular</span>
-          <div class="prod-kg">1 kg</div>
-          <div class="prod-name">Family Pack</div>
-          <div class="prod-price">₹140</div>
-          <ul class="prod-feats">
-            <li>~10 soft idlis or 6 crispy dosas</li>
-            <li>Families of 3–5 people</li>
-            <li>Best value per serving</li>
-          </ul>
-          <div class="qty-ctrl">
-            <button class="qty-btn" onclick="changeQty('qty-1kg',-1)">−</button>
-            <div class="qty-num" id="qty-1kg">0</div>
-            <button class="qty-btn" onclick="changeQty('qty-1kg',1)">+</button>
-          </div>
-        </div>
-        <div class="prod-card">
-          <span class="prod-tag white">Try It First</span>
-          <div class="prod-kg">500g</div>
-          <div class="prod-name">Starter Pack</div>
-          <div class="prod-price">₹75</div>
-          <ul class="prod-feats">
-            <li>~5 idlis or 3 dosas</li>
-            <li>Couples · Solo · First order</li>
-            <li>Same night-fresh quality</li>
-          </ul>
-          <div class="qty-ctrl">
-            <button class="qty-btn" onclick="changeQty('qty-500g',-1)">−</button>
-            <div class="qty-num" id="qty-500g">0</div>
-            <button class="qty-btn" onclick="changeQty('qty-500g',1)">+</button>
-          </div>
-        </div>
+<!-- ORDER CTA STRIP -->
+<div class="order-strip" id="about">
+  <div class="order-cta-box">
+    <div class="order-cta-l">
+      <div class="order-cta-ico">
+        <svg viewBox="0 0 448 512"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
+      </div>
+      <div>
+        <div class="order-cta-t">Ordering is Easy!</div>
+        <div class="order-cta-s">Choose your products and message us on WhatsApp. Or fill the form below.</div>
       </div>
     </div>
+    <button class="order-cta-btn" onclick="document.getElementById('order').scrollIntoView({behavior:'smooth'})">
+      <svg viewBox="0 0 448 512"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
+      Order Now on WhatsApp
+    </button>
   </div>
-</section>
+</div>
 
-<!-- HOW IT WORKS -->
-<section class="sec" id="how" style="background:var(--cream2)">
-  <div style="max-width:1160px;margin:0 auto">
-    <div class="eyebrow">How It Works</div>
-    <h2 class="sec-title">Simple as <span class="g">Sunday morning.</span></h2>
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">01</div>
-        <span class="step-ico">📱</span>
-        <div class="step-t">Order tonight</div>
-        <div class="step-d">Fill our quick form. We confirm your slot on WhatsApp within minutes.</div>
-      </div>
-      <div class="step highlight">
-        <div class="step-num">02</div>
-        <span class="step-ico" style="filter:brightness(0)invert(1)">🪨</span>
-        <div class="step-t">We grind all night</div>
-        <div class="step-d">Stone-ground, 12hr natural fermentation. No shortcuts, no machines.</div>
-      </div>
-      <div class="step">
-        <div class="step-num">03</div>
-        <span class="step-ico">🌅</span>
-        <div class="step-t">Morning delivery</div>
-        <div class="step-d">At your door before breakfast. Cold-chain from grinder to you.</div>
-      </div>
-      <div class="step">
-        <div class="step-num">04</div>
-        <span class="step-ico">🤝</span>
-        <div class="step-t">Pay on delivery</div>
-        <div class="step-d">Cash or UPI when it arrives. No advance needed for first orders.</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ORDER -->
-<section class="order-sec" id="order">
-  <div class="order-grid">
-    <div class="order-sticky">
+<!-- ORDER FORM -->
+<section class="form-sec" id="order">
+  <div class="form-sec-inner">
+    <div class="form-left-sticky">
       <div class="eyebrow">Place Your Order</div>
-      <h2 class="order-h">Fresh batter,<br><span class="t">tomorrow</span><br><span class="g">morning.</span></h2>
-      <p class="order-p">Fill in your details — we'll confirm your slot, delivery time and payment on WhatsApp.</p>
-      <div class="trust-list">
-        <div class="trust-item">
-          <div class="trust-ico">💵</div>
-          <div><div class="trust-t">Pay on Delivery</div><div class="trust-s">Cash or UPI at your door. No advance.</div></div>
-        </div>
-        <div class="trust-item">
-          <div class="trust-ico">📍</div>
-          <div><div class="trust-t">Lucknow Delivery</div><div class="trust-s">Vrindavan Colony, Ashiyana & nearby areas.</div></div>
-        </div>
-        <div class="trust-item">
-          <div class="trust-ico">💬</div>
-          <div><div class="trust-t">WhatsApp Confirmation</div><div class="trust-s">We confirm your slot every evening before 10pm.</div></div>
-        </div>
-      </div>
-      <div class="social-proof">
-        <div>
-          <div class="sp-stars">★★★★★</div>
-          <div class="sp-t">500+ families love it</div>
-          <div class="sp-s">Lucknow's most trusted fresh batter</div>
-        </div>
+      <h2 class="form-left-h">Fresh batter,<br>delivered <em>tomorrow</em><br>morning.</h2>
+      <p class="form-left-p">Fill in your details and we'll confirm your slot, delivery time and payment on WhatsApp — usually within minutes.</p>
+      <div class="fl-trust">
+        <div class="fl-trust-item">Pay on Delivery — Cash or UPI at your door</div>
+        <div class="fl-trust-item">Lucknow delivery — Vrindavan Colony, Ashiyana &amp; nearby</div>
+        <div class="fl-trust-item">WhatsApp confirmation before 10pm every evening</div>
+        <div class="fl-trust-item">No preservatives. No compromise.</div>
       </div>
     </div>
 
     <div class="form-card">
       <div id="order-success" style="display:none">
-        <div style="font-size:3rem;margin-bottom:12px">🎉</div>
+        <div style="font-size:2.8rem;margin-bottom:12px">🎉</div>
         <h3>Order Placed!</h3>
         <p style="font-size:.88rem;color:var(--muted);margin-bottom:14px">WhatsApp should open automatically. If not, tap below.</p>
         <div id="order-ref-badge"></div>
         <br/>
         <a id="order-wa-fallback" href="#" target="_blank">📲 Open WhatsApp to confirm</a>
         <br/><br/>
-        <button onclick="document.getElementById('order-success').style.display='none';document.getElementById('order-form-inner').style.display='block'" style="background:none;border:none;color:var(--muted);font-size:.82rem;cursor:pointer">Place another order</button>
+        <button onclick="document.getElementById('order-success').style.display='none';document.getElementById('order-form-inner').style.display='block'" style="background:none;border:none;color:var(--muted);font-size:.82rem;cursor:pointer;font-family:'DM Sans',sans-serif">Place another order</button>
       </div>
-
       <div id="order-form-inner">
-        <h3>Send Your Order 🌿</h3>
-        <p class="order-sub">We confirm availability and delivery time on WhatsApp.</p>
-        <form class="form" onsubmit="sendWA(event)">
+        <div class="form-card-h">Send Your Order</div>
+        <div class="form-card-sub">We'll confirm availability and delivery time on WhatsApp.</div>
+        <form class="frm" onsubmit="sendWA(event)">
           <input id="f-name" required placeholder="Your name"/>
           <input id="f-phone" type="tel" required placeholder="Phone number (e.g. 98765 43210)" inputmode="numeric"/>
           <textarea id="f-addr" required placeholder="Delivery address · area / landmark"></textarea>
@@ -486,45 +505,45 @@ footer{background:var(--green);padding:52px 40px;display:flex;justify-content:sp
             <div id="pin-status"></div>
           </div>
 
-          <div style="font-size:.75rem;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Select Packs</div>
-          <div id="pack-selector" style="display:flex;flex-direction:column;gap:10px;margin-bottom:4px">
-            <div class="pack-row-new">
-              <div class="pack-info-new"><strong>1 kg Pack</strong><span>₹140 per pack</span></div>
-              <div class="qty-sm">
-                <button type="button" class="qty-sm-btn" onclick="changeQty('qty-1kg',-1)">−</button>
-                <div class="qty-sm-num" id="qty-1kg-form">0</div>
-                <button type="button" class="qty-sm-btn" onclick="changeQty('qty-1kg',1)">+</button>
+          <div class="pack-lbl">Select Packs</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div class="pack-row-f">
+              <div><span class="pack-f-n">1 kg Pack</span><span class="pack-f-p">₹140 per pack</span></div>
+              <div class="qty-mini">
+                <button type="button" class="qty-mini-btn" onclick="changeQty('qty-1kg',-1)">−</button>
+                <div class="qty-mini-n" id="qty-1kg-form">0</div>
+                <button type="button" class="qty-mini-btn" onclick="changeQty('qty-1kg',1)">+</button>
               </div>
             </div>
-            <div class="pack-row-new">
-              <div class="pack-info-new"><strong>500g Family Pack</strong><span>₹75 per pack</span></div>
-              <div class="qty-sm">
-                <button type="button" class="qty-sm-btn" onclick="changeQty('qty-500g',-1)">−</button>
-                <div class="qty-sm-num" id="qty-500g-form">0</div>
-                <button type="button" class="qty-sm-btn" onclick="changeQty('qty-500g',1)">+</button>
+            <div class="pack-row-f">
+              <div><span class="pack-f-n">500g Starter Pack</span><span class="pack-f-p">₹75 per pack</span></div>
+              <div class="qty-mini">
+                <button type="button" class="qty-mini-btn" onclick="changeQty('qty-500g',-1)">−</button>
+                <div class="qty-mini-n" id="qty-500g-form">0</div>
+                <button type="button" class="qty-mini-btn" onclick="changeQty('qty-500g',1)">+</button>
               </div>
             </div>
-            <div class="pack-sub">
-              <div class="pack-sub-l"><strong>Subscription / Bulk</strong><span>Daily · Weekly · Hotel supply</span></div>
-              <button type="button" class="sub-add-btn" id="sub-toggle" onclick="toggleSubscription(this)">Add</button>
+            <div class="pack-sub-f">
+              <div class="pack-sub-f-l"><strong>Subscription / Bulk</strong><span>Daily · Weekly · Hotel supply</span></div>
+              <button type="button" class="sub-btn" id="sub-toggle" onclick="toggleSubscription(this)">Add</button>
             </div>
           </div>
 
-          <div class="coupon-row">
+          <div class="cpn-row">
             <input id="f-coupon" placeholder="Coupon code" autocomplete="off" oninput="this.value=this.value.toUpperCase()"/>
-            <button type="button" class="coupon-apply" id="coupon-btn" onclick="applyCoupon()">Apply</button>
+            <button type="button" class="cpn-apply" id="coupon-btn" onclick="applyCoupon()">Apply</button>
           </div>
-          <div class="coupon-success" id="coupon-success"></div>
-          <div class="coupon-error" id="coupon-error"></div>
+          <div class="cpn-ok" id="coupon-success"></div>
+          <div class="cpn-err" id="coupon-error"></div>
 
           <div id="order-summary" style="display:none">
             <div id="sum-items-list"></div>
             <div id="sum-subtotal-row" style="display:none"><span>Subtotal</span><span id="sum-base">—</span></div>
             <div id="sum-discount-row" style="display:none"><span id="sum-discount-label">Discount</span><span id="sum-discount">—</span></div>
-            <div class="sum-total-row"><span>You pay</span><span id="sum-final" style="color:var(--green)">—</span></div>
+            <div class="sum-total-row"><span>You pay</span><span id="sum-final">—</span></div>
             <div class="sum-cod">💵 Cash or UPI on delivery</div>
             <div id="upi-qr-box" style="display:none">
-              <div style="font-size:.72rem;font-weight:700;color:var(--green);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Pay via UPI</div>
+              <div style="font-size:.72rem;font-weight:700;color:var(--green);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">Pay via UPI</div>
               <div id="upi-qr-canvas"></div>
               <div id="upi-qr-amount">—</div>
               <div style="font-size:.68rem;color:var(--muted);margin-top:2px">Scan · PhonePe · GPay · Paytm · BHIM</div>
@@ -535,36 +554,11 @@ footer{background:var(--green);padding:52px 40px;display:flex;justify-content:sp
           </div>
 
           <div id="delivery-date-row">🚚 <span>Delivery: <strong id="delivery-date-text">Tomorrow</strong></span></div>
-          <button class="form-wa-btn" type="submit">
-            <svg width="16" height="16" viewBox="0 0 448 512" fill="currentColor"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
-            Confirm on WhatsApp
+          <button class="wa-submit" type="submit">
+            <svg viewBox="0 0 448 512"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
+            Order Now on WhatsApp
           </button>
         </form>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- TESTIMONIALS -->
-<section class="sec" id="reviews">
-  <div style="max-width:1160px;margin:0 auto">
-    <div class="eyebrow">Real Customers</div>
-    <h2 class="sec-title">Lucknow families <span class="g">love it.</span></h2>
-    <div class="testi-grid">
-      <div class="testi-card">
-        <div class="stars">★★★★★</div>
-        <div class="testi-q">"My kids ask for dosas every morning now! The batter is so fresh you can smell the fermentation — just like what we used to get back home in Chennai."</div>
-        <div class="testi-by"><span>S</span>Sunita R. · Vrindavan Colony</div>
-      </div>
-      <div class="testi-card">
-        <div class="stars">★★★★★</div>
-        <div class="testi-q">"I've tried 4 batter brands in Lucknow. None of them ferment naturally like this. The idlis come out fluffy and soft every single time."</div>
-        <div class="testi-by"><span>R</span>Rajan M. · Ashiyana</div>
-      </div>
-      <div class="testi-card">
-        <div class="stars">★★★★★</div>
-        <div class="testi-q">"Delivery is always on time before 7am. The WhatsApp confirmation the previous evening gives you total peace of mind. Highly recommended!"</div>
-        <div class="testi-by"><span>P</span>Preethi K. · Indira Nagar</div>
       </div>
     </div>
   </div>
@@ -573,34 +567,55 @@ footer{background:var(--green);padding:52px 40px;display:flex;justify-content:sp
 <!-- FOOTER -->
 <footer>
   <div>
-    <div class="foot-brand">Absolute Fresh Food</div>
-    <div class="foot-sub">Lucknow · Est. 2023 · FSSAI 12724055000349</div>
+    <div class="foot-brand-name">absolute fresh</div>
+    <div class="foot-brand-tag">Fresh. Authentic. Ready.</div>
+    <p class="foot-p">Absolute Fresh brings you authentic South Indian food made fresh every day in Lucknow.</p>
+    <div class="fssai" style="margin-top:16px">
+      <div class="fssai-label">FSSAI Licensed</div>
+      <div class="fssai-num">12724055000349</div>
+    </div>
   </div>
-  <div class="foot-links">
-    <a href="#products">Products</a>
-    <a href="#order">Order</a>
-    <a href="https://wa.me/917985079797" target="_blank">WhatsApp</a>
-    <a href="https://instagram.com/absolutefreshfood" target="_blank">Instagram</a>
-    <a href="https://sales.absolutefreshfood.com/marketing/signup.html" target="_blank">Partner With Us</a>
+  <div>
+    <div class="foot-col-h">Help</div>
+    <div class="foot-links">
+      <a href="#order">How to Order</a>
+      <a href="#">Delivery &amp; Storage</a>
+      <a href="#">FAQs</a>
+    </div>
   </div>
-  <div class="foot-copy">© 2026 Absolute Fresh Food. All rights reserved.</div>
+  <div>
+    <div class="foot-col-h">Products</div>
+    <div class="foot-links">
+      <a href="#products">Idli &amp; Dosa Batter</a>
+      <a href="#products">Coconut Chutney</a>
+      <a href="#products">Tomato Chutney</a>
+      <a href="#products">Combos</a>
+    </div>
+  </div>
+  <div>
+    <div class="foot-col-h">Contact</div>
+    <div class="foot-links">
+      <a href="https://wa.me/917985079797">📱 +91 79850 79797</a>
+      <a href="https://instagram.com/absolutefreshfood">📷 @absolutefreshfood</a>
+      <a href="#">Lucknow, Uttar Pradesh</a>
+      <a href="https://sales.absolutefreshfood.com/marketing/signup.html">Partner With Us</a>
+    </div>
+  </div>
 </footer>
+<div class="foot-bottom">
+  <span>© 2026 Absolute Fresh Food. All rights reserved.</span>
+  <div class="foot-bottom-links">
+    <a href="#">Privacy Policy</a>
+    <a href="#">Terms &amp; Conditions</a>
+  </div>
+</div>
 
 <script>
-// ── Ticker ──────────────────────────────────────────────────
-const words=['Stone Ground Nightly','12hr Natural Fermentation','No Preservatives','Morning Delivery by 6am','Lucknow Made','100% Fresh','Zero Chemicals','Pay on Delivery'];
-const t=document.getElementById('ticker-track');
-const html=words.map(w=>`<span class="t-item">🌿 ${w}</span><span class="t-item t-dot">·</span>`).join('');
-t.innerHTML=html+html;
-
-// ── Supabase ────────────────────────────────────────────────
 const _SB_URL='https://fbfopgzblqmsflkfejwa.supabase.co';
 const _SB_KEY='sb_publishable_r7mYhsyIKtBjBKzxH8St9g_OHjTU-RQ';
 const _db=supabase.createClient(_SB_URL,_SB_KEY);
-
 let _appliedCoupon=null,_upiPaid=false,_wantSubscription=false,_orderSubmitting=false;
 
-// ── Coupon ──────────────────────────────────────────────────
 async function applyCoupon(){
   const code=document.getElementById('f-coupon').value.trim().toUpperCase();
   const sEl=document.getElementById('coupon-success'),eEl=document.getElementById('coupon-error'),btn=document.getElementById('coupon-btn');
@@ -608,27 +623,21 @@ async function applyCoupon(){
   if(!code){eEl.textContent='Please enter a coupon code.';eEl.style.display='block';return;}
   btn.disabled=true;btn.textContent='…';
   try{
-    const{data:coupon,error}=await _db.from('coupons').select('id,code,discount_value,discount_type,expires_on,status,min_order_value,max_uses,times_used,coupon_type').eq('code',code).single();
-    if(error||!coupon){eEl.textContent='Coupon not found.';eEl.style.display='block';}
-    else if(coupon.status!=='active'){eEl.textContent='This coupon is no longer active.';eEl.style.display='block';}
-    else if(coupon.expires_on&&new Date(coupon.expires_on)<new Date()){eEl.textContent='This coupon has expired.';eEl.style.display='block';}
-    else if(coupon.max_uses&&coupon.times_used>=coupon.max_uses){eEl.textContent='Coupon fully used.';eEl.style.display='block';}
-    else{
-      _appliedCoupon=coupon;
-      const msg=coupon.discount_type==='bogo'?(coupon.coupon_type==='rakhigift'?`🎁 "${coupon.code}" — Buy 1kg, Get 500g + Podi Chutney FREE! 🪔`:`🎁 "${coupon.code}" — Buy 1kg, Get 500g FREE!`):`✅ "${coupon.code}" — ${coupon.discount_value}% off!`;
-      sEl.textContent=msg;sEl.style.display='block';btn.textContent='✓';updateOrderSummary();
-    }
+    const{data:c,error}=await _db.from('coupons').select('id,code,discount_value,discount_type,expires_on,status,min_order_value,max_uses,times_used,coupon_type').eq('code',code).single();
+    if(error||!c){eEl.textContent='Coupon not found.';eEl.style.display='block';}
+    else if(c.status!=='active'){eEl.textContent='This coupon is no longer active.';eEl.style.display='block';}
+    else if(c.expires_on&&new Date(c.expires_on)<new Date()){eEl.textContent='This coupon has expired.';eEl.style.display='block';}
+    else if(c.max_uses&&c.times_used>=c.max_uses){eEl.textContent='Coupon fully used.';eEl.style.display='block';}
+    else{_appliedCoupon=c;sEl.textContent=c.discount_type==='bogo'?(c.coupon_type==='rakhigift'?`🎁 "${c.code}" — Buy 1kg, Get 500g + Podi Chutney FREE!`:`🎁 "${c.code}" — Buy 1kg, Get 500g FREE!`):`✅ "${c.code}" — ${c.discount_value}% off!`;sEl.style.display='block';btn.textContent='✓';updateOrderSummary();}
   }catch(ex){eEl.textContent='Could not verify coupon.';eEl.style.display='block';}
-  btn.disabled=false;
-  if(!_appliedCoupon)btn.textContent='Apply';
+  btn.disabled=false;if(!_appliedCoupon)btn.textContent='Apply';
 }
 
-// ── Packs ───────────────────────────────────────────────────
-const PACKS=[{id:'qty-1kg',name:'1 kg Pack',price:140},{id:'qty-500g',name:'500g Family Pack',price:75}];
+const PACKS=[{id:'qty-1kg',name:'1 kg Pack',price:140},{id:'qty-500g',name:'500g Starter Pack',price:75}];
 function changeQty(id,delta){
-  const el=document.getElementById(id),formEl=document.getElementById(id+'-form');
-  const val=Math.max(0,parseInt(el.textContent||'0')+delta);
-  el.textContent=val;if(formEl)formEl.textContent=val;updateOrderSummary();
+  const el=document.getElementById(id),fEl=document.getElementById(id+'-form');
+  const v=Math.max(0,parseInt(el.textContent||'0')+delta);
+  el.textContent=v;if(fEl)fEl.textContent=v;updateOrderSummary();
 }
 function toggleSubscription(btn){_wantSubscription=!_wantSubscription;btn.textContent=_wantSubscription?'✓ Added':'Add';btn.classList.toggle('active',_wantSubscription);updateOrderSummary();}
 function getOrderItems(){return PACKS.map(p=>({id:p.id,name:p.name,qty:parseInt(document.getElementById(p.id).textContent)||0,price:p.price})).filter(i=>i.qty>0);}
@@ -636,14 +645,10 @@ function getOrderPrices(){
   const items=getOrderItems(),base=items.reduce((s,i)=>s+i.price*i.qty,0);
   let disc=0,saving=0,freeItems=[];
   if(_appliedCoupon){
-    if(_appliedCoupon.discount_type==='bogo'){
-      const isRakhi=_appliedCoupon.coupon_type==='rakhigift';
-      const kg1=items.find(i=>i.id==='qty-1kg');
-      if(kg1&&kg1.qty>0){freeItems=[{id:'qty-500g',name:'500g Family Pack',price:75,qty:kg1.qty,free:true}];if(isRakhi)freeItems.push({id:'podi',name:'Podi Chutney 30g',price:45,qty:kg1.qty,free:true});}
-    }else{disc=_appliedCoupon.discount_value||0;saving=base>0?Math.round(base*disc/100):0;}
+    if(_appliedCoupon.discount_type==='bogo'){const isRakhi=_appliedCoupon.coupon_type==='rakhigift';const kg1=items.find(i=>i.id==='qty-1kg');if(kg1&&kg1.qty>0){freeItems=[{id:'qty-500g',name:'500g Starter Pack',price:75,qty:kg1.qty,free:true}];if(isRakhi)freeItems.push({id:'podi',name:'Podi Chutney 30g',price:45,qty:kg1.qty,free:true});}}
+    else{disc=_appliedCoupon.discount_value||0;saving=base>0?Math.round(base*disc/100):0;}
   }
-  const final=base-saving,freeValue=freeItems.reduce((s,i)=>s+i.price*i.qty,0);
-  return{base,disc,saving,final,items,freeItems,freeValue};
+  return{base,disc,saving,final:base-saving,items,freeItems,freeValue:freeItems.reduce((s,i)=>s+i.price*i.qty,0)};
 }
 function updateOrderSummary(){
   const{base,disc,saving,final,items,freeItems,freeValue}=getOrderPrices();
@@ -652,17 +657,15 @@ function updateOrderSummary(){
   box.style.display='block';
   const isBogo=_appliedCoupon&&_appliedCoupon.discount_type==='bogo';
   const listEl=document.getElementById('sum-items-list');
-  const paidLines=items.map(i=>`<div style="display:flex;justify-content:space-between;margin-bottom:5px;color:var(--text2);font-size:.83rem"><span>${i.name} ×${i.qty}</span><span>₹${i.price*i.qty}</span></div>`).join('');
-  const freeLines=isBogo?freeItems.map(i=>`<div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:.83rem;color:var(--green);font-weight:700"><span>🎁 FREE ${i.name} ×${i.qty}</span><span style="text-decoration:line-through;opacity:.5">₹${i.price*i.qty}</span></div>`).join(''):'';
-  const subLine=_wantSubscription?`<div style="display:flex;justify-content:space-between;margin-bottom:5px;color:var(--turmeric-d);font-size:.83rem"><span>Subscription / Bulk</span><span>Quote on WhatsApp</span></div>`:'';
-  listEl.innerHTML=paidLines+freeLines+subLine;
-  const subRow=document.getElementById('sum-subtotal-row');
-  subRow.style.display=items.length>1?'flex':'none';
+  listEl.innerHTML=items.map(i=>`<div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:.83rem;color:var(--text2)"><span>${i.name} ×${i.qty}</span><span>₹${i.price*i.qty}</span></div>`).join('')
+    +(isBogo?freeItems.map(i=>`<div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:.83rem;color:var(--green-l);font-weight:700"><span>🎁 FREE ${i.name} ×${i.qty}</span><span style="text-decoration:line-through;opacity:.5">₹${i.price*i.qty}</span></div>`).join(''):'')
+    +(_wantSubscription?`<div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:.83rem;color:var(--gold)"><span>Subscription / Bulk</span><span>Quote on WA</span></div>`:'');
+  document.getElementById('sum-subtotal-row').style.display=items.length>1?'flex':'none';
   document.getElementById('sum-base').textContent=`₹${base}`;
-  const discRow=document.getElementById('sum-discount-row');
-  if(isBogo&&freeValue>0){discRow.style.display='flex';document.getElementById('sum-discount-label').textContent='Free packs value';document.getElementById('sum-discount').textContent=`₹${freeValue}`;}
-  else if(saving>0){discRow.style.display='flex';document.getElementById('sum-discount-label').textContent=`Coupon (${disc}% off)`;document.getElementById('sum-discount').textContent=`−₹${saving}`;}
-  else{discRow.style.display='none';}
+  const dr=document.getElementById('sum-discount-row');
+  if(isBogo&&freeValue>0){dr.style.display='flex';document.getElementById('sum-discount-label').textContent='Free packs value';document.getElementById('sum-discount').textContent=`₹${freeValue}`;}
+  else if(saving>0){dr.style.display='flex';document.getElementById('sum-discount-label').textContent=`Coupon (${disc}% off)`;document.getElementById('sum-discount').textContent=`−₹${saving}`;}
+  else dr.style.display='none';
   document.getElementById('sum-final').textContent=base>0?`₹${final}`:'To be quoted';
   updateUpiQr(final>0?final:null);
 }
@@ -674,27 +677,24 @@ function updateUpiQr(amount){
   const upiUrl=`upi://pay?pa=absolutefreshfood@ptyes&pn=AbsoluteFresh&am=${amount}&tn=${ref}&cu=INR`;
   document.getElementById('upi-qr-amount').textContent=`₹${amount} · Ref: ${ref}`;
   document.getElementById('upi-pay-btn').href=upiUrl;
-  if(window.QRCode){const c=document.getElementById('upi-qr-canvas');c.innerHTML='';new QRCode(c,{text:upiUrl,width:160,height:160,colorDark:'#1B6B2F',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.H});}
+  if(window.QRCode){const c=document.getElementById('upi-qr-canvas');c.innerHTML='';new QRCode(c,{text:upiUrl,width:160,height:160,colorDark:'#1A3828',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.H});}
 }
 
-// ── PIN ─────────────────────────────────────────────────────
 let _serviceAreas=null,_pinValid=false;
 (async()=>{const{data}=await _db.from('service_areas').select('pincode,area_name').eq('is_active',true);_serviceAreas=data||[];})();
 function checkPin(){
   const pin=document.getElementById('f-pin').value.trim(),el=document.getElementById('pin-status');
   if(pin.length<6){el.innerHTML='';_pinValid=false;return;}
-  if(_serviceAreas===null){el.innerHTML='<span style="color:var(--turmeric)">Checking…</span>';return;}
-  if(_serviceAreas.length===0){_pinValid=true;el.innerHTML='';return;}
+  if(!_serviceAreas){el.innerHTML='<span style="color:var(--gold)">Checking…</span>';return;}
+  if(!_serviceAreas.length){_pinValid=true;el.innerHTML='';return;}
   const area=_serviceAreas.find(a=>a.pincode===pin);
   if(area){el.innerHTML=`<span style="color:var(--green);font-weight:700">🎉 We deliver to ${area.area_name||pin}!</span>`;_pinValid=true;}
-  else{el.innerHTML=`<span style="color:var(--red)">Sorry, not in delivery area yet. <a href="https://wa.me/918318767689" style="color:var(--red);text-decoration:underline">WhatsApp us</a></span>`;_pinValid=false;}
+  else{el.innerHTML=`<span style="color:#C0392B">Sorry, not in delivery area yet. <a href="https://wa.me/918318767689" style="color:#C0392B;text-decoration:underline">WhatsApp us</a></span>`;_pinValid=false;}
 }
 
-// ── Delivery date ────────────────────────────────────────────
 const _tomorrow=(()=>{const d=new Date();d.setDate(d.getDate()+1);return{iso:d.toISOString().split('T')[0],display:d.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'short'})};})();
 document.addEventListener('DOMContentLoaded',()=>{const el=document.getElementById('delivery-date-text');if(el)el.textContent=_tomorrow.display;});
 
-// ── UPI paid ─────────────────────────────────────────────────
 function toggleUpiPaid(){
   _upiPaid=!_upiPaid;
   const btn=document.getElementById('upi-paid-btn'),badge=document.getElementById('upi-paid-badge');
@@ -702,12 +702,9 @@ function toggleUpiPaid(){
   else{btn.style.background='';btn.style.color='';btn.textContent="✅ I've paid via UPI — mark as paid";badge.style.display='none';}
 }
 
-// ── Send order ────────────────────────────────────────────────
 const WA='918318767689';
 async function sendWA(e){
-  e.preventDefault();
-  if(_orderSubmitting)return;
-  _orderSubmitting=true;
+  e.preventDefault();if(_orderSubmitting)return;_orderSubmitting=true;
   const btn=e.target.querySelector('button[type="submit"]');
   const n=document.getElementById('f-name').value.trim();
   const ph=document.getElementById('f-phone').value.trim().replace(/[\s\-]/g,'').replace(/^\+91/,'').replace(/^0/,'');
@@ -716,20 +713,16 @@ async function sendWA(e){
   if(!n||!ph||!ad){alert('Please fill your name, phone and address.');_orderSubmitting=false;return;}
   if(ph.length<10){alert('Please enter a valid 10-digit phone number.');_orderSubmitting=false;return;}
   if(pin.length<6){alert('Please enter your 6-digit pincode.');document.getElementById('f-pin').focus();_orderSubmitting=false;return;}
-  checkPin();
-  if(!_pinValid){document.getElementById('f-pin').focus();_orderSubmitting=false;return;}
+  checkPin();if(!_pinValid){document.getElementById('f-pin').focus();_orderSubmitting=false;return;}
   const{base,disc,saving,final,items,freeItems,freeValue}=getOrderPrices();
-  if(items.length===0&&!_wantSubscription){alert('Please add at least one pack.');_orderSubmitting=false;return;}
+  if(!items.length&&!_wantSubscription){alert('Please add at least one pack.');_orderSubmitting=false;return;}
   btn.disabled=true;btn.textContent='Placing order…';
   const isBogo=_appliedCoupon&&_appliedCoupon.discount_type==='bogo';
   const itemLines=items.map(i=>`%0A  • ${i.name} ×${i.qty} = ₹${i.price*i.qty}`).join('');
   const freeLines=isBogo?freeItems.map(i=>`%0A  🎁 FREE ${i.name} ×${i.qty}`).join(''):'';
   const subLine=_wantSubscription?'%0A  • Subscription / Bulk (quote needed)':'';
   let couponLine='';
-  if(_appliedCoupon&&saving>0){
-    couponLine=isBogo?`%0ACoupon: ${_appliedCoupon.code} (Buy 1kg Get 500g FREE — ₹${freeValue} worth free)`:`%0ACoupon: ${_appliedCoupon.code} (${disc}% off — saved ₹${saving})`;
-    _db.rpc('increment_coupon_usage',{coupon_id:_appliedCoupon.id}).catch(()=>{});
-  }
+  if(_appliedCoupon&&(saving>0||isBogo)){couponLine=isBogo?`%0ACoupon: ${_appliedCoupon.code} (BOGO — ₹${freeValue} worth free)`:`%0ACoupon: ${_appliedCoupon.code} (${disc}% off — saved ₹${saving})`;_db.rpc('increment_coupon_usage',{coupon_id:_appliedCoupon.id}).catch(()=>{});}
   const totalLine=base>0?`%0ATotal: ₹${final}${isBogo&&freeValue>0?` + FREE packs worth ₹${freeValue}`:saving>0?` (saved ₹${saving})`:''}` :'';
   let orderRef='WEB-'+Date.now().toString(36).toUpperCase();
   try{
@@ -737,12 +730,10 @@ async function sendWA(e){
     const{data:existing}=await _db.from('web_orders').select('order_ref').eq('customer_phone',ph).eq('delivery_date',_tomorrow.iso).gte('created_at',tenMinAgo).limit(1);
     if(existing&&existing.length){orderRef=existing[0].order_ref;}
     else{
-      const allItems=[...items,...(isBogo?freeItems.map(i=>({...i,name:`FREE ${i.name}`,price:0})):[])]
-        .concat(_wantSubscription?[{name:'Subscription/Bulk',qty:1,price:0}]:[]);
       await _db.from('web_orders').insert({
         order_ref:orderRef,customer_name:n,customer_phone:ph,customer_address:ad,
-        items:allItems,coupon_code:_appliedCoupon?_appliedCoupon.code:null,
-        coupon_id:_appliedCoupon?_appliedCoupon.id:null,
+        items:[...items,...(isBogo?freeItems.map(i=>({...i,name:`FREE ${i.name}`,price:0})):[])].concat(_wantSubscription?[{name:'Subscription/Bulk',qty:1,price:0}]:[]),
+        coupon_code:_appliedCoupon?_appliedCoupon.code:null,coupon_id:_appliedCoupon?_appliedCoupon.id:null,
         subtotal:base||null,discount_amount:saving||null,total:final||null,
         customer_pincode:pin,status:'new',source:'website_preview',delivery_date:_tomorrow.iso,
         admin_notes:_upiPaid?`✅ PAID via UPI · Ref: ${window._pendingOrderRef}`:null
@@ -750,12 +741,12 @@ async function sendWA(e){
     }
   }catch(err){console.warn('Save failed:',err);}
   const paymentLine=_upiPaid?`✅ PAID via UPI · Ref: ${window._pendingOrderRef||'—'}`:'COD / UPI on delivery';
-  const msg=`Hi Absolute Fresh! 🌿%0A%0AName: ${encodeURIComponent(n)}%0APhone: +91${ph}%0AAddress: ${encodeURIComponent(ad)} - ${pin}%0ADelivery Date: ${_tomorrow.display}%0A%0AOrder:${itemLines}${freeLines}${subLine}${couponLine}${totalLine}%0APayment: ${encodeURIComponent(paymentLine)}%0A%0ARef: ${orderRef}`;
+  const msg=`Hi Absolute Fresh! 🌿%0A%0AName: ${encodeURIComponent(n)}%0APhone: +91${ph}%0AAddress: ${encodeURIComponent(ad)} - ${pin}%0ADelivery: ${_tomorrow.display}%0A%0AOrder:${itemLines}${freeLines}${subLine}${couponLine}${totalLine}%0APayment: ${encodeURIComponent(paymentLine)}%0ARef: ${orderRef}`;
   const waUrl=`https://wa.me/${WA}?text=${msg}`;
   window.open(waUrl,'_blank');
   document.getElementById('order-form-inner').style.display='none';
   const sc=document.getElementById('order-success');sc.style.display='block';
-  document.getElementById('order-ref-badge').textContent=`Order ${orderRef} · Delivery ${_tomorrow.display}`;
+  document.getElementById('order-ref-badge').textContent=`Order ${orderRef} · ${_tomorrow.display}`;
   document.getElementById('order-wa-fallback').href=waUrl;
   _orderSubmitting=false;
 }
