@@ -4,287 +4,299 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Absolute Fresh — Fresh. Authentic. Ready.</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 :root{
-  --bg:#F5F0E8; --bg2:#EDE8DC; --white:#FFFFFF;
-  --green:#1A3828; --green2:#2A5C3F; --green-l:#3A7A54; --green-pale:#EAF2EC;
-  --gold:#C8902A; --gold-l:#E8B84B; --gold-pale:#FBF3E2;
-  --text:#1A1A15; --text2:#3D3D30; --muted:#7A7060;
-  --border:#D8D0B8; --border2:#C8BEA0;
-  --radius:12px;
+  --bg:#FDFAF4;
+  --green:#1B5224;
+  --green2:#24692E;
+  --green-pale:#EBF4EC;
+  --red:#C62828;
+  --gold:#E8A000;
+  --gold-pale:#FEF7E6;
+  --text:#1A140A;
+  --text2:#4A3F2A;
+  --muted:#8A7D62;
+  --border:#E0D8C4;
+  --white:#FFFFFF;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
 a{text-decoration:none;color:inherit}
-button{font-family:'DM Sans',sans-serif}
-img{max-width:100%}
+button{font-family:'Inter',sans-serif}
 
-/* ── NAV ── */
+/* NAV */
 nav{
-  position:sticky;top:0;z-index:200;
-  background:rgba(245,240,232,.97);backdrop-filter:blur(12px);
-  border-bottom:1px solid var(--border);
+  background:var(--white);border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:100;
   display:flex;align-items:center;justify-content:space-between;
-  padding:0 48px;height:72px;
+  padding:0 48px;height:68px;
 }
-.nav-logo{display:flex;flex-direction:column;line-height:1.15;cursor:pointer}
-.nav-logo-main{font-family:'DM Serif Display',serif;font-size:19px;font-weight:400;color:var(--green);letter-spacing:-.02em}
-.nav-logo-tag{font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
-.nav-links{display:flex;gap:0;list-style:none}
-.nav-links a{font-size:13.5px;font-weight:500;color:var(--text2);padding:0 18px;height:72px;display:flex;align-items:center;border-bottom:2px solid transparent;transition:all .2s}
-.nav-links a:hover,.nav-links a.active{color:var(--green);border-bottom-color:var(--green)}
-.nav-cta{background:var(--green);color:#fff;font-size:13px;font-weight:600;
-  padding:11px 22px;border:none;border-radius:999px;cursor:pointer;
-  display:flex;align-items:center;gap:8px;transition:all .2s}
-.nav-cta:hover{background:var(--green2);transform:scale(1.03)}
-.nav-cta svg{width:16px;height:16px;fill:#fff;flex-shrink:0}
-@media(max-width:768px){.nav-links{display:none}nav{padding:0 20px;height:60px}}
+.nav-logo img{height:36px;object-fit:contain}
+.nav-links{display:flex;gap:32px;list-style:none}
+.nav-links a{font-size:13.5px;font-weight:500;color:var(--text2);transition:color .2s}
+.nav-links a:hover{color:var(--green)}
+.nav-wa{
+  background:var(--green);color:#fff;font-size:13px;font-weight:600;
+  padding:10px 20px;border:none;border-radius:6px;cursor:pointer;
+  display:flex;align-items:center;gap:8px;transition:background .2s;
+}
+.nav-wa:hover{background:var(--green2)}
+.nav-wa svg{width:16px;height:16px;fill:#fff;flex-shrink:0}
+@media(max-width:768px){
+  .nav-links{display:none}
+  nav{padding:0 18px;height:60px}
+  .nav-logo img{height:30px}
+}
 
-/* ── HERO ── */
+/* HERO */
 .hero{
-  display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 72px);
+  display:grid;grid-template-columns:1fr 1fr;
+  min-height:calc(100vh - 68px);
   background:var(--bg);
 }
-.hero-left{display:flex;flex-direction:column;justify-content:center;padding:72px 48px 72px 64px}
-.hero-tag{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:20px}
-.hero-h1{font-family:'DM Serif Display',serif;font-size:clamp(40px,5vw,68px);font-weight:400;line-height:1.1;color:var(--green);margin-bottom:6px}
-.hero-h1 em{font-style:italic;color:var(--gold)}
-.hero-sub-h{font-size:clamp(15px,1.6vw,18px);color:var(--text2);line-height:1.7;margin-bottom:36px;max-width:440px}
-.hero-btns{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:36px}
-.btn-primary{background:var(--green);color:#fff;font-size:14px;font-weight:600;
-  padding:14px 28px;border:none;border-radius:999px;cursor:pointer;
-  display:flex;align-items:center;gap:9px;transition:all .25s;
-  box-shadow:0 4px 16px rgba(26,56,40,.25)}
-.btn-primary:hover{background:var(--green2);transform:translateY(-1px);box-shadow:0 8px 24px rgba(26,56,40,.3)}
-.btn-primary svg{width:18px;height:18px;fill:#fff;flex-shrink:0}
-.hero-note{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
-.hero-note svg{width:14px;height:14px;flex-shrink:0}
+.hero-left{
+  display:flex;flex-direction:column;justify-content:center;
+  padding:72px 56px 72px 64px;
+}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--green);margin-bottom:28px;
+}
+.hero-tag::before{content:'';width:24px;height:1.5px;background:var(--green)}
+h1{
+  font-family:'Lora',serif;
+  font-size:clamp(36px,4.5vw,60px);font-weight:700;line-height:1.1;
+  color:var(--text);letter-spacing:-.02em;margin-bottom:8px;
+}
+h1 em{font-style:italic;color:var(--green)}
+.hero-sub-line{
+  font-family:'Lora',serif;font-style:italic;
+  font-size:clamp(16px,2vw,22px);color:var(--gold);
+  margin-bottom:24px;
+}
+.hero-p{
+  font-size:15px;color:var(--text2);line-height:1.75;
+  max-width:440px;margin-bottom:40px;
+}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:40px}
+.btn-green{
+  background:var(--green);color:#fff;font-size:14px;font-weight:600;
+  padding:13px 28px;border:none;border-radius:6px;cursor:pointer;
+  display:flex;align-items:center;gap:9px;transition:all .2s;
+}
+.btn-green:hover{background:var(--green2);transform:translateY(-1px)}
+.btn-green svg{width:17px;height:17px;fill:#fff;flex-shrink:0}
+.btn-outline{
+  background:transparent;color:var(--green);font-size:14px;font-weight:600;
+  padding:13px 28px;border:1.5px solid var(--green);border-radius:6px;cursor:pointer;transition:all .2s;
+}
+.btn-outline:hover{background:var(--green-pale)}
+.hero-pills{display:flex;flex-wrap:wrap;gap:10px}
+.pill{
+  font-size:11.5px;font-weight:600;color:var(--text2);
+  padding:6px 14px;border:1px solid var(--border);border-radius:999px;
+  background:var(--white);
+}
 .hero-right{
-  background:var(--green);
+  background:linear-gradient(160deg,#F5EFD8 0%,#EDE5C8 100%);
   display:flex;align-items:center;justify-content:center;
-  position:relative;overflow:hidden;padding:40px;
+  padding:48px;position:relative;overflow:hidden;
 }
 .hero-right::before{
-  content:'';position:absolute;top:-80px;right:-80px;width:400px;height:400px;
-  border-radius:50%;background:rgba(255,255,255,.03);
+  content:'';position:absolute;top:-60px;left:-60px;
+  width:320px;height:320px;border-radius:50%;
+  background:rgba(27,82,36,.06);
 }
-.hero-right::after{
-  content:'';position:absolute;bottom:-60px;left:-60px;width:280px;height:280px;
-  border-radius:50%;background:rgba(200,144,42,.08);
+.hero-prod-img{
+  position:relative;z-index:1;
+  max-width:380px;width:100%;
+  filter:drop-shadow(0 24px 48px rgba(0,0,0,.18));
+  transition:transform .4s ease;
 }
-.hero-product-img{
-  position:relative;z-index:1;text-align:center;
-}
-.hero-pack{
-  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
-  border-radius:20px;padding:32px 28px 24px;display:inline-block;
-  backdrop-filter:blur(4px);min-width:200px;
-}
-.hero-pack-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px}
-.hero-pack-name{font-family:'DM Serif Display',serif;font-size:24px;color:#fff;margin-bottom:2px}
-.hero-pack-sub{font-size:11px;color:rgba(255,255,255,.45);margin-bottom:20px;letter-spacing:.04em;text-transform:uppercase}
-.hero-pack-pill{display:inline-block;background:rgba(200,144,42,.2);border:1px solid rgba(200,144,42,.35);color:var(--gold-l);font-size:11px;font-weight:700;padding:4px 14px;border-radius:999px;margin-bottom:8px}
-.hero-pack-pill2{display:inline-block;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.6);font-size:10px;padding:4px 14px;border-radius:999px}
-.hero-pack-price{font-family:'DM Serif Display',serif;font-size:42px;color:#fff;margin-top:20px;margin-bottom:4px}
-.hero-pack-per{font-size:11px;color:rgba(255,255,255,.4)}
-.hero-pack-stack{display:flex;flex-direction:column;gap:10px;align-items:center}
-.hero-pack-sm{
-  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
-  border-radius:14px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;
-  gap:40px;width:100%;
-}
-.hero-pack-sm-n{font-size:13px;color:rgba(255,255,255,.75);font-weight:500}
-.hero-pack-sm-p{font-family:'DM Serif Display',serif;font-size:20px;color:#fff}
+.hero-prod-img:hover{transform:scale(1.03)}
 @media(max-width:900px){
   .hero{grid-template-columns:1fr;min-height:auto}
   .hero-left{padding:56px 20px 40px}
-  .hero-right{padding:40px 20px;min-height:320px}
+  .hero-right{padding:40px 20px;min-height:300px}
+  .hero-prod-img{max-width:260px}
 }
 
-/* ── SECTION ── */
+/* MARQUEE */
+.marquee-wrap{
+  background:var(--green);padding:12px 0;overflow:hidden;
+  border-top:3px solid var(--gold);border-bottom:3px solid var(--gold);
+}
+.marquee-track{display:flex;animation:marquee 20s linear infinite;width:max-content}
+@keyframes marquee{to{transform:translateX(-50%)}}
+.m-item{font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#fff;padding:0 40px;flex-shrink:0;white-space:nowrap}
+.m-sep{color:var(--gold);margin:0 -20px;opacity:.6}
+
+/* PRODUCTS */
 .sec{padding:80px 64px}
-@media(max-width:900px){.sec{padding:56px 20px}}
-.sec-inner{max-width:1140px;margin:0 auto}
-.eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
-.sec-h{font-family:'DM Serif Display',serif;font-size:clamp(30px,3.5vw,48px);font-weight:400;color:var(--green);line-height:1.15;margin-bottom:6px}
-.sec-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:40px;flex-wrap:wrap;gap:12px}
-.view-all{font-size:13px;font-weight:600;color:var(--green);display:flex;align-items:center;gap:4px;transition:gap .2s}
-.view-all:hover{gap:8px}
+@media(max-width:768px){.sec{padding:56px 20px}}
+.sec-inner{max-width:1100px;margin:0 auto}
+.sec-label{font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+.sec-h{font-family:'Lora',serif;font-size:clamp(28px,3.5vw,44px);font-weight:700;color:var(--text);margin-bottom:40px;line-height:1.15}
+.sec-h em{font-style:italic;color:var(--green)}
 
-/* ── PRODUCTS ── */
-.cat-label{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);padding:20px 0 14px;border-top:1.5px solid var(--border);margin-top:8px}
-.prod-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px}
-@media(max-width:600px){.prod-grid{grid-template-columns:1fr}}
-.prod-item{background:var(--white);display:flex;align-items:center;gap:20px;padding:20px 24px;transition:background .2s;cursor:default}
-.prod-item:hover{background:#FAFAF6}
-.prod-img{width:88px;height:88px;border-radius:12px;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;position:relative}
-.prod-img-inner{font-size:36px;line-height:1}
-.best-badge{position:absolute;top:-4px;right:-4px;background:var(--gold);color:#fff;font-size:8.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:999px}
-.prod-info{flex:1}
-.prod-n{font-size:15px;font-weight:600;color:var(--text);margin-bottom:3px}
-.prod-d{font-size:12.5px;color:var(--muted);line-height:1.5;margin-bottom:10px}
-.prod-p{font-family:'DM Serif Display',serif;font-size:22px;color:var(--green)}
-
-/* ── TRUST ── */
-.trust-strip{background:var(--green);padding:56px 64px}
-@media(max-width:900px){.trust-strip{padding:48px 20px}}
-.trust-inner{max-width:1140px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:32px}
-@media(max-width:700px){.trust-inner{grid-template-columns:1fr 1fr;gap:28px}}
-.trust-card{text-align:center}
-.trust-ico-wrap{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:22px}
-.trust-t{font-size:14px;font-weight:700;color:#fff;margin-bottom:6px}
-.trust-d{font-size:12px;color:rgba(255,255,255,.55);line-height:1.6}
-
-/* ── ORDER SECTION ── */
-.order-strip{background:var(--bg2);border-top:1px solid var(--border)}
-.order-cta-box{max-width:1140px;margin:0 auto;padding:56px 64px;display:flex;align-items:center;justify-content:space-between;gap:32px;flex-wrap:wrap}
-@media(max-width:900px){.order-cta-box{flex-direction:column;align-items:flex-start;padding:48px 20px}}
-.order-cta-l{display:flex;align-items:center;gap:20px}
-.order-cta-ico{width:56px;height:56px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.order-cta-ico svg{width:28px;height:28px;fill:#fff}
-.order-cta-t{font-family:'DM Serif Display',serif;font-size:26px;color:var(--green)}
-.order-cta-s{font-size:13px;color:var(--muted);margin-top:2px}
-.order-cta-btn{background:var(--green);color:#fff;font-size:14px;font-weight:700;
-  padding:16px 32px;border:none;border-radius:999px;cursor:pointer;
-  display:flex;align-items:center;gap:10px;transition:all .2s;white-space:nowrap}
-.order-cta-btn:hover{background:var(--green2);transform:scale(1.03)}
-.order-cta-btn svg{width:20px;height:20px;fill:#fff}
-
-/* ── FORM SECTION ── */
-.form-sec{padding:80px 64px;background:var(--bg)}
-@media(max-width:900px){.form-sec{padding:56px 20px}}
-.form-sec-inner{max-width:1140px;margin:0 auto;display:grid;grid-template-columns:1fr 1.1fr;gap:72px;align-items:start}
-@media(max-width:900px){.form-sec-inner{grid-template-columns:1fr;gap:40px}}
-.form-left-sticky{position:sticky;top:90px}
-@media(max-width:900px){.form-left-sticky{position:static}}
-.form-left-h{font-family:'DM Serif Display',serif;font-size:clamp(28px,3vw,42px);color:var(--green);line-height:1.15;margin-bottom:14px}
-.form-left-h em{font-style:italic;color:var(--gold)}
-.form-left-p{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:28px}
-.fl-trust{display:flex;flex-direction:column;gap:14px}
-.fl-trust-item{display:flex;align-items:center;gap:12px;font-size:13.5px;color:var(--text2);font-weight:500}
-.fl-trust-item::before{content:'✓';width:22px;height:22px;background:var(--green-pale);border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:800;color:var(--green);flex-shrink:0}
-
-/* FORM CARD */
-.form-card{background:var(--white);border-radius:20px;border:1.5px solid var(--border);padding:36px;box-shadow:0 4px 24px rgba(26,56,40,.07)}
-.form-card-h{font-family:'DM Serif Display',serif;font-size:22px;color:var(--green);margin-bottom:4px}
-.form-card-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
-.frm{display:flex;flex-direction:column;gap:12px}
-.frm input,.frm textarea{
-  width:100%;background:var(--bg);border:1.5px solid var(--border);color:var(--text);
-  font-family:'DM Sans',sans-serif;font-size:14px;
-  padding:12px 16px;border-radius:10px;outline:none;transition:border .2s;
+/* Product rows — like the reference */
+.prod-cat{font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);padding-top:28px;padding-bottom:14px;border-top:1px solid var(--border);margin-top:4px}
+.prod-list{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)}
+@media(max-width:580px){.prod-list{grid-template-columns:1fr}}
+.prod-item{
+  background:var(--white);
+  display:flex;align-items:center;gap:20px;
+  padding:20px 24px;transition:background .2s;cursor:default;
 }
-.frm input:focus,.frm textarea:focus{border-color:var(--green);background:var(--white)}
+.prod-item:hover{background:#FAFAF7}
+.prod-thumb{
+  width:100px;height:100px;flex-shrink:0;
+  border-radius:10px;overflow:hidden;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;position:relative;
+}
+.prod-thumb img{width:100%;height:100%;object-fit:contain;padding:4px}
+.best{position:absolute;top:-2px;right:-2px;background:var(--red);color:#fff;font-size:8px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:4px}
+.prod-info-wrap{flex:1}
+.prod-name{font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px}
+.prod-desc{font-size:12.5px;color:var(--muted);line-height:1.55;margin-bottom:10px}
+.prod-price{font-family:'Lora',serif;font-size:22px;font-weight:700;color:var(--green)}
+
+/* PROMISE SECTION */
+.promise-sec{background:var(--green);padding:72px 64px}
+@media(max-width:768px){.promise-sec{padding:56px 20px}}
+.promise-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1.2fr 1fr;gap:72px;align-items:center}
+@media(max-width:860px){.promise-inner{grid-template-columns:1fr;gap:40px}}
+.promise-h{font-family:'Lora',serif;font-size:clamp(28px,3.5vw,44px);font-weight:700;color:#fff;line-height:1.15;margin-bottom:20px}
+.promise-h em{font-style:italic;color:var(--gold)}
+.promise-p{font-size:15px;color:rgba(255,255,255,.75);line-height:1.75;margin-bottom:32px}
+.promise-list{display:flex;flex-direction:column;gap:14px}
+.promise-item{display:flex;align-items:center;gap:14px;font-size:14px;font-weight:600;color:#fff}
+.promise-item::before{content:'→';color:var(--gold);font-weight:700;font-size:14px;flex-shrink:0}
+.promise-img{border-radius:16px;overflow:hidden;max-width:100%}
+.promise-img img{width:100%;object-fit:contain;display:block;max-height:360px}
+
+/* ORDER FORM */
+.order-sec{padding:80px 64px;background:var(--bg)}
+@media(max-width:768px){.order-sec{padding:56px 20px}}
+.order-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1.1fr;gap:72px;align-items:start}
+@media(max-width:900px){.order-inner{grid-template-columns:1fr;gap:40px}}
+.order-sticky{position:sticky;top:90px}
+@media(max-width:900px){.order-sticky{position:static}}
+.order-h{font-family:'Lora',serif;font-size:clamp(26px,3vw,40px);font-weight:700;color:var(--text);line-height:1.15;margin-bottom:14px}
+.order-h em{font-style:italic;color:var(--green)}
+.order-p{font-size:14px;color:var(--muted);line-height:1.75;margin-bottom:28px}
+.trust-list{display:flex;flex-direction:column;gap:12px}
+.trust-it{display:flex;align-items:center;gap:12px;font-size:13.5px;color:var(--text2);font-weight:500}
+.trust-it::before{content:'✓';width:22px;height:22px;border-radius:50%;background:var(--green-pale);color:var(--green);font-size:11px;font-weight:800;display:grid;place-items:center;flex-shrink:0}
+
+/* Form Card */
+.fcard{background:var(--white);border-radius:16px;border:1px solid var(--border);padding:36px;box-shadow:0 4px 24px rgba(0,0,0,.06)}
+.fcard-h{font-family:'Lora',serif;font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px}
+.fcard-sub{font-size:13px;color:var(--muted);margin-bottom:22px}
+.frm{display:flex;flex-direction:column;gap:11px}
+.frm input,.frm textarea{
+  width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);
+  font-family:'Inter',sans-serif;font-size:14px;
+  padding:11px 14px;border-radius:8px;outline:none;transition:border .2s;
+}
+.frm input:focus,.frm textarea:focus{border-color:var(--green);background:#fff}
 .frm input::placeholder,.frm textarea::placeholder{color:var(--muted)}
-.frm textarea{min-height:68px;resize:vertical}
-#pin-status{font-size:.76rem;margin-top:4px;min-height:16px;padding-left:2px}
-.pack-lbl{font-size:.72rem;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
-.pack-row-f{display:flex;align-items:center;justify-content:space-between;
-  background:var(--bg);border:1.5px solid var(--border);padding:12px 14px;border-radius:10px;transition:border-color .2s}
+.frm textarea{min-height:66px;resize:vertical}
+#pin-status{font-size:.75rem;margin-top:3px;min-height:16px;padding-left:2px}
+.pack-lbl{font-size:.72rem;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.pack-row-f{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--bg);border:1px solid var(--border);padding:10px 14px;border-radius:8px;transition:border-color .2s}
 .pack-row-f:hover{border-color:var(--green)}
-.pack-f-n{font-size:14px;font-weight:600;color:var(--text);display:block;margin-bottom:2px}
+.pack-row-f-img{width:48px;height:48px;border-radius:6px;overflow:hidden;flex-shrink:0;background:var(--bg)}
+.pack-row-f-img img{width:100%;height:100%;object-fit:contain}
+.pack-f-n{font-size:13.5px;font-weight:600;color:var(--text);display:block;margin-bottom:1px}
 .pack-f-p{font-size:12px;color:var(--green);font-weight:700}
-.pack-sub-f{background:var(--gold-pale);border:1.5px solid rgba(200,144,42,.25);padding:12px 14px;border-radius:10px;display:flex;align-items:center;justify-content:space-between}
-.pack-sub-f-l strong{display:block;font-size:14px;font-weight:600;color:var(--gold);margin-bottom:2px}
-.pack-sub-f-l span{font-size:11px;color:rgba(160,100,20,.7)}
-.sub-btn{background:transparent;border:1.5px solid var(--gold);color:var(--gold);font-size:12px;font-weight:700;padding:6px 16px;border-radius:999px;cursor:pointer;transition:all .2s}
-.sub-btn:hover,.sub-btn.active{background:var(--gold-pale)}
-.qty-mini{display:flex;align-items:center;background:var(--white);border-radius:999px;border:1.5px solid var(--border)}
-.qty-mini-btn{width:34px;height:34px;border:none;background:transparent;color:var(--text);font-size:16px;cursor:pointer;border-radius:999px;display:grid;place-items:center;transition:background .2s}
+.sub-row{background:var(--gold-pale);border:1px solid rgba(232,160,0,.3);padding:10px 14px;border-radius:8px;display:flex;align-items:center;justify-content:space-between}
+.sub-row-l strong{display:block;font-size:13.5px;font-weight:600;color:var(--gold);margin-bottom:1px}
+.sub-row-l span{font-size:11.5px;color:rgba(180,120,0,.8)}
+.sub-btn{background:transparent;border:1.5px solid var(--gold);color:var(--gold);font-size:12px;font-weight:700;padding:5px 14px;border-radius:999px;cursor:pointer;transition:all .2s}
+.sub-btn:hover,.sub-btn.active{background:rgba(232,160,0,.1)}
+.qty-mini{display:flex;align-items:center;background:#fff;border:1px solid var(--border);border-radius:999px}
+.qty-mini-btn{width:32px;height:32px;border:none;background:transparent;color:var(--text);font-size:16px;cursor:pointer;border-radius:999px;display:grid;place-items:center;transition:background .2s}
 .qty-mini-btn:hover{background:var(--green-pale)}
-.qty-mini-n{width:32px;text-align:center;font-size:14px;font-weight:700;color:var(--text)}
-.cpn-row{display:flex;gap:10px}
-.cpn-row input{flex:1;background:var(--bg);border:1.5px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;letter-spacing:.06em;text-transform:uppercase;padding:11px 14px;border-radius:10px;outline:none;transition:border .2s}
+.qty-mini-n{width:30px;text-align:center;font-size:14px;font-weight:700;color:var(--text)}
+.cpn-row{display:flex;gap:8px}
+.cpn-row input{flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:'Inter',sans-serif;font-size:13px;letter-spacing:.06em;text-transform:uppercase;padding:10px 13px;border-radius:8px;outline:none;transition:border .2s}
 .cpn-row input:focus{border-color:var(--gold)}
 .cpn-row input::placeholder{text-transform:none;letter-spacing:0;color:var(--muted)}
-.cpn-apply{background:var(--green);color:#fff;border:none;font-size:13px;font-weight:700;padding:11px 18px;border-radius:10px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.cpn-apply{background:var(--green);color:#fff;border:none;font-size:13px;font-weight:700;padding:10px 16px;border-radius:8px;cursor:pointer;transition:background .2s;white-space:nowrap}
 .cpn-apply:hover{background:var(--green2)}
-.cpn-ok{font-size:12px;padding:9px 12px;border-radius:8px;background:var(--green-pale);color:var(--green);border:1px solid rgba(26,56,40,.15);display:none;font-weight:600}
-.cpn-err{font-size:12px;padding:9px 12px;border-radius:8px;background:#FEF2F2;color:#C0392B;border:1px solid rgba(192,57,43,.15);display:none}
-#order-summary{background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:14px;font-size:.88rem}
+.cpn-ok{font-size:12px;padding:9px 12px;border-radius:8px;background:var(--green-pale);color:var(--green);border:1px solid rgba(27,82,36,.15);display:none;font-weight:600}
+.cpn-err{font-size:12px;padding:9px 12px;border-radius:8px;background:#FEF2F2;color:#B91C1C;border:1px solid rgba(185,28,28,.15);display:none}
+#order-summary{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:.88rem}
 #sum-items-list div{display:flex;justify-content:space-between;margin-bottom:5px;font-size:.83rem;color:var(--text2)}
 #sum-subtotal-row,#sum-discount-row{display:flex;justify-content:space-between;margin-bottom:6px;font-size:.83rem}
-#sum-discount-row{color:var(--green-l);font-weight:700}
-.sum-total-row{display:flex;justify-content:space-between;font-weight:800;font-size:1rem;border-top:1.5px solid var(--border);padding-top:10px;margin-top:4px;color:var(--green)}
+#sum-discount-row{color:var(--green);font-weight:700}
+.sum-total-row{display:flex;justify-content:space-between;font-weight:700;font-size:.95rem;border-top:1px solid var(--border);padding-top:10px;margin-top:4px;color:var(--green)}
 .sum-cod{font-size:.72rem;color:var(--muted);margin-top:6px;text-align:center}
-#upi-qr-box{margin-top:12px;background:var(--white);border-radius:10px;padding:14px;text-align:center;border:1.5px solid var(--border)}
+#upi-qr-box{margin-top:12px;background:#fff;border-radius:10px;padding:14px;text-align:center;border:1px solid var(--border)}
 #upi-qr-canvas{display:inline-block;border-radius:6px;overflow:hidden;line-height:0}
 #upi-qr-amount{margin-top:8px;font-size:.8rem;color:var(--text);font-weight:700}
-#upi-pay-btn{display:block;margin-top:10px;padding:10px;background:var(--green);color:#fff;border-radius:9px;font-size:.82rem;font-weight:700}
-#upi-paid-btn{display:block;width:100%;margin-top:8px;padding:10px;background:var(--bg);color:var(--muted);border:1.5px solid var(--border);border-radius:9px;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .2s}
+#upi-pay-btn{display:block;margin-top:10px;padding:10px;background:var(--green);color:#fff;border-radius:8px;font-size:.82rem;font-weight:700}
+#upi-paid-btn{display:block;width:100%;margin-top:8px;padding:10px;background:var(--bg);color:var(--muted);border:1px solid var(--border);border-radius:8px;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .2s}
 #upi-paid-badge{display:none;margin-top:8px;background:var(--green-pale);color:var(--green);border-radius:8px;padding:7px;font-size:.78rem;font-weight:700}
-#delivery-date-row{background:var(--green-pale);border:1.5px solid rgba(26,56,40,.15);border-radius:10px;padding:10px 14px;font-size:.85rem;color:var(--text2);display:flex;align-items:center;gap:8px}
+#delivery-date-row{background:var(--green-pale);border:1px solid rgba(27,82,36,.15);border-radius:8px;padding:10px 13px;font-size:.84rem;color:var(--text2);display:flex;align-items:center;gap:8px}
 #delivery-date-row strong{color:var(--green)}
 .wa-submit{
-  width:100%;background:var(--green);color:#fff;font-family:'DM Sans',sans-serif;font-size:14.5px;font-weight:700;
-  padding:15px;border:none;border-radius:12px;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;gap:10px;transition:all .25s;
-  box-shadow:0 4px 16px rgba(26,56,40,.25);
+  width:100%;background:var(--green);color:#fff;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;
+  padding:14px;border:none;border-radius:10px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:9px;transition:all .2s;
+  box-shadow:0 4px 16px rgba(27,82,36,.2);
 }
-.wa-submit:hover{background:var(--green2);transform:translateY(-1px);box-shadow:0 8px 28px rgba(26,56,40,.3)}
+.wa-submit:hover{background:var(--green2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(27,82,36,.3)}
 .wa-submit:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
-.wa-submit svg{width:18px;height:18px;fill:#fff;flex-shrink:0}
-#order-success{text-align:center;padding:28px 8px}
-#order-success h3{font-family:'DM Serif Display',serif;font-size:26px;color:var(--green);margin-bottom:8px}
-#order-ref-badge{background:var(--green-pale);border:1.5px solid rgba(26,56,40,.2);border-radius:10px;padding:10px 16px;font-size:.82rem;color:var(--green);font-weight:700;margin-bottom:16px;display:inline-block}
-#order-wa-fallback{display:inline-block;background:#25D366;color:#fff;font-weight:700;border-radius:10px;padding:11px 20px;font-size:.9rem;margin-bottom:12px}
+.wa-submit svg{width:17px;height:17px;fill:#fff}
+#order-success{text-align:center;padding:24px 8px}
+#order-success h3{font-family:'Lora',serif;font-size:24px;color:var(--green);margin-bottom:8px}
+#order-ref-badge{background:var(--green-pale);border:1px solid rgba(27,82,36,.2);border-radius:8px;padding:10px 14px;font-size:.82rem;color:var(--green);font-weight:700;margin-bottom:14px;display:inline-block}
+#order-wa-fallback{display:inline-block;background:#25D366;color:#fff;font-weight:700;border-radius:8px;padding:10px 18px;font-size:.9rem;margin-bottom:10px}
 
-/* ── FOOTER ── */
-footer{background:var(--white);border-top:1.5px solid var(--border);padding:48px 64px;display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:40px}
-@media(max-width:900px){footer{grid-template-columns:1fr 1fr;padding:40px 20px;gap:32px}}
+/* FOOTER */
+footer{background:var(--white);border-top:1px solid var(--border);padding:48px 64px 32px;display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:40px}
+@media(max-width:900px){footer{grid-template-columns:1fr 1fr;padding:40px 20px 28px;gap:32px}}
 @media(max-width:500px){footer{grid-template-columns:1fr}}
+.foot-logo img{height:32px;object-fit:contain;margin-bottom:10px}
+.foot-p{font-size:13px;color:var(--muted);line-height:1.7}
+.foot-fssai{display:inline-block;border:1px solid var(--border);border-radius:6px;padding:8px 12px;margin-top:14px}
+.foot-fssai-l{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
+.foot-fssai-n{font-size:11px;color:var(--text);font-weight:600}
 .foot-col-h{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin-bottom:14px}
-.foot-brand-name{font-family:'DM Serif Display',serif;font-size:20px;color:var(--green);margin-bottom:4px}
-.foot-brand-tag{font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
-.foot-p{font-size:12.5px;color:var(--muted);line-height:1.65}
 .foot-links{display:flex;flex-direction:column;gap:9px}
-.foot-links a{font-size:13px;color:var(--text2);transition:color .2s}
+.foot-links a{font-size:13px;color:var(--muted);transition:color .2s}
 .foot-links a:hover{color:var(--green)}
-.foot-bottom{background:var(--bg);border-top:1px solid var(--border);padding:16px 64px;display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);flex-wrap:wrap;gap:8px}
+.foot-bottom{background:var(--white);border-top:1px solid var(--border);padding:16px 64px;display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);flex-wrap:wrap;gap:8px}
 @media(max-width:768px){.foot-bottom{padding:14px 20px}}
-.foot-bottom-links{display:flex;gap:20px}
-.foot-bottom-links a{color:var(--muted);font-size:11.5px;transition:color .2s}
-.foot-bottom-links a:hover{color:var(--text)}
-.fssai{border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;display:inline-block;margin-top:10px}
-.fssai-label{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px}
-.fssai-num{font-size:11px;color:var(--text);font-weight:600}
 
 /* WA FAB */
-.wa-fab{position:fixed;bottom:24px;right:24px;z-index:100;width:52px;height:52px;background:#25D366;border-radius:50%;display:grid;place-items:center;box-shadow:0 4px 16px rgba(37,211,102,.4);transition:transform .25s}
+.wa-fab{position:fixed;bottom:24px;right:24px;z-index:100;width:52px;height:52px;background:#25D366;border-radius:50%;display:grid;place-items:center;box-shadow:0 4px 16px rgba(37,211,102,.4);transition:transform .2s}
 .wa-fab:hover{transform:scale(1.1)}
 .wa-fab svg{width:24px;height:24px;fill:#fff}
-
-/* HERO qty (big section) */
-.hero-qty{display:flex;align-items:center;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.2);border-radius:999px;width:fit-content;margin-top:20px}
-.hero-qty-btn{width:40px;height:40px;border:none;background:transparent;color:#fff;font-size:18px;cursor:pointer;border-radius:999px;display:grid;place-items:center;transition:background .2s}
-.hero-qty-btn:hover{background:rgba(255,255,255,.15)}
-.hero-qty-n{width:40px;text-align:center;font-size:17px;font-weight:700;color:#fff}
 </style>
 </head>
 <body>
 
-<!-- WA FAB -->
-<a class="wa-fab" href="https://wa.me/917985079797" target="_blank" aria-label="WhatsApp">
+<a class="wa-fab" href="https://wa.me/917985079797" target="_blank">
   <svg viewBox="0 0 448 512"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
 </a>
 
 <!-- NAV -->
 <nav>
-  <div class="nav-logo" onclick="window.scrollTo({top:0,behavior:'smooth'})">
-    <div class="nav-logo-main">absolute fresh</div>
-    <div class="nav-logo-tag">Fresh. Authentic. Ready.</div>
-  </div>
+  <div class="nav-logo"><img src="img/logo.png" alt="Absolute Fresh"/></div>
   <ul class="nav-links">
-    <li><a href="#products" class="active">Products</a></li>
-    <li><a href="#products">Combos</a></li>
-    <li><a href="#about">About Us</a></li>
+    <li><a href="#products">Products</a></li>
+    <li><a href="#promise">Our Promise</a></li>
     <li><a href="#order">Order</a></li>
   </ul>
-  <button class="nav-cta" onclick="document.getElementById('order').scrollIntoView({behavior:'smooth'})">
+  <button class="nav-wa" onclick="document.getElementById('order').scrollIntoView({behavior:'smooth'})">
     <svg viewBox="0 0 448 512"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
     Order on WhatsApp
   </button>
@@ -293,212 +305,138 @@ footer{background:var(--white);border-top:1.5px solid var(--border);padding:48px
 <!-- HERO -->
 <section class="hero">
   <div class="hero-left">
-    <div class="hero-tag">Stone-ground · Naturally fermented · Lucknow</div>
-    <h1 class="hero-h1">Fresh South Indian<br>Breakfast.<br><em>Ready in Minutes.</em></h1>
-    <p class="hero-sub-h">Stone-ground batter, naturally fermented overnight, delivered fresh to your doorstep.</p>
-    <div class="hero-btns">
-      <button class="btn-primary" onclick="document.getElementById('order').scrollIntoView({behavior:'smooth'})">
+    <div class="hero-tag">Lucknow · Stone-Ground Daily</div>
+    <h1>Fresh South Indian<br>Breakfast.<br><em>Ready in Minutes.</em></h1>
+    <p class="hero-sub-line">Every great morning begins together.</p>
+    <p class="hero-p">Stone-ground batter and freshly made chutneys, delivered fresh to your doorstep. No preservatives. No shortcuts. Just the authentic taste your family deserves, morning after morning.</p>
+    <div class="hero-actions">
+      <button class="btn-green" onclick="document.getElementById('order').scrollIntoView({behavior:'smooth'})">
         <svg viewBox="0 0 448 512"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
         Order on WhatsApp
       </button>
+      <button class="btn-outline" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">See Products</button>
     </div>
-    <div class="hero-note">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-      Keep Refrigerated 2–5°C
+    <div class="hero-pills">
+      <span class="pill">✓ No Preservatives</span>
+      <span class="pill">✓ Naturally Fermented</span>
+      <span class="pill">✓ Ready in 5 Minutes</span>
+      <span class="pill">✓ Pay on Delivery</span>
     </div>
   </div>
-
   <div class="hero-right">
-    <div class="hero-product-img">
-      <div class="hero-pack-stack">
-        <!-- Main product card -->
-        <div class="hero-pack" style="min-width:240px">
-          <div class="hero-pack-label">Absolute Fresh</div>
-          <div class="hero-pack-name">Idli &amp; Dosa Batter</div>
-          <div class="hero-pack-sub">Naturally Fermented · Stone-Ground</div>
-          <div><span class="hero-pack-pill">No Preservatives</span></div>
-          <div style="margin-top:6px"><span class="hero-pack-pill2">Keep Refrigerated</span></div>
-          <div class="hero-pack-price">₹140</div>
-          <div class="hero-pack-per">1 kg pack · Family size</div>
-          <div class="hero-qty" style="margin-top:20px">
-            <button class="hero-qty-btn" onclick="changeQty('qty-1kg',-1)">−</button>
-            <div class="hero-qty-n" id="qty-1kg">0</div>
-            <button class="hero-qty-btn" onclick="changeQty('qty-1kg',1)">+</button>
-          </div>
-        </div>
-        <!-- 500g -->
-        <div class="hero-pack-sm">
-          <div>
-            <div class="hero-pack-sm-n">500g Starter Pack</div>
-            <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:2px">Perfect for couples · First order</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:12px">
-            <div class="hero-pack-sm-p">₹75</div>
-            <div class="hero-qty" style="margin-top:0;transform:scale(.85);transform-origin:right">
-              <button class="hero-qty-btn" onclick="changeQty('qty-500g',-1)">−</button>
-              <div class="hero-qty-n" id="qty-500g">0</div>
-              <button class="hero-qty-btn" onclick="changeQty('qty-500g',1)">+</button>
-            </div>
-          </div>
-        </div>
-        <button onclick="document.getElementById('order').scrollIntoView({behavior:'smooth'})" style="background:var(--gold);color:#fff;border:none;border-radius:999px;padding:12px 28px;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;width:100%;font-family:'DM Sans',sans-serif" onmouseover="this.style.background='#b07820'" onmouseout="this.style.background='var(--gold)'">
-          Add to order →
-        </button>
-      </div>
-    </div>
+    <img class="hero-prod-img" src="img/batter-1kg.png" alt="Absolute Fresh Idli & Dosa Batter 1kg"/>
   </div>
 </section>
 
-<!-- PRODUCTS GRID -->
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track" id="marquee-track"></div>
+</div>
+
+<!-- PRODUCTS -->
 <section class="sec" id="products">
   <div class="sec-inner">
-    <div class="sec-row">
-      <div>
-        <div class="eyebrow">What We Make</div>
-        <h2 class="sec-h">Our Products</h2>
-      </div>
-      <a class="view-all" href="#order">View All Products →</a>
-    </div>
+    <div class="sec-label">What We Make</div>
+    <h2 class="sec-h">The Batter That Brings<br><em>Families Together</em></h2>
 
-    <div class="cat-label">Batter</div>
-    <div class="prod-grid">
+    <div class="prod-cat">Batter</div>
+    <div class="prod-list">
       <div class="prod-item">
-        <div class="prod-img"><div class="prod-img-inner">🫙</div></div>
-        <div class="prod-info">
-          <div class="prod-n">Idli &amp; Dosa Batter 500g</div>
-          <div class="prod-d">Perfect texture. Soft &amp; fluffy idlis, crispy dosas.</div>
-          <div class="prod-p">₹75</div>
+        <div class="prod-thumb">
+          <img src="img/batter-500g.png" alt="500g Batter"/>
+        </div>
+        <div class="prod-info-wrap">
+          <div class="prod-name">Idli &amp; Dosa Batter 500g</div>
+          <div class="prod-desc">~6 dosas or 11 idlis. Perfect for couples and small families. Stone-ground, naturally fermented.</div>
+          <div class="prod-price">₹75</div>
         </div>
       </div>
       <div class="prod-item">
-        <div class="prod-img"><div class="prod-img-inner">🫙</div><div class="best-badge">BEST SELLER</div></div>
-        <div class="prod-info">
-          <div class="prod-n">Idli &amp; Dosa Batter 1kg</div>
-          <div class="prod-d">Our best seller. Great for families.</div>
-          <div class="prod-p">₹140</div>
+        <div class="prod-thumb">
+          <img src="img/batter-1kg.png" alt="1kg Batter"/>
+          <div class="best">BEST SELLER</div>
         </div>
-      </div>
-    </div>
-
-    <div class="cat-label" style="margin-top:4px">Chutneys</div>
-    <div class="prod-grid">
-      <div class="prod-item">
-        <div class="prod-img" style="background:#E8F5EC"><div class="prod-img-inner">🥥</div></div>
-        <div class="prod-info">
-          <div class="prod-n">Coconut Chutney 200g</div>
-          <div class="prod-d">Fresh coconut, tempered to perfection.</div>
-          <div class="prod-p">₹40</div>
-        </div>
-      </div>
-      <div class="prod-item">
-        <div class="prod-img" style="background:#FEF0EC"><div class="prod-img-inner">🍅</div></div>
-        <div class="prod-info">
-          <div class="prod-n">Tomato Chutney 200g</div>
-          <div class="prod-d">Tangy tomatoes with a hint of spice.</div>
-          <div class="prod-p">₹45</div>
+        <div class="prod-info-wrap">
+          <div class="prod-name">Idli &amp; Dosa Batter 1kg</div>
+          <div class="prod-desc">~15 dosas or 25 idlis. Our most popular pack. Great for families of 3–5.</div>
+          <div class="prod-price">₹140</div>
         </div>
       </div>
     </div>
 
-    <div class="cat-label" style="margin-top:4px">Combos</div>
-    <div class="prod-grid">
+    <div class="prod-cat" style="margin-top:4px">Chutneys</div>
+    <div class="prod-list">
       <div class="prod-item">
-        <div class="prod-img" style="background:#F5F0E8"><div class="prod-img-inner">🫙🥥</div></div>
-        <div class="prod-info">
-          <div class="prod-n">Couple Combo</div>
-          <div class="prod-d">500g Batter + 200g Chutney. Perfect for a quick breakfast.</div>
-          <div class="prod-p">₹140</div>
+        <div class="prod-thumb" style="background:#FEF5F0">
+          <img src="img/podi-chutney.png" alt="Podi Chutney"/>
+        </div>
+        <div class="prod-info-wrap">
+          <div class="prod-name">Podi Chutney 30g</div>
+          <div class="prod-desc">Authentic gunpowder spice. A bold, roasted blend — the soul of South Indian breakfasts. Perfect with idli, dosa or rice.</div>
+          <div class="prod-price">₹45</div>
         </div>
       </div>
       <div class="prod-item">
-        <div class="prod-img" style="background:#F5F0E8"><div class="prod-img-inner">🫙🥥</div><div class="best-badge" style="background:var(--green)">FAMILY</div></div>
-        <div class="prod-info">
-          <div class="prod-n">Family Combo</div>
-          <div class="prod-d">1kg Batter + 250g Chutney. Complete breakfast for the whole family.</div>
-          <div class="prod-p">₹180</div>
+        <div class="prod-thumb" style="background:#FEF9F0;font-size:48px;padding:8px">🥜</div>
+        <div class="prod-info-wrap">
+          <div class="prod-name">Peanut Chutney</div>
+          <div class="prod-desc">Rich, creamy and crafted from hand-selected peanuts. Pairs beautifully with any breakfast.</div>
+          <div class="prod-price">Ask on WhatsApp</div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- TRUST STRIP -->
-<div class="trust-strip">
-  <div class="trust-inner">
-    <div class="trust-card">
-      <div class="trust-ico-wrap">🌿</div>
-      <div class="trust-t">No Preservatives</div>
-      <div class="trust-d">Made with natural ingredients, just like home.</div>
-    </div>
-    <div class="trust-card">
-      <div class="trust-ico-wrap">🪨</div>
-      <div class="trust-t">Stone-Ground</div>
-      <div class="trust-d">Better taste, better texture, the traditional way.</div>
-    </div>
-    <div class="trust-card">
-      <div class="trust-ico-wrap">❄️</div>
-      <div class="trust-t">Delivered Fresh</div>
-      <div class="trust-d">Maintained at the right temperature from our kitchen to yours.</div>
-    </div>
-    <div class="trust-card">
-      <div class="trust-ico-wrap">🤍</div>
-      <div class="trust-t">Made with Care</div>
-      <div class="trust-d">Small batches, made daily with love.</div>
-    </div>
-  </div>
-</div>
-
-<!-- ORDER CTA STRIP -->
-<div class="order-strip" id="about">
-  <div class="order-cta-box">
-    <div class="order-cta-l">
-      <div class="order-cta-ico">
-        <svg viewBox="0 0 448 512"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
-      </div>
-      <div>
-        <div class="order-cta-t">Ordering is Easy!</div>
-        <div class="order-cta-s">Choose your products and message us on WhatsApp. Or fill the form below.</div>
+<!-- PROMISE -->
+<section class="promise-sec" id="promise">
+  <div class="promise-inner">
+    <div>
+      <h2 class="promise-h">Every Great Morning<br><em>Begins Together.</em></h2>
+      <p class="promise-p">We believe breakfast is more than the first meal of the day. It's the moment families pause, connect and begin the day together.<br><br>Every batch is freshly prepared using premium rice and dals, naturally fermented and packed with care. We don't simply make batter. We help create warm mornings, meaningful conversations and unforgettable breakfasts.</p>
+      <div class="promise-list">
+        <div class="promise-item">Freshly Prepared Daily</div>
+        <div class="promise-item">Naturally Fermented</div>
+        <div class="promise-item">Premium Ingredients</div>
+        <div class="promise-item">No Added Preservatives</div>
       </div>
     </div>
-    <button class="order-cta-btn" onclick="document.getElementById('order').scrollIntoView({behavior:'smooth'})">
-      <svg viewBox="0 0 448 512"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
-      Order Now on WhatsApp
-    </button>
+    <div class="promise-img">
+      <img src="img/podi-chutney.png" alt="Podi Chutney — Authentic Gunpowder Spice"/>
+    </div>
   </div>
-</div>
+</section>
 
 <!-- ORDER FORM -->
-<section class="form-sec" id="order">
-  <div class="form-sec-inner">
-    <div class="form-left-sticky">
-      <div class="eyebrow">Place Your Order</div>
-      <h2 class="form-left-h">Fresh batter,<br>delivered <em>tomorrow</em><br>morning.</h2>
-      <p class="form-left-p">Fill in your details and we'll confirm your slot, delivery time and payment on WhatsApp — usually within minutes.</p>
-      <div class="fl-trust">
-        <div class="fl-trust-item">Pay on Delivery — Cash or UPI at your door</div>
-        <div class="fl-trust-item">Lucknow delivery — Vrindavan Colony, Ashiyana &amp; nearby</div>
-        <div class="fl-trust-item">WhatsApp confirmation before 10pm every evening</div>
-        <div class="fl-trust-item">No preservatives. No compromise.</div>
+<section class="order-sec" id="order">
+  <div class="order-inner">
+    <div class="order-sticky">
+      <div class="sec-label">Place Your Order</div>
+      <h2 class="order-h">Delivered fresh<br>to your door,<br><em>every morning.</em></h2>
+      <p class="order-p">Fill in your details — we confirm your slot, delivery time and payment on WhatsApp. Usually within minutes.</p>
+      <div class="trust-list">
+        <div class="trust-it">Pay on Delivery — Cash or UPI at your door</div>
+        <div class="trust-it">Lucknow delivery — Vrindavan Colony, Ashiyana &amp; nearby</div>
+        <div class="trust-it">WhatsApp confirmation before 10pm every evening</div>
+        <div class="trust-it">Sealed fresh from our kitchen every single day</div>
       </div>
     </div>
 
-    <div class="form-card">
+    <div class="fcard">
       <div id="order-success" style="display:none">
-        <div style="font-size:2.8rem;margin-bottom:12px">🎉</div>
+        <div style="font-size:2.5rem;margin-bottom:10px">🎉</div>
         <h3>Order Placed!</h3>
-        <p style="font-size:.88rem;color:var(--muted);margin-bottom:14px">WhatsApp should open automatically. If not, tap below.</p>
-        <div id="order-ref-badge"></div>
-        <br/>
-        <a id="order-wa-fallback" href="#" target="_blank">📲 Open WhatsApp to confirm</a>
-        <br/><br/>
-        <button onclick="document.getElementById('order-success').style.display='none';document.getElementById('order-form-inner').style.display='block'" style="background:none;border:none;color:var(--muted);font-size:.82rem;cursor:pointer;font-family:'DM Sans',sans-serif">Place another order</button>
+        <p style="font-size:.88rem;color:var(--muted);margin-bottom:14px">WhatsApp should open now. If not, tap below.</p>
+        <div id="order-ref-badge"></div><br/>
+        <a id="order-wa-fallback" href="#" target="_blank">📲 Open WhatsApp to confirm</a><br/><br/>
+        <button onclick="document.getElementById('order-success').style.display='none';document.getElementById('order-form-inner').style.display='block'" style="background:none;border:none;color:var(--muted);font-size:.82rem;cursor:pointer;font-family:'Inter',sans-serif">Place another order</button>
       </div>
       <div id="order-form-inner">
-        <div class="form-card-h">Send Your Order</div>
-        <div class="form-card-sub">We'll confirm availability and delivery time on WhatsApp.</div>
+        <div class="fcard-h">Send Your Order</div>
+        <div class="fcard-sub">We confirm availability and delivery slot on WhatsApp.</div>
         <form class="frm" onsubmit="sendWA(event)">
           <input id="f-name" required placeholder="Your name"/>
-          <input id="f-phone" type="tel" required placeholder="Phone number (e.g. 98765 43210)" inputmode="numeric"/>
+          <input id="f-phone" type="tel" required placeholder="Phone number" inputmode="numeric"/>
           <textarea id="f-addr" required placeholder="Delivery address · area / landmark"></textarea>
           <div>
             <input id="f-pin" type="tel" inputmode="numeric" maxlength="6" required placeholder="Pincode (e.g. 226012)" oninput="this.value=this.value.replace(/\D/g,'')" onblur="checkPin()"/>
@@ -506,9 +444,10 @@ footer{background:var(--white);border-top:1.5px solid var(--border);padding:48px
           </div>
 
           <div class="pack-lbl">Select Packs</div>
-          <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;flex-direction:column;gap:9px">
             <div class="pack-row-f">
-              <div><span class="pack-f-n">1 kg Pack</span><span class="pack-f-p">₹140 per pack</span></div>
+              <div class="pack-row-f-img"><img src="img/batter-1kg.png" alt="1kg"/></div>
+              <div style="flex:1"><span class="pack-f-n">1 kg Batter</span><span class="pack-f-p">₹140 per pack</span></div>
               <div class="qty-mini">
                 <button type="button" class="qty-mini-btn" onclick="changeQty('qty-1kg',-1)">−</button>
                 <div class="qty-mini-n" id="qty-1kg-form">0</div>
@@ -516,15 +455,16 @@ footer{background:var(--white);border-top:1.5px solid var(--border);padding:48px
               </div>
             </div>
             <div class="pack-row-f">
-              <div><span class="pack-f-n">500g Starter Pack</span><span class="pack-f-p">₹75 per pack</span></div>
+              <div class="pack-row-f-img"><img src="img/batter-500g.png" alt="500g"/></div>
+              <div style="flex:1"><span class="pack-f-n">500g Batter</span><span class="pack-f-p">₹75 per pack</span></div>
               <div class="qty-mini">
                 <button type="button" class="qty-mini-btn" onclick="changeQty('qty-500g',-1)">−</button>
                 <div class="qty-mini-n" id="qty-500g-form">0</div>
                 <button type="button" class="qty-mini-btn" onclick="changeQty('qty-500g',1)">+</button>
               </div>
             </div>
-            <div class="pack-sub-f">
-              <div class="pack-sub-f-l"><strong>Subscription / Bulk</strong><span>Daily · Weekly · Hotel supply</span></div>
+            <div class="sub-row">
+              <div class="sub-row-l"><strong>Subscription / Bulk</strong><span>Daily · Weekly · Hotels &amp; Restaurants</span></div>
               <button type="button" class="sub-btn" id="sub-toggle" onclick="toggleSubscription(this)">Add</button>
             </div>
           </div>
@@ -535,6 +475,12 @@ footer{background:var(--white);border-top:1.5px solid var(--border);padding:48px
           </div>
           <div class="cpn-ok" id="coupon-success"></div>
           <div class="cpn-err" id="coupon-error"></div>
+
+          <!-- Hidden qty els synced from hero -->
+          <div style="display:none">
+            <div id="qty-1kg">0</div>
+            <div id="qty-500g">0</div>
+          </div>
 
           <div id="order-summary" style="display:none">
             <div id="sum-items-list"></div>
@@ -549,7 +495,7 @@ footer{background:var(--white);border-top:1.5px solid var(--border);padding:48px
               <div style="font-size:.68rem;color:var(--muted);margin-top:2px">Scan · PhonePe · GPay · Paytm · BHIM</div>
               <a id="upi-pay-btn" href="#">📲 Tap to Pay on Phone</a>
               <button type="button" id="upi-paid-btn" onclick="toggleUpiPaid()">✅ I've paid via UPI — mark as paid</button>
-              <div id="upi-paid-badge">✅ Payment confirmed · Ref included in your WhatsApp order</div>
+              <div id="upi-paid-badge">✅ Payment confirmed · Ref included in your order</div>
             </div>
           </div>
 
@@ -567,12 +513,19 @@ footer{background:var(--white);border-top:1.5px solid var(--border);padding:48px
 <!-- FOOTER -->
 <footer>
   <div>
-    <div class="foot-brand-name">absolute fresh</div>
-    <div class="foot-brand-tag">Fresh. Authentic. Ready.</div>
-    <p class="foot-p">Absolute Fresh brings you authentic South Indian food made fresh every day in Lucknow.</p>
-    <div class="fssai" style="margin-top:16px">
-      <div class="fssai-label">FSSAI Licensed</div>
-      <div class="fssai-num">12724055000349</div>
+    <div class="foot-logo"><img src="img/logo.png" alt="Absolute Fresh"/></div>
+    <p class="foot-p">Bringing authentic South Indian breakfasts to homes, retailers, cafés and modern trade — one fresh morning at a time.</p>
+    <div class="foot-fssai">
+      <div class="foot-fssai-l">FSSAI Licensed</div>
+      <div class="foot-fssai-n">12724055000349</div>
+    </div>
+  </div>
+  <div>
+    <div class="foot-col-h">Products</div>
+    <div class="foot-links">
+      <a href="#products">Idli &amp; Dosa Batter</a>
+      <a href="#products">Podi Chutney</a>
+      <a href="#products">Peanut Chutney</a>
     </div>
   </div>
   <div>
@@ -584,37 +537,47 @@ footer{background:var(--white);border-top:1.5px solid var(--border);padding:48px
     </div>
   </div>
   <div>
-    <div class="foot-col-h">Products</div>
-    <div class="foot-links">
-      <a href="#products">Idli &amp; Dosa Batter</a>
-      <a href="#products">Coconut Chutney</a>
-      <a href="#products">Tomato Chutney</a>
-      <a href="#products">Combos</a>
-    </div>
-  </div>
-  <div>
     <div class="foot-col-h">Contact</div>
     <div class="foot-links">
-      <a href="https://wa.me/917985079797">📱 +91 79850 79797</a>
-      <a href="https://instagram.com/absolutefreshfood">📷 @absolutefreshfood</a>
-      <a href="#">Lucknow, Uttar Pradesh</a>
-      <a href="https://sales.absolutefreshfood.com/marketing/signup.html">Partner With Us</a>
+      <a href="https://wa.me/917985079797">+91 79850 79797</a>
+      <a href="mailto:hello@absolutefresh.com">hello@absolutefresh.com</a>
+      <a href="https://instagram.com/absolutefreshfood">@absolutefreshfood</a>
+      <a href="https://sales.absolutefreshfood.com/marketing/signup.html">Become a Partner</a>
     </div>
   </div>
 </footer>
 <div class="foot-bottom">
   <span>© 2026 Absolute Fresh Food. All rights reserved.</span>
-  <div class="foot-bottom-links">
-    <a href="#">Privacy Policy</a>
-    <a href="#">Terms &amp; Conditions</a>
-  </div>
+  <span>Lucknow, Uttar Pradesh · Est. 2023</span>
 </div>
 
 <script>
-const _SB_URL='https://fbfopgzblqmsflkfejwa.supabase.co';
-const _SB_KEY='sb_publishable_r7mYhsyIKtBjBKzxH8St9g_OHjTU-RQ';
-const _db=supabase.createClient(_SB_URL,_SB_KEY);
+// Marquee
+const words=['Crafted Fresh Daily','No Added Preservatives','Stone-Ground','Naturally Fermented','Premium Rice & Dals','Ready in 5 Minutes','Soft Idlis · Crispy Dosas','Authentic South Indian'];
+const t=document.getElementById('marquee-track');
+const h=words.map(w=>`<span class="m-item">${w}</span><span class="m-item m-sep">✦</span>`).join('');
+t.innerHTML=h+h;
+
+// Delivery date
+const _tomorrow=(()=>{const d=new Date();d.setDate(d.getDate()+1);return{iso:d.toISOString().split('T')[0],display:d.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'short'})};})();
+document.addEventListener('DOMContentLoaded',()=>{const el=document.getElementById('delivery-date-text');if(el)el.textContent=_tomorrow.display;});
+
+// Supabase
+const _db=supabase.createClient('https://fbfopgzblqmsflkfejwa.supabase.co','sb_publishable_r7mYhsyIKtBjBKzxH8St9g_OHjTU-RQ');
 let _appliedCoupon=null,_upiPaid=false,_wantSubscription=false,_orderSubmitting=false;
+
+// Qty — syncs form qty display and hidden qty elements
+const PACKS=[{id:'qty-1kg',name:'1 kg Batter',price:140},{id:'qty-500g',name:'500g Batter',price:75}];
+function changeQty(id,delta){
+  const el=document.getElementById(id);
+  const formEl=document.getElementById(id+'-form');
+  const v=Math.max(0,parseInt((el?el.textContent:formEl?formEl.textContent:'0')||'0')+delta);
+  if(el)el.textContent=v;
+  if(formEl)formEl.textContent=v;
+  updateOrderSummary();
+}
+function getOrderItems(){return PACKS.map(p=>({id:p.id,name:p.name,qty:parseInt(document.getElementById(p.id)?.textContent||document.getElementById(p.id+'-form')?.textContent||'0')||0,price:p.price})).filter(i=>i.qty>0);}
+function toggleSubscription(btn){_wantSubscription=!_wantSubscription;btn.textContent=_wantSubscription?'✓ Added':'Add';btn.classList.toggle('active',_wantSubscription);updateOrderSummary();}
 
 async function applyCoupon(){
   const code=document.getElementById('f-coupon').value.trim().toUpperCase();
@@ -623,29 +586,21 @@ async function applyCoupon(){
   if(!code){eEl.textContent='Please enter a coupon code.';eEl.style.display='block';return;}
   btn.disabled=true;btn.textContent='…';
   try{
-    const{data:c,error}=await _db.from('coupons').select('id,code,discount_value,discount_type,expires_on,status,min_order_value,max_uses,times_used,coupon_type').eq('code',code).single();
+    const{data:c,error}=await _db.from('coupons').select('id,code,discount_value,discount_type,expires_on,status,max_uses,times_used,coupon_type').eq('code',code).single();
     if(error||!c){eEl.textContent='Coupon not found.';eEl.style.display='block';}
     else if(c.status!=='active'){eEl.textContent='This coupon is no longer active.';eEl.style.display='block';}
     else if(c.expires_on&&new Date(c.expires_on)<new Date()){eEl.textContent='This coupon has expired.';eEl.style.display='block';}
     else if(c.max_uses&&c.times_used>=c.max_uses){eEl.textContent='Coupon fully used.';eEl.style.display='block';}
-    else{_appliedCoupon=c;sEl.textContent=c.discount_type==='bogo'?(c.coupon_type==='rakhigift'?`🎁 "${c.code}" — Buy 1kg, Get 500g + Podi Chutney FREE!`:`🎁 "${c.code}" — Buy 1kg, Get 500g FREE!`):`✅ "${c.code}" — ${c.discount_value}% off!`;sEl.style.display='block';btn.textContent='✓';updateOrderSummary();}
-  }catch(ex){eEl.textContent='Could not verify coupon.';eEl.style.display='block';}
+    else{_appliedCoupon=c;sEl.textContent=c.discount_type==='bogo'?(c.coupon_type==='rakhigift'?`🎁 "${c.code}" — Buy 1kg, Get 500g + Podi FREE!`:`🎁 "${c.code}" — Buy 1kg, Get 500g FREE!`):`✅ "${c.code}" — ${c.discount_value}% off!`;sEl.style.display='block';btn.textContent='✓';updateOrderSummary();}
+  }catch(ex){eEl.textContent='Could not verify.';eEl.style.display='block';}
   btn.disabled=false;if(!_appliedCoupon)btn.textContent='Apply';
 }
 
-const PACKS=[{id:'qty-1kg',name:'1 kg Pack',price:140},{id:'qty-500g',name:'500g Starter Pack',price:75}];
-function changeQty(id,delta){
-  const el=document.getElementById(id),fEl=document.getElementById(id+'-form');
-  const v=Math.max(0,parseInt(el.textContent||'0')+delta);
-  el.textContent=v;if(fEl)fEl.textContent=v;updateOrderSummary();
-}
-function toggleSubscription(btn){_wantSubscription=!_wantSubscription;btn.textContent=_wantSubscription?'✓ Added':'Add';btn.classList.toggle('active',_wantSubscription);updateOrderSummary();}
-function getOrderItems(){return PACKS.map(p=>({id:p.id,name:p.name,qty:parseInt(document.getElementById(p.id).textContent)||0,price:p.price})).filter(i=>i.qty>0);}
 function getOrderPrices(){
   const items=getOrderItems(),base=items.reduce((s,i)=>s+i.price*i.qty,0);
   let disc=0,saving=0,freeItems=[];
   if(_appliedCoupon){
-    if(_appliedCoupon.discount_type==='bogo'){const isRakhi=_appliedCoupon.coupon_type==='rakhigift';const kg1=items.find(i=>i.id==='qty-1kg');if(kg1&&kg1.qty>0){freeItems=[{id:'qty-500g',name:'500g Starter Pack',price:75,qty:kg1.qty,free:true}];if(isRakhi)freeItems.push({id:'podi',name:'Podi Chutney 30g',price:45,qty:kg1.qty,free:true});}}
+    if(_appliedCoupon.discount_type==='bogo'){const isRakhi=_appliedCoupon.coupon_type==='rakhigift';const kg1=items.find(i=>i.id==='qty-1kg');if(kg1&&kg1.qty>0){freeItems=[{id:'qty-500g',name:'500g Batter',price:75,qty:kg1.qty}];if(isRakhi)freeItems.push({id:'podi',name:'Podi Chutney',price:45,qty:kg1.qty});}}
     else{disc=_appliedCoupon.discount_value||0;saving=base>0?Math.round(base*disc/100):0;}
   }
   return{base,disc,saving,final:base-saving,items,freeItems,freeValue:freeItems.reduce((s,i)=>s+i.price*i.qty,0)};
@@ -657,9 +612,10 @@ function updateOrderSummary(){
   box.style.display='block';
   const isBogo=_appliedCoupon&&_appliedCoupon.discount_type==='bogo';
   const listEl=document.getElementById('sum-items-list');
-  listEl.innerHTML=items.map(i=>`<div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:.83rem;color:var(--text2)"><span>${i.name} ×${i.qty}</span><span>₹${i.price*i.qty}</span></div>`).join('')
-    +(isBogo?freeItems.map(i=>`<div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:.83rem;color:var(--green-l);font-weight:700"><span>🎁 FREE ${i.name} ×${i.qty}</span><span style="text-decoration:line-through;opacity:.5">₹${i.price*i.qty}</span></div>`).join(''):'')
-    +(_wantSubscription?`<div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:.83rem;color:var(--gold)"><span>Subscription / Bulk</span><span>Quote on WA</span></div>`:'');
+  listEl.innerHTML=
+    items.map(i=>`<div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:.83rem;color:var(--text2)"><span>${i.name} ×${i.qty}</span><span>₹${i.price*i.qty}</span></div>`).join('')+
+    (isBogo?freeItems.map(i=>`<div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:.83rem;color:var(--green);font-weight:700"><span>🎁 FREE ${i.name} ×${i.qty}</span><span style="text-decoration:line-through;opacity:.5">₹${i.price*i.qty}</span></div>`).join(''):'')+
+    (_wantSubscription?`<div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:.83rem;color:var(--gold)"><span>Subscription / Bulk</span><span>Quote on WA</span></div>`:'');
   document.getElementById('sum-subtotal-row').style.display=items.length>1?'flex':'none';
   document.getElementById('sum-base').textContent=`₹${base}`;
   const dr=document.getElementById('sum-discount-row');
@@ -674,10 +630,10 @@ function updateUpiQr(amount){
   if(!amount){box.style.display='none';return;}
   box.style.display='block';
   const ref=window._pendingOrderRef||(window._pendingOrderRef='AFF-'+Date.now().toString(36).toUpperCase());
-  const upiUrl=`upi://pay?pa=absolutefreshfood@ptyes&pn=AbsoluteFresh&am=${amount}&tn=${ref}&cu=INR`;
+  const url=`upi://pay?pa=absolutefreshfood@ptyes&pn=AbsoluteFresh&am=${amount}&tn=${ref}&cu=INR`;
   document.getElementById('upi-qr-amount').textContent=`₹${amount} · Ref: ${ref}`;
-  document.getElementById('upi-pay-btn').href=upiUrl;
-  if(window.QRCode){const c=document.getElementById('upi-qr-canvas');c.innerHTML='';new QRCode(c,{text:upiUrl,width:160,height:160,colorDark:'#1A3828',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.H});}
+  document.getElementById('upi-pay-btn').href=url;
+  if(window.QRCode){const c=document.getElementById('upi-qr-canvas');c.innerHTML='';new QRCode(c,{text:url,width:160,height:160,colorDark:'#1B5224',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.H});}
 }
 
 let _serviceAreas=null,_pinValid=false;
@@ -688,13 +644,9 @@ function checkPin(){
   if(!_serviceAreas){el.innerHTML='<span style="color:var(--gold)">Checking…</span>';return;}
   if(!_serviceAreas.length){_pinValid=true;el.innerHTML='';return;}
   const area=_serviceAreas.find(a=>a.pincode===pin);
-  if(area){el.innerHTML=`<span style="color:var(--green);font-weight:700">🎉 We deliver to ${area.area_name||pin}!</span>`;_pinValid=true;}
-  else{el.innerHTML=`<span style="color:#C0392B">Sorry, not in delivery area yet. <a href="https://wa.me/918318767689" style="color:#C0392B;text-decoration:underline">WhatsApp us</a></span>`;_pinValid=false;}
+  if(area){el.innerHTML=`<span style="color:var(--green);font-weight:600">🎉 We deliver to ${area.area_name||pin}!</span>`;_pinValid=true;}
+  else{el.innerHTML=`<span style="color:#B91C1C">Sorry, not in our delivery area yet. <a href="https://wa.me/918318767689" style="color:#B91C1C;text-decoration:underline">WhatsApp us</a></span>`;_pinValid=false;}
 }
-
-const _tomorrow=(()=>{const d=new Date();d.setDate(d.getDate()+1);return{iso:d.toISOString().split('T')[0],display:d.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'short'})};})();
-document.addEventListener('DOMContentLoaded',()=>{const el=document.getElementById('delivery-date-text');if(el)el.textContent=_tomorrow.display;});
-
 function toggleUpiPaid(){
   _upiPaid=!_upiPaid;
   const btn=document.getElementById('upi-paid-btn'),badge=document.getElementById('upi-paid-badge');
@@ -721,14 +673,13 @@ async function sendWA(e){
   const itemLines=items.map(i=>`%0A  • ${i.name} ×${i.qty} = ₹${i.price*i.qty}`).join('');
   const freeLines=isBogo?freeItems.map(i=>`%0A  🎁 FREE ${i.name} ×${i.qty}`).join(''):'';
   const subLine=_wantSubscription?'%0A  • Subscription / Bulk (quote needed)':'';
-  let couponLine='';
-  if(_appliedCoupon&&(saving>0||isBogo)){couponLine=isBogo?`%0ACoupon: ${_appliedCoupon.code} (BOGO — ₹${freeValue} worth free)`:`%0ACoupon: ${_appliedCoupon.code} (${disc}% off — saved ₹${saving})`;_db.rpc('increment_coupon_usage',{coupon_id:_appliedCoupon.id}).catch(()=>{});}
-  const totalLine=base>0?`%0ATotal: ₹${final}${isBogo&&freeValue>0?` + FREE packs worth ₹${freeValue}`:saving>0?` (saved ₹${saving})`:''}` :'';
+  let cpnLine='';
+  if(_appliedCoupon&&(saving>0||isBogo)){cpnLine=isBogo?`%0ACoupon: ${_appliedCoupon.code} (BOGO — ₹${freeValue} free)`:`%0ACoupon: ${_appliedCoupon.code} (${disc}% off — saved ₹${saving})`;_db.rpc('increment_coupon_usage',{coupon_id:_appliedCoupon.id}).catch(()=>{});}
+  const totalLine=base>0?`%0ATotal: ₹${final}${isBogo&&freeValue>0?` + FREE packs worth ₹${freeValue}`:saving>0?` (saved ₹${saving})`:''}`:'' ;
   let orderRef='WEB-'+Date.now().toString(36).toUpperCase();
   try{
-    const tenMinAgo=new Date(Date.now()-600000).toISOString();
-    const{data:existing}=await _db.from('web_orders').select('order_ref').eq('customer_phone',ph).eq('delivery_date',_tomorrow.iso).gte('created_at',tenMinAgo).limit(1);
-    if(existing&&existing.length){orderRef=existing[0].order_ref;}
+    const{data:ex}=await _db.from('web_orders').select('order_ref').eq('customer_phone',ph).eq('delivery_date',_tomorrow.iso).gte('created_at',new Date(Date.now()-600000).toISOString()).limit(1);
+    if(ex&&ex.length){orderRef=ex[0].order_ref;}
     else{
       await _db.from('web_orders').insert({
         order_ref:orderRef,customer_name:n,customer_phone:ph,customer_address:ad,
@@ -740,8 +691,8 @@ async function sendWA(e){
       });
     }
   }catch(err){console.warn('Save failed:',err);}
-  const paymentLine=_upiPaid?`✅ PAID via UPI · Ref: ${window._pendingOrderRef||'—'}`:'COD / UPI on delivery';
-  const msg=`Hi Absolute Fresh! 🌿%0A%0AName: ${encodeURIComponent(n)}%0APhone: +91${ph}%0AAddress: ${encodeURIComponent(ad)} - ${pin}%0ADelivery: ${_tomorrow.display}%0A%0AOrder:${itemLines}${freeLines}${subLine}${couponLine}${totalLine}%0APayment: ${encodeURIComponent(paymentLine)}%0ARef: ${orderRef}`;
+  const payLine=_upiPaid?`✅ PAID via UPI · Ref: ${window._pendingOrderRef||'—'}`:'COD / UPI on delivery';
+  const msg=`Hi Absolute Fresh! 🌿%0A%0AName: ${encodeURIComponent(n)}%0APhone: +91${ph}%0AAddress: ${encodeURIComponent(ad)} - ${pin}%0ADelivery: ${_tomorrow.display}%0A%0AOrder:${itemLines}${freeLines}${subLine}${cpnLine}${totalLine}%0APayment: ${encodeURIComponent(payLine)}%0ARef: ${orderRef}`;
   const waUrl=`https://wa.me/${WA}?text=${msg}`;
   window.open(waUrl,'_blank');
   document.getElementById('order-form-inner').style.display='none';
