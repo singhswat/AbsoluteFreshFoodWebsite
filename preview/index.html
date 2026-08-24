@@ -167,6 +167,36 @@ h1 em{font-style:italic;color:var(--green)}
 .prod-desc{font-size:12.5px;color:var(--muted);line-height:1.55;margin-bottom:10px}
 .prod-price{font-family:'Lora',serif;font-size:22px;font-weight:700;color:var(--green)}
 
+/* STATS BAR */
+.stats-bar{background:var(--green);padding:28px 32px}
+.stats-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:0;text-align:center}
+.stat-item{padding:0 16px;border-right:1px solid rgba(255,255,255,.2)}
+.stat-item:last-child{border-right:none}
+.stat-num{font-family:'Lora',serif;font-size:clamp(22px,2.8vw,36px);font-weight:700;color:#fff;line-height:1}
+.stat-label{font-size:12px;color:rgba(255,255,255,.7);margin-top:6px;font-weight:500}
+@media(max-width:640px){
+  .stats-inner{grid-template-columns:repeat(2,1fr);gap:24px 0}
+  .stat-item{border-right:none;border-bottom:1px solid rgba(255,255,255,.15);padding-bottom:16px}
+  .stat-item:nth-child(2n){border-right:none}
+  .stat-item:nth-last-child(-n+2){border-bottom:none}
+}
+
+/* PODI TOAST */
+#podi-toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--text);color:#fff;
+  padding:14px 22px;border-radius:40px;
+  display:flex;align-items:center;gap:10px;
+  font-size:13.5px;font-weight:500;white-space:nowrap;
+  box-shadow:0 8px 32px rgba(0,0,0,.28);
+  opacity:0;transition:opacity .5s,transform .5s;
+  z-index:999;pointer-events:none;
+}
+#podi-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#podi-toast .toast-icon{font-size:18px}
+#podi-toast a{color:var(--gold);font-weight:700;text-decoration:underline;pointer-events:auto}
+@media(max-width:480px){#podi-toast{font-size:12px;padding:12px 16px;max-width:90vw;white-space:normal;text-align:center}}
+
 /* PROMISE SECTION */
 .promise-sec{background:var(--green);padding:72px 64px}
 @media(max-width:768px){.promise-sec{padding:56px 20px}}
@@ -330,6 +360,16 @@ footer{background:var(--white);border-top:1px solid var(--border);padding:48px 6
     <img class="hero-prod-img" src="img/batter-1kg.png" alt="Absolute Fresh Idli & Dosa Batter 1kg"/>
   </div>
 </section>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat-item"><div class="stat-num">500+</div><div class="stat-label">Families in Lucknow served</div></div>
+    <div class="stat-item"><div class="stat-num">10,000+</div><div class="stat-label">Fresh packets delivered</div></div>
+    <div class="stat-item"><div class="stat-num">5</div><div class="stat-label">Ingredients. Nothing hidden.</div></div>
+    <div class="stat-item"><div class="stat-num">&lt;24h</div><div class="stat-label">Grain to door, every batch</div></div>
+  </div>
+</div>
 
 <!-- MARQUEE -->
 <div class="marquee-wrap">
@@ -722,6 +762,24 @@ async function sendWA(e){
   document.getElementById('order-wa-fallback').href=waUrl;
   _orderSubmitting=false;
 }
+</script>
+
+<!-- PODI TOAST -->
+<div id="podi-toast">
+  <span class="toast-icon">🌶️</span>
+  <span>We also make <strong>Podi Chutney</strong> — pairs perfectly with your batter. <a href="#order">Add to order →</a></span>
+</div>
+<script>
+(function(){
+  const toast=document.getElementById('podi-toast');
+  const SHOW_DELAY=4000, SHOW_DUR=7000, REPEAT=30000;
+  function showToast(){
+    toast.classList.add('show');
+    setTimeout(()=>toast.classList.remove('show'), SHOW_DUR);
+  }
+  setTimeout(showToast, SHOW_DELAY);
+  setInterval(showToast, REPEAT);
+})();
 </script>
 </body>
 </html>
