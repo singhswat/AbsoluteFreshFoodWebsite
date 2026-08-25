@@ -640,8 +640,15 @@
       if(!p) return;
       const qty = parseFloat(row.querySelector('.bi-qty').value)||0;
       const rate = parseFloat(row.querySelector('.bi-rate')?.value)||0;
-      const base = qty * rate;
-      const tax = base * p.gst/100;
+      const gstMode = document.querySelector('input[name="bi-gst-mode"]:checked')?.value || 'buyer';
+      let base, tax;
+      if(gstMode === 'seller'){
+        base = qty * rate / (1 + p.gst/100);
+        tax = qty * rate - base;
+      } else {
+        base = qty * rate;
+        tax = base * p.gst/100;
+      }
       sub += base; gstAmt += tax;
     });
     document.getElementById('bi-subtotal').textContent = '₹'+sub.toFixed(2);
@@ -660,7 +667,8 @@
       const qty = parseFloat(row.querySelector('.bi-qty').value)||0;
       const rate = parseFloat(row.querySelector('.bi-rate')?.value)||0;
       const disc = p.mrp>0 ? Math.round((1 - rate/p.mrp)*100*10)/10 : 0;
-      return {name:p.name, hsn:p.hsn, qty, mrp:p.mrp, rate, disc, gst:p.gst};
+      const gstMode2 = document.querySelector('input[name="bi-gst-mode"]:checked')?.value || 'buyer';
+      return {name:p.name, hsn:p.hsn, qty, mrp:p.mrp, rate, disc, gst:p.gst, gstMode:gstMode2};
     }).filter(Boolean);
     if(!items.length){ alert('Add at least one product.'); return; }
 
@@ -707,7 +715,7 @@
     </div>
     <table><thead><tr><th>Description</th><th>HSN</th><th style="text-align:center">Qty</th><th style="text-align:right">Rate</th><th style="text-align:center">GST</th><th style="text-align:right">Tax</th><th style="text-align:right">Total</th></tr></thead><tbody>${itemRows}</tbody></table>
     <div class="totals"><table><tr><td>Subtotal</td><td style="text-align:right">₹${sub.toFixed(2)}</td></tr><tr><td>GST</td><td style="text-align:right">₹${gstAmt.toFixed(2)}</td></tr><tr class="grand"><td>Grand Total</td><td style="text-align:right">₹${grand.toFixed(2)}</td></tr></table></div>
-    <div class="terms"><strong>Terms:</strong> Payment due on delivery. All disputes to be discussed with Absolute Fresh and liability is limited to the total invoice value.</div>
+    <div class="terms"><strong>Terms:</strong> ${items[0]?.gstMode==='seller'?'GST included in price (seller absorbs).':'GST charged to buyer separately.'} Payment due on delivery. All disputes to be discussed with Absolute Fresh and liability is limited to the total invoice value.</div>
     <div class="footer"><span>Thank you for your business!</span><span>Absolute Fresh Food · absolutefreshfood.com</span></div>
     <div style="margin-top:16px;text-align:center;font-size:10px;color:#aaa;border-top:1px dashed #ddd;padding-top:10px">🖥️ System-generated invoice. No signature required.</div>
     <div style="text-align:center;padding:20px"><button onclick="window.print()" style="background:#CC0000;color:#fff;border:none;padding:12px 36px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer">⬇ Save as PDF</button></div>
@@ -751,7 +759,18 @@
       <label class="flbl">Address</label>
       <input id="bi-addr" class="finp" placeholder="Full address"/>
     </div>
-    <div style="margin:10px 0 6px;font-size:.7rem;color:#94A3B8;text-transform:uppercase;letter-spacing:.05em">Line Items</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:10px 0 6px">
+      <div style="font-size:.7rem;color:#94A3B8;text-transform:uppercase;letter-spacing:.05em">Line Items</div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:.75rem">
+        <span style="color:#94A3B8">GST:</span>
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;color:#4ADE80">
+          <input type="radio" name="bi-gst-mode" value="buyer" checked onchange="calcBiTotals()"/> Buyer pays
+        </label>
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;color:#FBBF24">
+          <input type="radio" name="bi-gst-mode" value="seller" onchange="calcBiTotals()"/> Included
+        </label>
+      </div>
+    </div>
     <div id="bi-items"></div>
     <button onclick="addBiRow()" style="width:100%;background:none;border:1px dashed #334155;color:#64748B;border-radius:8px;padding:8px;font-size:.8rem;cursor:pointer;margin-bottom:10px">+ Add Item</button>
     <div style="background:#0F172A;border-radius:8px;padding:10px 14px;margin-bottom:10px">
