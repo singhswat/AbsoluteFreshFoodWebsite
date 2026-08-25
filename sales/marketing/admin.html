@@ -3744,11 +3744,19 @@ async function submitInvoice(){
     if(descSel && descSel.selectedIndex > 0){ hasItem = true; break; }
   }
   if(!hasItem){ alert('Please select at least one product before submitting.'); return; }
+  // Lock button to prevent duplicate submissions
+  const btn = document.querySelector('button[onclick="submitInvoice()"]');
+  if(btn && btn.disabled) return;
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Submitting…'; btn.style.background='#475569'; }
+  // Ensure invoice number is fixed before saving
+  const numEl = document.getElementById('inv-number');
+  if(numEl && !numEl.value.trim()) numEl.value = genInvNumber();
   // Build invoice and save
   generateInvoicePDF(false);
   // Show feedback
-  const btn = document.querySelector('button[onclick="submitInvoice()"]');
-  if(btn){ btn.textContent='✅ Submitted!'; btn.style.background='#166534'; setTimeout(()=>{btn.textContent='✅ Submit Invoice';btn.style.background='#CC0000';},3000); }
+  if(btn){ btn.textContent='✅ Submitted!'; btn.style.background='#166534'; }
+  // Re-enable after 5s (in case they need to reprint, but won't re-save due to _savedInvoices set)
+  setTimeout(()=>{ if(btn){btn.disabled=false;btn.textContent='✅ Submit Invoice';btn.style.background='#CC0000';} },5000);
 }
 
 function generateInvoicePDF(skipSave){
