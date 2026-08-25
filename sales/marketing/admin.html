@@ -3438,10 +3438,14 @@ function addInvRow(){
   const idx = tbody.rows.length;
   const row = tbody.insertRow();
   row.innerHTML = `
-    <td><select onchange="fillInvRow(this,${idx})" style="background:#0F172A;color:#CBD5E1;border:1px solid #334155;border-radius:6px;padding:4px;width:100%;font-size:.78rem">
-      <option value="">— Select —</option>
-      ${INV_PRODUCTS.map((p,i)=>`<option value="${i}">${p.name}</option>`).join('')}
-    </select></td>
+    <td>
+      <input id="inv-desc-${idx}" style="${iStyle()}" placeholder="Description" list="inv-prod-list-${idx}"/>
+      <datalist id="inv-prod-list-${idx}">${INV_PRODUCTS.map((p,i)=>`<option value="${p.name}" data-idx="${i}">`).join('')}</datalist>
+      <select onchange="fillInvRow(this,${idx})" style="background:#0F172A;color:#475569;border:none;border-top:1px solid #334155;border-radius:0 0 6px 6px;padding:2px 4px;width:100%;font-size:.7rem;margin-top:2px">
+        <option value="">— quick fill product —</option>
+        ${INV_PRODUCTS.map((p,i)=>`<option value="${i}">${p.name}</option>`).join('')}
+      </select>
+    </td>
     <td><input id="inv-hsn-${idx}" style="${iStyle()}" placeholder="HSN"/></td>
     <td><input id="inv-qty-${idx}" type="number" min="1" value="1" style="${iStyle()}" oninput="calcInvRow(${idx})"/></td>
     <td><input id="inv-rate-${idx}" type="number" min="0" value="0" style="${iStyle()}" oninput="calcInvRow(${idx})"/></td>
@@ -3482,6 +3486,8 @@ function initInvoiceTab(){
 function fillInvRow(sel,idx){
   const p = INV_PRODUCTS[parseInt(sel.value)];
   if(!p) return;
+  const descEl = document.getElementById('inv-desc-'+idx);
+  if(descEl && !descEl.value) descEl.value = p.name;
   document.getElementById('inv-hsn-'+idx).value = p.hsn;
   document.getElementById('inv-rate-'+idx).value = p.rate;
   document.getElementById('inv-gst-'+idx).value = p.gst;
@@ -3734,7 +3740,7 @@ function generateInvoicePDF(skipSave){
   let itemRows='', subtotal=0, gstTotal=0;
   const itemsData = [];
   for(let i=0;i<rows.length;i++){
-    const name = rows[i].querySelector('select')?.options[rows[i].querySelector('select')?.selectedIndex]?.text||'Item';
+    const name = rows[i].querySelector('input[id^="inv-desc"]')?.value.trim() || rows[i].querySelector('select')?.options[rows[i].querySelector('select')?.selectedIndex]?.text || 'Item';
     const hsn  = rows[i].querySelector('input[id^="inv-hsn"]')?.value||'';
     const qty  = parseFloat(rows[i].querySelector('input[id^="inv-qty"]')?.value)||0;
     const mrp  = parseFloat(rows[i].querySelector('input[id^="inv-rate"]')?.value)||0;
