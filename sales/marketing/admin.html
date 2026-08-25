@@ -660,12 +660,11 @@
         </div>
 
         <!-- Actions -->
-        <button onclick="generateInvoicePDF()" style="width:100%;background:#1B5224;color:#fff;border:none;border-radius:10px;padding:14px;font-size:.95rem;font-weight:800;cursor:pointer;margin-bottom:12px">⬇ Generate Invoice PDF</button>
-
-        <div id="inv-send-btns" style="display:none;gap:10px">
-          <a id="inv-wa-btn" href="#" target="_blank" style="flex:1;background:#25D366;color:#fff;border:none;border-radius:10px;padding:12px;font-size:.85rem;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;display:block">📲 Send on WhatsApp</a>
-          <a id="inv-email-btn" href="#" style="flex:1;background:#1E3A5F;color:#93C5FD;border:1px solid #1d4ed8;border-radius:10px;padding:12px;font-size:.85rem;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;display:block">✉ Send via Email</a>
+        <div style="display:flex;gap:10px;margin-bottom:12px">
+          <button onclick="generateInvoicePDF(false)" style="flex:1;background:#CC0000;color:#fff;border:none;border-radius:10px;padding:14px;font-size:.9rem;font-weight:800;cursor:pointer">⬇ Download PDF</button>
+          <button onclick="sendInvoiceWhatsApp()" style="flex:1;background:#25D366;color:#fff;border:none;border-radius:10px;padding:14px;font-size:.9rem;font-weight:800;cursor:pointer">📲 WhatsApp</button>
         </div>
+        <div id="inv-send-btns" style="display:none"></div>
 
         </div><!-- end inv-form-section -->
 
@@ -3758,8 +3757,8 @@ function generateInvoicePDF(skipSave){
   const grand = subtotal+gstTotal;
   const invNum = v('inv-number')||genInvNumber();
   if(!skipSave) saveInvoiceToDB(invNum, grand, subtotal, gstTotal, itemsData);
-  const win = window.open('','_blank');
-  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>Invoice ${invNum}</title>
+  // Build HTML for the invoice
+  const invHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8"/>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:Arial,sans-serif;font-size:13px;color:#1a1a1a;padding:40px;max-width:800px;margin:0 auto}
@@ -3784,13 +3783,12 @@ function generateInvoicePDF(skipSave){
     .footer{margin-top:40px;padding-top:16px;border-top:1px solid #ddd;display:flex;justify-content:space-between;font-size:11px;color:#999}
     .terms{margin-top:24px;font-size:11px;color:#666;background:#fff5f5;padding:12px;border-radius:4px;border-left:3px solid #CC0000}
     .fssai{font-size:10px;color:#999;margin-top:4px}
-    @media print{body{padding:20px}button{display:none}}
   </style></head><body>
   <div class="header">
     <div>
-      <img src="https://sales.absolutefreshfood.com/images/aff-logo.png" alt="Absolute Fresh" style="height:60px;width:auto;display:block;margin-bottom:6px"/>
+      <img src="https://sales.absolutefreshfood.com/images/aff-logo.png" alt="Absolute Fresh" style="height:60px;width:auto;display:block;margin-bottom:6px" crossorigin="anonymous"/>
       <div class="brand-sub">Stone-Ground Daily · Lucknow, UP</div>
-      <div style="font-size:11px;color:#555;margin-top:6px">📞 +91 83187 67689 &nbsp;|&nbsp; hello@absolutefresh.com</div>
+      <div style="font-size:11px;color:#555;margin-top:6px">+91 83187 67689 &nbsp;|&nbsp; hello@absolutefresh.com</div>
       <div class="fssai">FSSAI: 12724055000349 &nbsp;|&nbsp; GSTIN: ${v('inv-gstin-self')||'—'}</div>
     </div>
     <div class="inv-meta">
@@ -3806,8 +3804,8 @@ function generateInvoicePDF(skipSave){
       <p><strong>${v('inv-co-name')||'Company Name'}</strong><br>
       ${v('inv-co-addr')||''}<br>
       ${v('inv-co-gstin') ? 'GSTIN: '+v('inv-co-gstin') : ''}<br>
-      ${v('inv-co-phone') ? '📞 '+v('inv-co-phone') : ''}<br>
-      ${v('inv-co-email') ? '✉ '+v('inv-co-email') : ''}</p>
+      ${v('inv-co-phone') ? '+91 '+v('inv-co-phone') : ''}<br>
+      ${v('inv-co-email') ? v('inv-co-email') : ''}</p>
     </div>
     <div class="party-box">
       <h4>Delivery Details</h4>
@@ -3824,29 +3822,61 @@ function generateInvoicePDF(skipSave){
   </table>
   <div class="totals">
     <table>
-      <tr><td>Subtotal</td><td style="text-align:right">₹${subtotal.toFixed(2)}</td></tr>
-      <tr><td>GST</td><td style="text-align:right">₹${gstTotal.toFixed(2)}</td></tr>
-      <tr class="grand"><td>Grand Total</td><td style="text-align:right">₹${grand.toFixed(2)}</td></tr>
+      <tr><td>Subtotal</td><td style="text-align:right">Rs.${subtotal.toFixed(2)}</td></tr>
+      <tr><td>GST</td><td style="text-align:right">Rs.${gstTotal.toFixed(2)}</td></tr>
+      <tr class="grand"><td>Grand Total</td><td style="text-align:right">Rs.${grand.toFixed(2)}</td></tr>
     </table>
   </div>
   <div class="terms">
-    <strong>Terms & Conditions:</strong> ${v('inv-terms')||'Payment due on delivery. All disputes subject to Lucknow jurisdiction.'}
+    <strong>Terms &amp; Conditions:</strong> ${v('inv-terms')||'Payment due on delivery. All disputes subject to Lucknow jurisdiction.'}
   </div>
   <div class="footer">
     <div>Thank you for your business!</div>
     <div>Absolute Fresh Food · absolutefreshfood.com</div>
   </div>
-  <div style="margin-top:24px;text-align:center">
-    <button onclick="window.print()" style="background:#1B5224;color:#fff;border:none;padding:12px 32px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">⬇ Save / Print PDF</button>
-  </div>
-  </body></html>`);
-  win.document.close();
+  </body></html>`;
 
-  // WhatsApp message
-  const waMsg = `Hi! Please find attached Invoice *${invNum}* from Absolute Fresh Food.\n\nBill To: ${v('inv-co-name')}\nAmount: ₹${grand.toFixed(2)}\nDate: ${v('inv-date')||new Date().toLocaleDateString('en-IN')}\n\nFor queries: +91 83187 67689`;
-  document.getElementById('inv-wa-btn').href = `https://wa.me/91${v('inv-co-phone').replace(/\D/g,'')}?text=${encodeURIComponent(waMsg)}`;
-  document.getElementById('inv-email-btn').href = `mailto:${v('inv-co-email')}?subject=Invoice ${invNum} - Absolute Fresh Food&body=${encodeURIComponent(waMsg)}`;
-  document.getElementById('inv-send-btns').style.display='flex';
+  if(skipSave){
+    // Preview mode (reprint) — open in new tab
+    const win = window.open('','_blank');
+    win.document.write(invHtml); win.document.close(); return;
+  }
+  saveInvoiceToDB(invNum, grand, subtotal, gstTotal, itemsData);
+  // Download PDF using html2pdf.js
+  const loadHtml2pdf = () => new Promise(res => {
+    if(window.html2pdf){ res(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+    s.onload = res; document.head.appendChild(s);
+  });
+  loadHtml2pdf().then(()=>{
+    const el = document.createElement('div');
+    el.innerHTML = invHtml;
+    el.style.position='absolute'; el.style.left='-9999px';
+    document.body.appendChild(el);
+    html2pdf().set({
+      margin: 10,
+      filename: `Invoice-${invNum}.pdf`,
+      image: {type:'jpeg', quality:0.98},
+      html2canvas: {scale:2, useCORS:true},
+      jsPDF: {unit:'mm', format:'a4', orientation:'portrait'}
+    }).from(el.firstChild).save().then(()=> document.body.removeChild(el));
+  });
+}
+
+function sendInvoiceWhatsApp(){
+  const v = id => document.getElementById(id)?.value||'';
+  const invNum = v('inv-number')||genInvNumber();
+  const grand = document.getElementById('inv-grand')?.textContent?.replace('₹','')||'';
+  const phone = v('inv-co-phone').replace(/\D/g,'');
+  const msg = `Hello! 🙏\n\nPlease find Invoice *${invNum}* from *Absolute Fresh Food*.\n\n` +
+    `*Bill To:* ${v('inv-co-name')}\n*Amount:* ₹${grand}\n*Date:* ${v('inv-date')||new Date().toLocaleDateString('en-IN')}\n\n` +
+    `_(Please download the PDF that was just saved to your device and attach it here)_\n\nFor queries: +91 83187 67689`;
+  if(!phone){ alert('Please enter customer phone number first.'); return; }
+  // First trigger the download
+  generateInvoicePDF(false);
+  // Then open WhatsApp after a short delay
+  setTimeout(()=> window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`, '_blank'), 1500);
 }
 </script>
 </body>
