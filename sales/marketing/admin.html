@@ -193,20 +193,19 @@
   <div style="background:#0A0A0A;border-bottom:1px solid #1E293B;padding:0 12px">
     <!-- Section toggle -->
     <div style="display:flex;gap:0;border-bottom:1px solid #1E293B;margin-bottom:0">
-      <button id="section-admin-btn" onclick="showSection('admin')" style="padding:8px 20px;background:transparent;border:none;border-bottom:2px solid #22c55e;color:#22c55e;font-size:.78rem;font-weight:700;cursor:pointer;letter-spacing:.04em;text-transform:uppercase">⚙️ Admin</button>
-      <button id="section-perf-btn"  onclick="showSection('perf')"  style="padding:8px 20px;background:transparent;border:none;border-bottom:2px solid transparent;color:#475569;font-size:.78rem;font-weight:700;cursor:pointer;letter-spacing:.04em;text-transform:uppercase">📊 Performance</button>
+      <button id="section-admin-btn"   onclick="showSection('admin')"   style="padding:8px 18px;background:transparent;border:none;border-bottom:2px solid #22c55e;color:#22c55e;font-size:.78rem;font-weight:700;cursor:pointer;letter-spacing:.04em;text-transform:uppercase">⚙️ Admin</button>
+      <button id="section-perf-btn"    onclick="showSection('perf')"    style="padding:8px 18px;background:transparent;border:none;border-bottom:2px solid transparent;color:#475569;font-size:.78rem;font-weight:700;cursor:pointer;letter-spacing:.04em;text-transform:uppercase">📊 Performance</button>
+      <button id="section-finance-btn" onclick="showSection('finance')" style="padding:8px 18px;background:transparent;border:none;border-bottom:2px solid transparent;color:#475569;font-size:.78rem;font-weight:700;cursor:pointer;letter-spacing:.04em;text-transform:uppercase">💰 Finance</button>
     </div>
     <!-- Admin tabs -->
     <div id="section-admin" class="tab-nav" style="border-bottom:none;padding:4px 0">
       <button class="tab-btn active" onclick="switchTab('home',this)">🏠 Home</button>
       <button class="tab-btn" onclick="switchTab('weborders',this)">🛒 Orders</button>
-      <button class="tab-btn" onclick="switchTab('invoice',this)">🧾 Invoice</button>
       <button class="tab-btn" onclick="switchTab('coupons',this)">🎟️ Coupons</button>
       <button class="tab-btn" onclick="switchTab('influencers',this)">👥 Influencers</button>
       <button class="tab-btn" onclick="switchTab('campaigns',this)">📣 Campaigns</button>
       <button class="tab-btn" onclick="switchTab('samples',this)">📦 Samples</button>
       <button class="tab-btn" onclick="switchTab('reviews',this)">📸 Content</button>
-      <button class="tab-btn" onclick="switchTab('payouts',this)">💰 Payouts</button>
       <button class="tab-btn" onclick="switchTab('products',this)">🥬 Products</button>
       <button class="tab-btn" onclick="switchTab('salesreps',this)">👷 Reps</button>
       <button class="tab-btn" onclick="switchTab('outlets',this)">🏪 Outlets</button>
@@ -218,6 +217,11 @@
       <button class="tab-btn" onclick="switchTab('salesdash',this)">📊 Sales Ops</button>
       <button class="tab-btn" onclick="switchTab('beatplans',this)">🗺️ Beat Plans</button>
       <button class="tab-btn" onclick="switchTab('repperf',this)">🏆 Rep Performance</button>
+    </div>
+    <!-- Finance tabs -->
+    <div id="section-finance" class="tab-nav" style="border-bottom:none;padding:4px 0;display:none">
+      <button class="tab-btn" onclick="switchTab('invoice',this)">🧾 Invoices</button>
+      <button class="tab-btn" onclick="switchTab('payouts',this)">💸 Payouts</button>
     </div>
   </div>
 
@@ -1500,13 +1504,23 @@
 
   // ── Section toggle (Admin / Performance) ─────────────────────
   function showSection(sec) {
-    const isAdmin = sec === 'admin';
-    document.getElementById('section-admin').style.display = isAdmin ? 'flex' : 'none';
-    document.getElementById('section-perf').style.display  = isAdmin ? 'none' : 'flex';
-    document.getElementById('section-admin-btn').style.borderBottomColor = isAdmin ? '#22c55e' : 'transparent';
-    document.getElementById('section-admin-btn').style.color = isAdmin ? '#22c55e' : '#475569';
-    document.getElementById('section-perf-btn').style.borderBottomColor  = isAdmin ? 'transparent' : '#22c55e';
-    document.getElementById('section-perf-btn').style.color  = isAdmin ? '#475569' : '#22c55e';
+    const sections = ['admin','perf','finance'];
+    const colors   = { admin:'#22c55e', perf:'#38BDF8', finance:'#FBBF24' };
+    sections.forEach(s => {
+      const active = s === sec;
+      const el  = document.getElementById('section-'+s);
+      const btn = document.getElementById('section-'+s+'-btn');
+      if(el)  el.style.display  = active ? 'flex' : 'none';
+      if(btn) {
+        btn.style.borderBottomColor = active ? colors[s] : 'transparent';
+        btn.style.color = active ? colors[s] : '#475569';
+      }
+    });
+    // Auto-activate first tab in newly shown section
+    if(sec === 'finance') {
+      const firstBtn = document.querySelector('#section-finance .tab-btn');
+      if(firstBtn) switchTab('invoice', firstBtn);
+    }
   }
 
   // ── Tab switching ────────────────────────────────────────────
