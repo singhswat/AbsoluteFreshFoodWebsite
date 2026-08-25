@@ -3426,13 +3426,27 @@
   }
 
 // ── INVOICE TAB ──────────────────────────────────────────────
-const INV_PRODUCTS = [
-  {name:'Idli & Dosa Batter 1kg', hsn:'10063090', rate:140, gst:5},
-  {name:'Idli & Dosa Batter 500g', hsn:'10063090', rate:75, gst:5},
-  {name:'Idli & Dosa Batter 200g', hsn:'10063090', rate:45, gst:5},
-  {name:'Podi Chutney 30g', hsn:'09109100', rate:45, gst:5},
-  {name:'Custom Item', hsn:'', rate:0, gst:5},
-];
+// HSN overrides by product name keyword
+const HSN_MAP = {'chutney':'09109100','podi':'09109100'};
+let INV_PRODUCTS = [{name:'Custom Item', hsn:'', rate:0, gst:5}];
+
+async function loadInvProducts(){
+  const {data} = await db.from('products').select('name,mrp').eq('is_active',true).order('name');
+  if(data?.length){
+    INV_PRODUCTS = data.map(p=>{
+      const key = Object.keys(HSN_MAP).find(k=>p.name.toLowerCase().includes(k));
+      return {name:p.name, hsn: key ? HSN_MAP[key] : '10063090', rate: parseFloat(p.mrp)||0, gst:5};
+    });
+    INV_PRODUCTS.push({name:'Custom Item', hsn:'', rate:0, gst:5});
+  }
+  // Rebuild all existing dropdowns with fresh product list
+  document.querySelectorAll('select[id^="inv-desc"]').forEach(sel=>{
+    const cur = sel.value;
+    sel.innerHTML = `<option value="">— Select Product —</option>`+
+      INV_PRODUCTS.map((p,i)=>`<option value="${i}">${p.name}</option>`).join('');
+    sel.value = cur;
+  });
+}
 
 function addInvRow(){
   const tbody = document.getElementById('inv-items-body');
@@ -3540,6 +3554,7 @@ function genInvNumber(){
 
 // ── Invoice view toggle ────────────────────────────────────────
 function showInvView(view){
+  loadInvProducts(); // always refresh product list from DB
   const isNew = view === 'new';
   document.getElementById('inv-form-section').style.display    = isNew ? 'block' : 'none';
   document.getElementById('inv-history-section').style.display = isNew ? 'none'  : 'block';
