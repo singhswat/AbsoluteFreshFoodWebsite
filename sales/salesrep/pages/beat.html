@@ -98,7 +98,7 @@
 <body>
 
 <div class="top-bar">
-  <span style="font-size:1.2rem">🥬</span>
+  <img src="../../images/aff-logo.png" style="height:28px;width:auto"/>
   <div style="font-weight:600;color:#F1F5F9;font-size:.85rem;flex:1" id="greeting">Good morning</div>
   <button class="icon-btn" onclick="openAddOutlet()">🆕 Add Outlet</button>
   <button class="icon-btn" onclick="refreshBeat()">↻</button>
@@ -398,12 +398,16 @@
       const statusPill=isDone
         ?'<span class="pill pill-done">Done</span>'
         :'<span class="pill pill-pending">Pending</span>';
+      const safePhone=(o.phone||'').replace(/'/g,'');
+      const safeArea=(o.area||'').replace(/'/g,'');
       const actions=isDone
         ?`<div class="action-btns">
             <button class="act-btn green" onclick="editOrder('${ord.id}','${log.outlet_id}','${(o.name||'').replace(/'/g,'')}')">Edit</button>
+            <button class="act-btn" style="border-color:#7C3AED;color:#A78BFA" onclick="openInvModal('${log.outlet_id}','${(o.name||'').replace(/'/g,'')}','${safeArea}','${safePhone}')">🧾 Invoice</button>
           </div>`
         :`<div class="action-btns">
             <button class="act-btn" onclick="placeOrder('${log.outlet_id}','${(o.name||'').replace(/'/g,'')}')">Order</button>
+            <button class="act-btn" style="border-color:#7C3AED;color:#A78BFA" onclick="openInvModal('${log.outlet_id}','${(o.name||'').replace(/'/g,'')}','${safeArea}','${safePhone}')">🧾 Invoice</button>
           </div>`;
 
       return`<tr class="${isDone?'done-row':'pending-row'}">
@@ -562,6 +566,141 @@
     await loadOutlets();
   }
 
+
+  // ── Beat Invoice ──────────────────────────────────────────
+  let beatInvProducts = [];
+  let beatInvOutlet = {};
+
+  async function loadBeatInvProducts(){
+    if(beatInvProducts.length) return;
+    const{data}=await db.from('products').select('name,mrp').eq('is_active',true).order('name');
+    beatInvProducts = (data||[]).map(p=>({name:p.name, hsn:'10063090', rate:parseFloat(p.mrp)||0, gst:5}));
+    beatInvProducts.push({name:'Custom Item', hsn:'', rate:0, gst:5});
+  }
+
+  async function openInvModal(outletId, outletName, area, phone){
+    await loadBeatInvProducts();
+    beatInvOutlet = {id:outletId, name:outletName, area, phone};
+    document.getElementById('inv-outlet-name').textContent = outletName + (area?' — '+area:'');
+    document.getElementById('bi-phone').value = phone||'';
+    document.getElementById('bi-addr').value = area||'';
+    document.getElementById('bi-gstin').value = '';
+    document.getElementById('bi-items').innerHTML = '';
+    addBiRow();
+    calcBiTotals();
+    document.getElementById('bi-submit').disabled = false;
+    document.getElementById('bi-submit').textContent = '✅ Submit Invoice';
+    document.getElementById('bi-submit').style.background = '#7C3AED';
+    document.getElementById('inv-modal').classList.add('show');
+  }
+  function closeInvModal(){ document.getElementById('inv-modal').classList.remove('show'); }
+
+  function addBiRow(){
+    const idx = document.getElementById('bi-items').children.length;
+    const opts = beatInvProducts.map((p,i)=>`<option value="${i}">${p.name}</option>`).join('');
+    const row = document.createElement('div');
+    row.style.cssText = 'display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:6px;margin-bottom:8px;align-items:center';
+    row.innerHTML = `
+      <select class="finp bi-prod" style="font-size:.78rem;padding:6px" onchange="calcBiTotals()">
+        <option value="">— Product —</option>${opts}
+      </select>
+      <input type="number" class="finp bi-qty" placeholder="Qty" min="1" value="1" style="font-size:.82rem;padding:6px;text-align:center" oninput="calcBiTotals()"/>
+      <input type="number" class="finp bi-disc" placeholder="Disc%" min="0" max="100" value="0" style="font-size:.82rem;padding:6px;text-align:center" oninput="calcBiTotals()"/>
+      <button onclick="this.parentElement.remove();calcBiTotals()" style="background:none;border:1px solid #991b1b;color:#F87171;border-radius:5px;padding:4px 8px;cursor:pointer;font-size:.8rem">✕</button>
+    `;
+    document.getElementById('bi-items').appendChild(row);
+  }
+
+  function calcBiTotals(){
+    let sub=0, gstAmt=0;
+    document.querySelectorAll('#bi-items > div').forEach(row=>{
+      const idx = parseInt(row.querySelector('.bi-prod').value);
+      const p = beatInvProducts[idx];
+      if(!p || idx==='') return;
+      const qty = parseFloat(row.querySelector('.bi-qty').value)||0;
+      const disc = parseFloat(row.querySelector('.bi-disc').value)||0;
+      const base = qty * p.rate * (1 - disc/100);
+      const tax = base * p.gst/100;
+      sub += base; gstAmt += tax;
+    });
+    document.getElementById('bi-subtotal').textContent = '₹'+sub.toFixed(2);
+    document.getElementById('bi-gst').textContent = '₹'+gstAmt.toFixed(2);
+    document.getElementById('bi-grand').textContent = '₹'+(sub+gstAmt).toFixed(2);
+  }
+
+  async function submitBeatInv(){
+    const btn = document.getElementById('bi-submit');
+    if(btn.disabled) return;
+    const rows = [...document.querySelectorAll('#bi-items > div')];
+    const items = rows.map(row=>{
+      const idx = parseInt(row.querySelector('.bi-prod').value);
+      const p = beatInvProducts[idx];
+      if(!p) return null;
+      const qty = parseFloat(row.querySelector('.bi-qty').value)||0;
+      const disc = parseFloat(row.querySelector('.bi-disc').value)||0;
+      return {name:p.name, hsn:p.hsn, qty, mrp:p.rate, disc, gst:p.gst};
+    }).filter(Boolean);
+    if(!items.length){ alert('Add at least one product.'); return; }
+
+    btn.disabled=true; btn.textContent='Saving…'; btn.style.background='#475569';
+
+    const today = new Date().toISOString().split('T')[0];
+    const dd = today.slice(2,4)+today.slice(5,7);
+    const invNum = 'AFF-'+dd+'-'+Math.floor(100+Math.random()*900);
+    let sub=0, gstAmt=0, itemRows='';
+    items.forEach(it=>{
+      const base = it.qty * it.mrp * (1-it.disc/100);
+      const tax = base * it.gst/100;
+      sub+=base; gstAmt+=tax;
+      const discCell = it.disc>0?`<span style="color:#f59e0b;font-size:10px"> -${it.disc}%</span>`:'';
+      itemRows+=`<tr><td>${it.name}</td><td>${it.hsn}</td><td style="text-align:center">${it.qty}</td><td style="text-align:right">₹${it.mrp.toFixed(2)}${discCell}</td><td style="text-align:center">${it.gst}%</td><td style="text-align:right">₹${tax.toFixed(2)}</td><td style="text-align:right">₹${(base+tax).toFixed(2)}</td></tr>`;
+    });
+    const grand = sub+gstAmt;
+    const phone = document.getElementById('bi-phone').value.trim();
+    const addr = document.getElementById('bi-addr').value.trim();
+    const gstin = document.getElementById('bi-gstin').value.trim();
+
+    // Save to DB
+    await db.from('b2b_invoices').insert({
+      invoice_number:invNum, invoice_date:today, due_date:today,
+      company_name:beatInvOutlet.name, company_address:addr,
+      company_phone:phone, company_gstin:gstin||null,
+      subtotal:sub, gst_total:gstAmt, grand_total:grand,
+      items, our_gstin:'09TULPS3880J1ZB',
+      status:'sent', rep_name:currentUser.name,
+      created_by:currentUser.id
+    });
+
+    // Open print window
+    const AFF_LOGO = 'https://sales.absolutefreshfood.com/images/aff-logo.png';
+    const invHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8"/>
+    <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:13px;color:#1a1a1a;padding:40px;max-width:800px;margin:0 auto}.header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px;padding-bottom:20px;border-bottom:3px solid #CC0000}.inv-title{font-size:28px;font-weight:900;color:#CC0000;letter-spacing:2px}.parties{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:28px}.party-box h4{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#999;margin-bottom:8px}.party-box strong{font-size:15px;color:#CC0000}table{width:100%;border-collapse:collapse;margin-bottom:20px}thead tr{background:#CC0000;color:#fff}thead th{padding:10px 12px;text-align:left;font-size:11px}tbody tr:nth-child(even){background:#fff5f5}tbody td{padding:9px 12px;border-bottom:1px solid #eee;font-size:12px}.totals{margin-left:auto;width:260px}.totals td{padding:6px 12px;font-size:13px}.totals tr.grand td{background:#CC0000;color:#fff;font-weight:700;font-size:15px;padding:10px 12px}.terms{margin-top:24px;font-size:11px;color:#666;background:#fff5f5;padding:12px;border-radius:4px;border-left:3px solid #CC0000}.footer{margin-top:28px;padding-top:12px;border-top:1px solid #ddd;display:flex;justify-content:space-between;font-size:11px;color:#999}@media print{button{display:none!important}}</style></head><body>
+    <div class="header">
+      <div><img src="${AFF_LOGO}" style="height:50px;margin-bottom:6px"/><br/><span style="font-size:11px;color:#666">Stone-Ground Daily · Lucknow, UP<br/>+91 83187 67689 | GSTIN: 09TULPS3880J1ZB<br/>FSSAI: 12724055000349</span></div>
+      <div style="text-align:right"><div class="inv-title">INVOICE</div><div style="font-size:12px;color:#666;margin-top:6px"># ${invNum}<br/>Date: ${today}</div></div>
+    </div>
+    <div class="parties">
+      <div class="party-box"><h4>Bill To</h4><strong>${beatInvOutlet.name}</strong><br/><span style="font-size:12px;color:#555">${addr}${gstin?'<br/>GSTIN: '+gstin:''}${phone?'<br/>+91 '+phone:''}</span></div>
+      <div class="party-box"><h4>Sales Rep</h4><span style="font-size:12px;color:#555">${currentUser.name}</span></div>
+    </div>
+    <table><thead><tr><th>Description</th><th>HSN</th><th style="text-align:center">Qty</th><th style="text-align:right">Rate</th><th style="text-align:center">GST</th><th style="text-align:right">Tax</th><th style="text-align:right">Total</th></tr></thead><tbody>${itemRows}</tbody></table>
+    <div class="totals"><table><tr><td>Subtotal</td><td style="text-align:right">₹${sub.toFixed(2)}</td></tr><tr><td>GST</td><td style="text-align:right">₹${gstAmt.toFixed(2)}</td></tr><tr class="grand"><td>Grand Total</td><td style="text-align:right">₹${grand.toFixed(2)}</td></tr></table></div>
+    <div class="terms"><strong>Terms:</strong> Payment due on delivery. All disputes to be discussed with Absolute Fresh and liability is limited to the total invoice value.</div>
+    <div class="footer"><span>Thank you for your business!</span><span>Absolute Fresh Food · absolutefreshfood.com</span></div>
+    <div style="margin-top:16px;text-align:center;font-size:10px;color:#aaa;border-top:1px dashed #ddd;padding-top:10px">🖥️ System-generated invoice. No signature required.</div>
+    <div style="text-align:center;padding:20px"><button onclick="window.print()" style="background:#CC0000;color:#fff;border:none;padding:12px 36px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer">⬇ Save as PDF</button></div>
+    </body></html>`;
+
+    const win = window.open('','_blank');
+    if(win){ win.document.write(invHtml); win.document.close(); }
+    closeInvModal();
+    showToast('Invoice '+invNum+' submitted ✅');
+  }
+
+  document.getElementById('inv-modal').addEventListener('click',e=>{
+    if(e.target===document.getElementById('inv-modal')) closeInvModal();
+  });
+
   // Close modals on backdrop tap
   ['order-modal','outlet-modal'].forEach(id=>{
     document.getElementById(id).addEventListener('click',e=>{
@@ -569,5 +708,41 @@
     });
   });
 </script>
+
+<!-- Invoice modal -->
+<div class="overlay" id="inv-modal">
+  <div class="sheet" style="max-height:95vh">
+    <div class="handle"></div>
+    <h3>🧾 Create Invoice</h3>
+    <div id="inv-outlet-name" style="font-size:.8rem;color:#A78BFA;margin-bottom:10px"></div>
+    <div class="form-row">
+      <div class="form-grp" style="margin:0">
+        <label class="flbl">GSTIN (buyer)</label>
+        <input id="bi-gstin" class="finp" placeholder="09XXXXX (optional)"/>
+      </div>
+      <div class="form-grp" style="margin:0">
+        <label class="flbl">Phone</label>
+        <input id="bi-phone" class="finp" placeholder="10-digit"/>
+      </div>
+    </div>
+    <div class="form-grp" style="margin-top:8px">
+      <label class="flbl">Address</label>
+      <input id="bi-addr" class="finp" placeholder="Full address"/>
+    </div>
+    <div style="margin:10px 0 6px;font-size:.7rem;color:#94A3B8;text-transform:uppercase;letter-spacing:.05em">Line Items</div>
+    <div id="bi-items"></div>
+    <button onclick="addBiRow()" style="width:100%;background:none;border:1px dashed #334155;color:#64748B;border-radius:8px;padding:8px;font-size:.8rem;cursor:pointer;margin-bottom:10px">+ Add Item</button>
+    <div style="background:#0F172A;border-radius:8px;padding:10px 14px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:.82rem;color:#94A3B8;margin-bottom:4px"><span>Subtotal</span><span id="bi-subtotal">₹0</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:.82rem;color:#94A3B8;margin-bottom:4px"><span>GST</span><span id="bi-gst">₹0</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:1rem;font-weight:700;color:#4ADE80"><span>Grand Total</span><span id="bi-grand">₹0</span></div>
+    </div>
+    <div class="m-actions">
+      <button class="m-cancel" onclick="closeInvModal()">Cancel</button>
+      <button class="m-submit" style="background:#7C3AED" id="bi-submit" onclick="submitBeatInv()">✅ Submit Invoice</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
