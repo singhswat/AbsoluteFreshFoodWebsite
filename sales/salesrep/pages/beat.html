@@ -613,7 +613,7 @@
         <option value="4"${tier==4?' selected':''}>T4</option>
       </select>
       <input type="number" class="finp bi-qty" placeholder="Qty" min="1" value="1" style="font-size:.82rem;padding:6px;text-align:center" oninput="calcBiTotals()"/>
-      <input type="number" class="finp bi-rate" placeholder="Rate" style="font-size:.82rem;padding:6px;text-align:right;color:#FBBF24" oninput="calcBiTotals()" readonly/>
+      <input type="number" class="finp bi-rate" placeholder="Rate" style="font-size:.82rem;padding:6px;text-align:right;color:#FBBF24" oninput="calcBiTotals()"/>
       <button onclick="this.parentElement.remove();calcBiTotals()" style="background:none;border:1px solid #991b1b;color:#F87171;border-radius:5px;padding:4px 8px;cursor:pointer;font-size:.8rem">✕</button>
     `;
     document.getElementById('bi-items').appendChild(row);
