@@ -577,7 +577,7 @@
             <div><label style="font-size:.7rem;color:#64748B">Invoice No.</label><input id="inv-number" placeholder="Auto" style="width:100%;margin-top:4px;background:#0F172A;border:1px solid #334155;border-radius:6px;padding:8px;color:#CBD5E1;font-size:.83rem"/></div>
             <div><label style="font-size:.7rem;color:#64748B">Date</label><input id="inv-date" type="date" style="width:100%;margin-top:4px;background:#0F172A;border:1px solid #334155;border-radius:6px;padding:8px;color:#CBD5E1;font-size:.83rem"/></div>
             <div><label style="font-size:.7rem;color:#64748B">Due Date</label><input id="inv-due" type="date" style="width:100%;margin-top:4px;background:#0F172A;border:1px solid #334155;border-radius:6px;padding:8px;color:#CBD5E1;font-size:.83rem"/></div>
-            <div><label style="font-size:.7rem;color:#64748B">Our GSTIN</label><input id="inv-gstin-self" placeholder="GSTIN" style="width:100%;margin-top:4px;background:#0F172A;border:1px solid #334155;border-radius:6px;padding:8px;color:#CBD5E1;font-size:.83rem"/></div>
+            <div><label style="font-size:.7rem;color:#64748B">Our GSTIN</label><input id="inv-gstin-self" value="09TULPS3880J1ZB" style="width:100%;margin-top:4px;background:#0F172A;border:1px solid #334155;border-radius:6px;padding:8px;color:#CBD5E1;font-size:.83rem"/></div>
           </div>
           <div style="margin-top:10px"><label style="font-size:.7rem;color:#64748B">Delivery Notes</label><input id="inv-delivery-notes" placeholder="e.g. Daily delivery 6–8 AM, Vrindavan Colony" style="width:100%;margin-top:4px;background:#0F172A;border:1px solid #334155;border-radius:6px;padding:8px;color:#CBD5E1;font-size:.83rem"/></div>
         </div>
@@ -594,7 +594,8 @@
                 <th style="padding:8px;text-align:left;color:#64748B;font-weight:600;font-size:.68rem">PRODUCT</th>
                 <th style="padding:8px;color:#64748B;font-weight:600;font-size:.68rem">HSN</th>
                 <th style="padding:8px;color:#64748B;font-weight:600;font-size:.68rem">QTY</th>
-                <th style="padding:8px;color:#64748B;font-weight:600;font-size:.68rem">RATE (₹)</th>
+                <th style="padding:8px;color:#64748B;font-weight:600;font-size:.68rem">MRP (₹ incl. GST)</th>
+                <th style="padding:8px;color:#F59E0B;font-weight:600;font-size:.68rem">DISC %</th>
                 <th style="padding:8px;color:#64748B;font-weight:600;font-size:.68rem">GST %</th>
                 <th style="padding:8px;color:#64748B;font-weight:600;font-size:.68rem;text-align:right">AMOUNT</th>
                 <th style="padding:8px"></th>
@@ -1475,6 +1476,7 @@
     if (name === 'beatplans') { loadSalesReps(); document.getElementById('bp-month-select').value = new Date().toISOString().slice(0,7); }
     if (name === 'salesdash') loadSalesDash();
     if (name === 'home') loadHomeStats();
+    if (name === 'invoice') initInvoiceTab();
   }
 
   function switchTabByName(name) {
@@ -3355,11 +3357,20 @@ function addInvRow(){
     <td><input id="inv-hsn-${idx}" style="${iStyle()}" placeholder="HSN"/></td>
     <td><input id="inv-qty-${idx}" type="number" min="1" value="1" style="${iStyle()}" oninput="calcInvRow(${idx})"/></td>
     <td><input id="inv-rate-${idx}" type="number" min="0" value="0" style="${iStyle()}" oninput="calcInvRow(${idx})"/></td>
+    <td><input id="inv-disc-${idx}" type="number" min="0" max="100" value="0" style="${iStyle('#92400e')}" oninput="calcInvRow(${idx})"/></td>
     <td><input id="inv-gst-${idx}" type="number" min="0" value="5" style="${iStyle()}" oninput="calcInvRow(${idx})"/></td>
     <td id="inv-amt-${idx}" style="color:#4ADE80;font-weight:700;text-align:right;padding:4px 8px;font-size:.82rem">₹0</td>
     <td><button onclick="this.closest('tr').remove();calcInvTotal()" style="background:#7f1d1d;color:#fff;border:none;border-radius:4px;padding:3px 8px;cursor:pointer;font-size:.75rem">✕</button></td>`;
 }
-function iStyle(){return 'background:#0F172A;color:#CBD5E1;border:1px solid #334155;border-radius:6px;padding:4px 6px;width:100%;font-size:.78rem';}
+function iStyle(borderColor){return 'background:#0F172A;color:#CBD5E1;border:1px solid '+(borderColor||'#334155')+';border-radius:6px;padding:4px 6px;width:100%;font-size:.78rem';}
+function initInvoiceTab(){
+  const today = new Date().toISOString().split('T')[0];
+  const invDateEl = document.getElementById('inv-date');
+  const invDueEl  = document.getElementById('inv-due');
+  if(invDateEl && !invDateEl.value) invDateEl.value = today;
+  if(invDueEl  && !invDueEl.value)  invDueEl.value  = today;
+  if(!document.getElementById('inv-number').value) document.getElementById('inv-number').value = genInvNumber();
+}
 function fillInvRow(sel,idx){
   const p = INV_PRODUCTS[parseInt(sel.value)];
   if(!p) return;
@@ -3368,26 +3379,31 @@ function fillInvRow(sel,idx){
   document.getElementById('inv-gst-'+idx).value = p.gst;
   calcInvRow(idx);
 }
+// GST is included in MRP. base = mrp / (1 + gst/100), after discount.
 function calcInvRow(idx){
-  const qty = parseFloat(document.getElementById('inv-qty-'+idx)?.value)||0;
-  const rate = parseFloat(document.getElementById('inv-rate-'+idx)?.value)||0;
-  const gst = parseFloat(document.getElementById('inv-gst-'+idx)?.value)||0;
-  const base = qty * rate;
-  const total = base + (base * gst / 100);
+  const qty  = parseFloat(document.getElementById('inv-qty-'+idx)?.value)||0;
+  const mrp  = parseFloat(document.getElementById('inv-rate-'+idx)?.value)||0;
+  const disc = parseFloat(document.getElementById('inv-disc-'+idx)?.value)||0;
+  const gst  = parseFloat(document.getElementById('inv-gst-'+idx)?.value)||0;
+  const effRate = mrp * (1 - disc/100);          // after discount, still GST-inclusive
+  const lineTotal = qty * effRate;               // total incl. GST
   const el = document.getElementById('inv-amt-'+idx);
-  if(el) el.textContent = '₹' + total.toFixed(2);
+  if(el) el.textContent = '₹' + lineTotal.toFixed(2);
   calcInvTotal();
 }
 function calcInvTotal(){
   const rows = document.getElementById('inv-items-body').rows;
   let subtotal=0, gstTotal=0;
   for(let i=0;i<rows.length;i++){
-    const qty = parseFloat(rows[i].querySelector('input[id^="inv-qty"]')?.value)||0;
-    const rate = parseFloat(rows[i].querySelector('input[id^="inv-rate"]')?.value)||0;
-    const gst = parseFloat(rows[i].querySelector('input[id^="inv-gst"]')?.value)||0;
-    const base = qty*rate;
+    const qty  = parseFloat(rows[i].querySelector('input[id^="inv-qty"]')?.value)||0;
+    const mrp  = parseFloat(rows[i].querySelector('input[id^="inv-rate"]')?.value)||0;
+    const disc = parseFloat(rows[i].querySelector('input[id^="inv-disc"]')?.value)||0;
+    const gst  = parseFloat(rows[i].querySelector('input[id^="inv-gst"]')?.value)||0;
+    const effRate = mrp * (1 - disc/100);
+    const lineTotal = qty * effRate;
+    const base = lineTotal / (1 + gst/100);
     subtotal += base;
-    gstTotal += base*gst/100;
+    gstTotal += lineTotal - base;
   }
   document.getElementById('inv-subtotal').textContent = '₹'+subtotal.toFixed(2);
   document.getElementById('inv-gst-total').textContent = '₹'+gstTotal.toFixed(2);
@@ -3405,13 +3421,18 @@ function generateInvoicePDF(){
   let itemRows='', subtotal=0, gstTotal=0;
   for(let i=0;i<rows.length;i++){
     const name = rows[i].querySelector('select')?.options[rows[i].querySelector('select')?.selectedIndex]?.text||'Item';
-    const hsn = rows[i].querySelector('input[id^="inv-hsn"]')?.value||'';
-    const qty = parseFloat(rows[i].querySelector('input[id^="inv-qty"]')?.value)||0;
-    const rate = parseFloat(rows[i].querySelector('input[id^="inv-rate"]')?.value)||0;
-    const gst = parseFloat(rows[i].querySelector('input[id^="inv-gst"]')?.value)||0;
-    const base=qty*rate; const tax=base*gst/100; const total=base+tax;
+    const hsn  = rows[i].querySelector('input[id^="inv-hsn"]')?.value||'';
+    const qty  = parseFloat(rows[i].querySelector('input[id^="inv-qty"]')?.value)||0;
+    const mrp  = parseFloat(rows[i].querySelector('input[id^="inv-rate"]')?.value)||0;
+    const disc = parseFloat(rows[i].querySelector('input[id^="inv-disc"]')?.value)||0;
+    const gst  = parseFloat(rows[i].querySelector('input[id^="inv-gst"]')?.value)||0;
+    const effRate = mrp * (1 - disc/100);
+    const lineTotal = qty * effRate;
+    const base = lineTotal / (1 + gst/100);
+    const tax = lineTotal - base;
     subtotal+=base; gstTotal+=tax;
-    itemRows+=`<tr><td>${name}</td><td>${hsn}</td><td style="text-align:center">${qty}</td><td style="text-align:right">₹${rate.toFixed(2)}</td><td style="text-align:center">${gst}%</td><td style="text-align:right">₹${tax.toFixed(2)}</td><td style="text-align:right">₹${total.toFixed(2)}</td></tr>`;
+    const discCell = disc > 0 ? `<span style="color:#f59e0b;font-size:10px"> -${disc}%</span>` : '';
+    itemRows+=`<tr><td>${name}</td><td>${hsn}</td><td style="text-align:center">${qty}</td><td style="text-align:right">₹${mrp.toFixed(2)}${discCell}</td><td style="text-align:center">${gst}%</td><td style="text-align:right">₹${tax.toFixed(2)}</td><td style="text-align:right">₹${lineTotal.toFixed(2)}</td></tr>`;
   }
   const grand = subtotal+gstTotal;
   const invNum = v('inv-number')||genInvNumber();
