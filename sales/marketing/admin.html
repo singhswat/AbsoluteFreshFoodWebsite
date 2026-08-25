@@ -556,7 +556,26 @@
     <!-- ═══════════ INVOICE ═══════════ -->
     <div id="tab-invoice" style="display:none;padding:16px">
       <div style="max-width:760px;margin:0 auto">
-        <div style="font-size:1.1rem;font-weight:800;color:#4ADE80;margin-bottom:20px">🧾 Generate Invoice</div>
+
+        <!-- View toggle -->
+        <div style="display:flex;gap:8px;margin-bottom:18px">
+          <button id="inv-view-new" onclick="showInvView('new')" style="flex:1;padding:10px;background:#1B5224;color:#4ADE80;border:1px solid #166534;border-radius:8px;font-weight:700;font-size:.83rem;cursor:pointer">🧾 New Invoice</button>
+          <button id="inv-view-history" onclick="showInvView('history')" style="flex:1;padding:10px;background:#1E293B;color:#64748B;border:1px solid #334155;border-radius:8px;font-weight:700;font-size:.83rem;cursor:pointer">📋 Past Invoices & Reconciliation</button>
+        </div>
+
+        <!-- ── NEW INVOICE FORM ── -->
+        <div id="inv-form-section">
+
+        <!-- Customer search -->
+        <div style="background:#0c2340;border:1px solid #1e3a5f;border-radius:10px;padding:12px 14px;margin-bottom:14px;position:relative">
+          <div style="font-size:.7rem;color:#7DD3FC;font-weight:700;margin-bottom:6px">🔍 Search Past Customer (auto-fill)</div>
+          <div style="display:flex;gap:8px">
+            <input id="inv-search" placeholder="Type company name or GSTIN…" oninput="searchInvCustomers(this.value)"
+              style="flex:1;background:#0F172A;border:1px solid #1e3a5f;border-radius:6px;padding:8px;color:#CBD5E1;font-size:.83rem;outline:none"/>
+            <button onclick="clearInvForm()" style="padding:8px 12px;background:#334155;color:#94A3B8;border:none;border-radius:6px;font-size:.75rem;cursor:pointer">Clear</button>
+          </div>
+          <div id="inv-search-results" style="display:none;position:absolute;left:14px;right:14px;top:72px;background:#1E293B;border:1px solid #334155;border-radius:8px;z-index:99;max-height:220px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.5)"></div>
+        </div>
 
         <!-- Company Details -->
         <div style="background:#1E293B;border:1px solid #334155;border-radius:12px;padding:16px;margin-bottom:14px">
@@ -626,6 +645,44 @@
           <a id="inv-wa-btn" href="#" target="_blank" style="flex:1;background:#25D366;color:#fff;border:none;border-radius:10px;padding:12px;font-size:.85rem;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;display:block">📲 Send on WhatsApp</a>
           <a id="inv-email-btn" href="#" style="flex:1;background:#1E3A5F;color:#93C5FD;border:1px solid #1d4ed8;border-radius:10px;padding:12px;font-size:.85rem;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;display:block">✉ Send via Email</a>
         </div>
+
+        </div><!-- end inv-form-section -->
+
+        <!-- ── PAST INVOICES & RECONCILIATION ── -->
+        <div id="inv-history-section" style="display:none">
+          <!-- Reconciliation summary -->
+          <div id="inv-recon-summary" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px"></div>
+
+          <!-- Search/filter -->
+          <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+            <input id="inv-hist-search" placeholder="Search by company or GSTIN…" oninput="loadInvHistory()" style="flex:1;min-width:180px;background:#1E293B;border:1px solid #334155;border-radius:6px;padding:8px;color:#CBD5E1;font-size:.83rem;outline:none"/>
+            <select id="inv-hist-status" onchange="loadInvHistory()" style="background:#1E293B;border:1px solid #334155;border-radius:6px;padding:8px;color:#CBD5E1;font-size:.83rem">
+              <option value="">All Status</option>
+              <option value="sent">Sent</option>
+              <option value="paid">Paid</option>
+              <option value="overdue">Overdue</option>
+              <option value="draft">Draft</option>
+            </select>
+            <button onclick="loadInvHistory()" style="padding:8px 14px;background:#334155;color:#94A3B8;border:none;border-radius:6px;font-size:.78rem;cursor:pointer">↻ Refresh</button>
+          </div>
+
+          <!-- Invoice list -->
+          <div style="background:#1E293B;border:1px solid #334155;border-radius:12px;overflow:hidden;overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:.8rem;min-width:600px">
+              <thead><tr style="background:#0F172A">
+                <th style="padding:10px;text-align:left;color:#64748B;font-size:.68rem">INV NO.</th>
+                <th style="padding:10px;text-align:left;color:#64748B;font-size:.68rem">DATE</th>
+                <th style="padding:10px;text-align:left;color:#64748B;font-size:.68rem">COMPANY</th>
+                <th style="padding:10px;text-align:left;color:#64748B;font-size:.68rem">GSTIN</th>
+                <th style="padding:10px;text-align:right;color:#64748B;font-size:.68rem">AMOUNT</th>
+                <th style="padding:10px;text-align:center;color:#64748B;font-size:.68rem">STATUS</th>
+                <th style="padding:10px;color:#64748B;font-size:.68rem">ACTIONS</th>
+              </tr></thead>
+              <tbody id="inv-hist-body"><tr><td colspan="7" style="text-align:center;padding:2rem;color:#475569">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -3415,10 +3472,202 @@ function genInvNumber(){
   return 'AFF-'+d.getFullYear().toString().slice(2)+(d.getMonth()+1).toString().padStart(2,'0')+'-'+Math.floor(Math.random()*900+100);
 }
 
-function generateInvoicePDF(){
+// ── Invoice view toggle ────────────────────────────────────────
+function showInvView(view){
+  const isNew = view === 'new';
+  document.getElementById('inv-form-section').style.display    = isNew ? 'block' : 'none';
+  document.getElementById('inv-history-section').style.display = isNew ? 'none'  : 'block';
+  document.getElementById('inv-view-new').style.background     = isNew ? '#1B5224' : '#1E293B';
+  document.getElementById('inv-view-new').style.color          = isNew ? '#4ADE80' : '#64748B';
+  document.getElementById('inv-view-new').style.borderColor    = isNew ? '#166534' : '#334155';
+  document.getElementById('inv-view-history').style.background = isNew ? '#1E293B' : '#0c2340';
+  document.getElementById('inv-view-history').style.color      = isNew ? '#64748B' : '#7DD3FC';
+  document.getElementById('inv-view-history').style.borderColor= isNew ? '#334155' : '#1e3a5f';
+  if (!isNew) loadInvHistory();
+}
+
+// ── Customer search autocomplete ───────────────────────────────
+let _invSearchTimer = null;
+async function searchInvCustomers(q){
+  const res = document.getElementById('inv-search-results');
+  if (!q || q.length < 2) { res.style.display='none'; return; }
+  clearTimeout(_invSearchTimer);
+  _invSearchTimer = setTimeout(async ()=>{
+    const { data } = await db.from('b2b_invoices')
+      .select('company_name,company_gstin,company_address,company_phone,company_email')
+      .or(`company_name.ilike.%${q}%,company_gstin.ilike.%${q}%`)
+      .order('created_at', {ascending:false})
+      .limit(20);
+    // Deduplicate by GSTIN or company_name
+    const seen = new Set();
+    const unique = (data||[]).filter(r=>{
+      const key = r.company_gstin || r.company_name;
+      if(seen.has(key)) return false;
+      seen.add(key); return true;
+    });
+    if(!unique.length){ res.style.display='none'; return; }
+    res.innerHTML = unique.map(r=>`
+      <div onclick="fillInvCustomer(${JSON.stringify(r).replace(/"/g,'&quot;')})"
+        style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #334155;transition:background .1s"
+        onmouseenter="this.style.background='#0F172A'" onmouseleave="this.style.background=''">
+        <div style="font-weight:700;color:#F1F5F9;font-size:.85rem">${r.company_name}</div>
+        <div style="font-size:.72rem;color:#64748B;margin-top:2px">${r.company_gstin||'No GSTIN'} · ${r.company_phone||''}</div>
+      </div>`).join('');
+    res.style.display = 'block';
+  }, 250);
+}
+function fillInvCustomer(r){
+  document.getElementById('inv-co-name').value  = r.company_name||'';
+  document.getElementById('inv-co-gstin').value = r.company_gstin||'';
+  document.getElementById('inv-co-addr').value  = r.company_address||'';
+  document.getElementById('inv-co-phone').value = r.company_phone||'';
+  document.getElementById('inv-co-email').value = r.company_email||'';
+  document.getElementById('inv-search').value   = r.company_name||'';
+  document.getElementById('inv-search-results').style.display = 'none';
+}
+function clearInvForm(){
+  ['inv-co-name','inv-co-gstin','inv-co-addr','inv-co-phone','inv-co-email','inv-search'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('inv-search-results').style.display='none';
+  document.getElementById('inv-items-body').innerHTML='';
+  calcInvTotal();
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('inv-date').value=today;
+  document.getElementById('inv-due').value=today;
+  document.getElementById('inv-number').value=genInvNumber();
+}
+// Close dropdown on outside click
+document.addEventListener('click', e=>{
+  if(!e.target.closest('#inv-search') && !e.target.closest('#inv-search-results')){
+    const r=document.getElementById('inv-search-results');
+    if(r) r.style.display='none';
+  }
+});
+
+// ── Save invoice to Supabase ───────────────────────────────────
+async function saveInvoiceToDB(invNum, grand, subtotal, gstTotal, items){
+  const v = id => document.getElementById(id)?.value||'';
+  const payload = {
+    invoice_number: invNum,
+    invoice_date:   v('inv-date') || new Date().toISOString().split('T')[0],
+    due_date:       v('inv-due') || null,
+    company_name:   v('inv-co-name'),
+    company_gstin:  v('inv-co-gstin') || null,
+    company_address:v('inv-co-addr') || null,
+    company_phone:  v('inv-co-phone') || null,
+    company_email:  v('inv-co-email') || null,
+    subtotal, gst_total: gstTotal, grand_total: grand,
+    items,
+    our_gstin:      v('inv-gstin-self') || '09TULPS3880J1ZB',
+    delivery_notes: v('inv-delivery-notes') || null,
+    terms:          v('inv-terms') || null,
+    status: 'sent',
+  };
+  const { error } = await db.from('b2b_invoices').insert(payload);
+  if(error) console.warn('Invoice save failed:', error.message);
+}
+
+// ── Past Invoices & Reconciliation ────────────────────────────
+async function loadInvHistory(){
+  const search = document.getElementById('inv-hist-search')?.value.trim()||'';
+  const status = document.getElementById('inv-hist-status')?.value||'';
+  let q = db.from('b2b_invoices').select('*').order('created_at',{ascending:false}).limit(200);
+  if(search) q = q.or(`company_name.ilike.%${search}%,company_gstin.ilike.%${search}%`);
+  if(status) q = q.eq('status', status);
+  const { data, error } = await q;
+  const tbody = document.getElementById('inv-hist-body');
+  if(error||!data?.length){
+    tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:2rem;color:#475569">${error?error.message:'No invoices yet. Generate your first one!'}</td></tr>`;
+    renderInvRecon([]);
+    return;
+  }
+  renderInvRecon(data);
+  const statusStyle = {
+    sent:    'background:#0c2340;color:#60A5FA',
+    paid:    'background:#052e16;color:#4ADE80',
+    overdue: 'background:#450a0a;color:#F87171',
+    draft:   'background:#1c1917;color:#78716C',
+    cancelled:'background:#1c1917;color:#78716C',
+  };
+  tbody.innerHTML = data.map(inv=>{
+    const date = inv.invoice_date ? new Date(inv.invoice_date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'2-digit'}) : '—';
+    const ss = statusStyle[inv.status]||statusStyle.sent;
+    return `<tr style="border-bottom:1px solid #0F172A">
+      <td style="padding:10px;font-weight:700;color:#4ADE80;font-family:monospace;font-size:.78rem">${inv.invoice_number}</td>
+      <td style="padding:10px;color:#94A3B8;font-size:.78rem">${date}</td>
+      <td style="padding:10px;font-weight:600;color:#F1F5F9;font-size:.82rem">${inv.company_name}</td>
+      <td style="padding:10px;color:#64748B;font-size:.75rem">${inv.company_gstin||'—'}</td>
+      <td style="padding:10px;text-align:right;font-weight:700;color:#FBBF24;font-family:monospace">₹${(+inv.grand_total).toFixed(2)}</td>
+      <td style="padding:10px;text-align:center"><span style="padding:2px 8px;border-radius:8px;font-size:.68rem;font-weight:700;${ss}">${inv.status}</span></td>
+      <td style="padding:10px;white-space:nowrap">
+        <button onclick="markInvPaid('${inv.id}','${inv.status}')" style="padding:3px 8px;border-radius:5px;border:none;background:${inv.status==='paid'?'#334155':'#052e16'};color:${inv.status==='paid'?'#64748B':'#4ADE80'};font-size:.72rem;cursor:pointer;margin-right:4px">${inv.status==='paid'?'✅ Paid':'Mark Paid'}</button>
+        <button onclick="reprintInvoice('${inv.id}')" style="padding:3px 8px;border-radius:5px;border:none;background:#0c2340;color:#60A5FA;font-size:.72rem;cursor:pointer">🖨 Reprint</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+function renderInvRecon(data){
+  const total    = data.reduce((s,r)=>s+(+r.grand_total),0);
+  const paid     = data.filter(r=>r.status==='paid').reduce((s,r)=>s+(+r.grand_total),0);
+  const pending  = data.filter(r=>r.status!=='paid'&&r.status!=='cancelled').reduce((s,r)=>s+(+r.grand_total),0);
+  document.getElementById('inv-recon-summary').innerHTML = `
+    <div style="background:#1E293B;border:1px solid #334155;border-radius:10px;padding:14px;text-align:center">
+      <div style="font-size:1.2rem;font-weight:800;color:#FBBF24;font-family:monospace">₹${fmt(total)}</div>
+      <div style="font-size:.65rem;color:#64748B;margin-top:4px">TOTAL BILLED</div>
+    </div>
+    <div style="background:#1E293B;border:1px solid #334155;border-radius:10px;padding:14px;text-align:center">
+      <div style="font-size:1.2rem;font-weight:800;color:#4ADE80;font-family:monospace">₹${fmt(paid)}</div>
+      <div style="font-size:.65rem;color:#64748B;margin-top:4px">COLLECTED</div>
+    </div>
+    <div style="background:#1E293B;border:1px solid #334155;border-radius:10px;padding:14px;text-align:center">
+      <div style="font-size:1.2rem;font-weight:800;color:#F87171;font-family:monospace">₹${fmt(pending)}</div>
+      <div style="font-size:.65rem;color:#64748B;margin-top:4px">OUTSTANDING</div>
+    </div>`;
+}
+async function markInvPaid(id, currentStatus){
+  if(currentStatus==='paid'){ alert('Already marked as paid.'); return; }
+  const ref = prompt('Payment reference / UTR (optional):');
+  if(ref===null) return;
+  await db.from('b2b_invoices').update({ status:'paid', payment_date: new Date().toISOString().split('T')[0], payment_ref: ref||null, updated_at: new Date().toISOString() }).eq('id',id);
+  loadInvHistory();
+}
+async function reprintInvoice(id){
+  const { data: inv } = await db.from('b2b_invoices').select('*').eq('id',id).single();
+  if(!inv) return;
+  // Fill form fields and trigger PDF
+  document.getElementById('inv-co-name').value  = inv.company_name||'';
+  document.getElementById('inv-co-gstin').value = inv.company_gstin||'';
+  document.getElementById('inv-co-addr').value  = inv.company_address||'';
+  document.getElementById('inv-co-phone').value = inv.company_phone||'';
+  document.getElementById('inv-co-email').value = inv.company_email||'';
+  document.getElementById('inv-number').value   = inv.invoice_number;
+  document.getElementById('inv-date').value     = inv.invoice_date||'';
+  document.getElementById('inv-due').value      = inv.due_date||'';
+  document.getElementById('inv-delivery-notes').value = inv.delivery_notes||'';
+  document.getElementById('inv-terms').value    = inv.terms||'';
+  // Restore items
+  const tbody = document.getElementById('inv-items-body');
+  tbody.innerHTML='';
+  (inv.items||[]).forEach(item=>{
+    addInvRow();
+    const idx = tbody.rows.length-1;
+    document.getElementById('inv-hsn-'+idx).value  = item.hsn||'';
+    document.getElementById('inv-qty-'+idx).value  = item.qty||1;
+    document.getElementById('inv-rate-'+idx).value = item.mrp||item.rate||0;
+    document.getElementById('inv-disc-'+idx).value = item.disc||0;
+    document.getElementById('inv-gst-'+idx).value  = item.gst||5;
+    calcInvRow(idx);
+  });
+  showInvView('new');
+  setTimeout(()=>generateInvoicePDF(true), 300);
+}
+
+function generateInvoicePDF(skipSave){
   const v = id => document.getElementById(id)?.value||'';
   const rows = document.getElementById('inv-items-body').rows;
   let itemRows='', subtotal=0, gstTotal=0;
+  const itemsData = [];
   for(let i=0;i<rows.length;i++){
     const name = rows[i].querySelector('select')?.options[rows[i].querySelector('select')?.selectedIndex]?.text||'Item';
     const hsn  = rows[i].querySelector('input[id^="inv-hsn"]')?.value||'';
@@ -3430,12 +3679,14 @@ function generateInvoicePDF(){
     const lineTotal = qty * effRate;
     const base = lineTotal / (1 + gst/100);
     const tax = lineTotal - base;
+    itemsData.push({name, hsn, qty, mrp, disc, gst});
     subtotal+=base; gstTotal+=tax;
     const discCell = disc > 0 ? `<span style="color:#f59e0b;font-size:10px"> -${disc}%</span>` : '';
     itemRows+=`<tr><td>${name}</td><td>${hsn}</td><td style="text-align:center">${qty}</td><td style="text-align:right">₹${mrp.toFixed(2)}${discCell}</td><td style="text-align:center">${gst}%</td><td style="text-align:right">₹${tax.toFixed(2)}</td><td style="text-align:right">₹${lineTotal.toFixed(2)}</td></tr>`;
   }
   const grand = subtotal+gstTotal;
   const invNum = v('inv-number')||genInvNumber();
+  if(!skipSave) saveInvoiceToDB(invNum, grand, subtotal, gstTotal, itemsData);
   const win = window.open('','_blank');
   win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>Invoice ${invNum}</title>
   <style>
