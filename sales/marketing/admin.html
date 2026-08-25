@@ -3765,9 +3765,9 @@ function generateInvoicePDF(skipSave){
     const disc = parseFloat(rows[i].querySelector('input[id^="inv-disc"]')?.value)||0;
     const gst  = parseFloat(rows[i].querySelector('input[id^="inv-gst"]')?.value)||0;
     const effRate = mrp * (1 - disc/100);
-    const lineTotal = qty * effRate;
-    const base = lineTotal / (1 + gst/100);
-    const tax = lineTotal - base;
+    const base = qty * effRate;          // ex-GST subtotal
+    const tax = base * (gst / 100);     // GST on top (buyer pays)
+    const lineTotal = base + tax;        // total billed to buyer
     itemsData.push({name, hsn, qty, mrp, disc, gst});
     subtotal+=base; gstTotal+=tax;
     const discCell = disc > 0 ? `<span style="color:#f59e0b;font-size:10px"> -${disc}%</span>` : '';
