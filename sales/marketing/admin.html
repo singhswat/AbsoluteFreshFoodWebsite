@@ -602,6 +602,23 @@
             <div><label style="font-size:.7rem;color:#64748B">Due Date</label><input id="inv-due" type="date" style="width:100%;margin-top:4px;background:#0F172A;border:1px solid #334155;border-radius:6px;padding:8px;color:#CBD5E1;font-size:.83rem"/></div>
             <div><label style="font-size:.7rem;color:#64748B">Our GSTIN</label><input id="inv-gstin-self" value="09TULPS3880J1ZB" style="width:100%;margin-top:4px;background:#0F172A;border:1px solid #334155;border-radius:6px;padding:8px;color:#CBD5E1;font-size:.83rem"/></div>
           </div>
+          <!-- GST responsibility toggle -->
+          <div style="margin-top:12px;background:#0F172A;border:1px solid #334155;border-radius:8px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+            <div>
+              <div style="font-size:.75rem;font-weight:700;color:#CBD5E1">GST Responsibility</div>
+              <div id="inv-gst-mode-label" style="font-size:.68rem;color:#64748B;margin-top:2px">Buyer pays GST on top of base rate</div>
+            </div>
+            <div style="display:flex;gap:6px">
+              <button id="inv-gst-buyer-btn" onclick="setGSTMode('buyer')"
+                style="padding:6px 14px;border-radius:6px;border:none;background:#1e3a5f;color:#60A5FA;font-size:.75rem;font-weight:700;cursor:pointer">
+                Buyer Pays GST
+              </button>
+              <button id="inv-gst-seller-btn" onclick="setGSTMode('seller')"
+                style="padding:6px 14px;border-radius:6px;border:1px solid #334155;background:transparent;color:#475569;font-size:.75rem;font-weight:700;cursor:pointer">
+                We Absorb GST
+              </button>
+            </div>
+          </div>
           <div style="margin-top:10px"><label style="font-size:.7rem;color:#64748B">Delivery Notes</label><input id="inv-delivery-notes" placeholder="e.g. Daily delivery 6–8 AM, Vrindavan Colony" style="width:100%;margin-top:4px;background:#0F172A;border:1px solid #334155;border-radius:6px;padding:8px;color:#CBD5E1;font-size:.83rem"/></div>
         </div>
 
@@ -617,7 +634,7 @@
                 <th style="padding:8px;text-align:left;color:#64748B;font-weight:600;font-size:.68rem">PRODUCT</th>
                 <th style="padding:8px;color:#64748B;font-weight:600;font-size:.68rem">HSN</th>
                 <th style="padding:8px;color:#64748B;font-weight:600;font-size:.68rem">QTY</th>
-                <th style="padding:8px;color:#64748B;font-weight:600;font-size:.68rem">MRP (₹ incl. GST)</th>
+                <th id="inv-rate-col-hdr" style="padding:8px;color:#64748B;font-weight:600;font-size:.68rem">RATE (₹ excl. GST)</th>
                 <th style="padding:8px;color:#F59E0B;font-weight:600;font-size:.68rem">DISC %</th>
                 <th style="padding:8px;color:#64748B;font-weight:600;font-size:.68rem">GST %</th>
                 <th style="padding:8px;color:#64748B;font-weight:600;font-size:.68rem;text-align:right">AMOUNT</th>
@@ -3433,6 +3450,26 @@ function addInvRow(){
     <td id="inv-amt-${idx}" style="color:#4ADE80;font-weight:700;text-align:right;padding:4px 8px;font-size:.82rem">₹0</td>
     <td><button onclick="this.closest('tr').remove();calcInvTotal()" style="background:#7f1d1d;color:#fff;border:none;border-radius:4px;padding:3px 8px;cursor:pointer;font-size:.75rem">✕</button></td>`;
 }
+let _gstMode = 'buyer'; // 'buyer' = GST added on top | 'seller' = GST included in rate
+function setGSTMode(mode){
+  _gstMode = mode;
+  const buyerBtn  = document.getElementById('inv-gst-buyer-btn');
+  const sellerBtn = document.getElementById('inv-gst-seller-btn');
+  const lbl       = document.getElementById('inv-gst-mode-label');
+  const hdr       = document.getElementById('inv-rate-col-hdr');
+  if(mode === 'buyer'){
+    buyerBtn.style.background  = '#1e3a5f'; buyerBtn.style.color  = '#60A5FA'; buyerBtn.style.border = 'none';
+    sellerBtn.style.background = 'transparent'; sellerBtn.style.color = '#475569'; sellerBtn.style.border = '1px solid #334155';
+    lbl.textContent = 'Buyer pays GST on top of base rate (standard B2B)';
+    if(hdr) hdr.textContent = 'RATE (₹ excl. GST)';
+  } else {
+    sellerBtn.style.background = '#2d1b00'; sellerBtn.style.color  = '#FBBF24'; sellerBtn.style.border = '1px solid #92400e';
+    buyerBtn.style.background  = 'transparent'; buyerBtn.style.color = '#475569'; buyerBtn.style.border = '1px solid #334155';
+    lbl.textContent = 'We absorb GST — MRP is all-inclusive (GST back-calculated)';
+    if(hdr) hdr.textContent = 'MRP (₹ incl. GST)';
+  }
+  calcInvTotal();
+}
 function iStyle(borderColor){return 'background:#0F172A;color:#CBD5E1;border:1px solid '+(borderColor||'#334155')+';border-radius:6px;padding:4px 6px;width:100%;font-size:.78rem';}
 function initInvoiceTab(){
   const today = new Date().toISOString().split('T')[0];
@@ -3450,14 +3487,20 @@ function fillInvRow(sel,idx){
   document.getElementById('inv-gst-'+idx).value = p.gst;
   calcInvRow(idx);
 }
-// GST is included in MRP. base = mrp / (1 + gst/100), after discount.
 function calcInvRow(idx){
   const qty  = parseFloat(document.getElementById('inv-qty-'+idx)?.value)||0;
-  const mrp  = parseFloat(document.getElementById('inv-rate-'+idx)?.value)||0;
+  const rate = parseFloat(document.getElementById('inv-rate-'+idx)?.value)||0;
   const disc = parseFloat(document.getElementById('inv-disc-'+idx)?.value)||0;
   const gst  = parseFloat(document.getElementById('inv-gst-'+idx)?.value)||0;
-  const effRate = mrp * (1 - disc/100);          // after discount, still GST-inclusive
-  const lineTotal = qty * effRate;               // total incl. GST
+  const effRate = rate * (1 - disc/100);
+  let lineTotal;
+  if(_gstMode === 'seller'){
+    // Rate is MRP inclusive — total = qty × effRate (GST inside)
+    lineTotal = qty * effRate;
+  } else {
+    // Rate is base excl. GST — total = qty × effRate × (1 + gst/100)
+    lineTotal = qty * effRate * (1 + gst/100);
+  }
   const el = document.getElementById('inv-amt-'+idx);
   if(el) el.textContent = '₹' + lineTotal.toFixed(2);
   calcInvTotal();
@@ -3467,18 +3510,26 @@ function calcInvTotal(){
   let subtotal=0, gstTotal=0;
   for(let i=0;i<rows.length;i++){
     const qty  = parseFloat(rows[i].querySelector('input[id^="inv-qty"]')?.value)||0;
-    const mrp  = parseFloat(rows[i].querySelector('input[id^="inv-rate"]')?.value)||0;
+    const rate = parseFloat(rows[i].querySelector('input[id^="inv-rate"]')?.value)||0;
     const disc = parseFloat(rows[i].querySelector('input[id^="inv-disc"]')?.value)||0;
     const gst  = parseFloat(rows[i].querySelector('input[id^="inv-gst"]')?.value)||0;
-    const effRate = mrp * (1 - disc/100);
-    const lineTotal = qty * effRate;
-    const base = lineTotal / (1 + gst/100);
-    subtotal += base;
-    gstTotal += lineTotal - base;
+    const effRate = rate * (1 - disc/100);
+    const base = qty * effRate;
+    const tax  = base * gst / 100;
+    if(_gstMode === 'seller'){
+      // back-calculate from inclusive total
+      const lineTotal = base; // effRate already inclusive
+      const b = lineTotal / (1 + gst/100);
+      subtotal += b;
+      gstTotal += lineTotal - b;
+    } else {
+      subtotal += base;
+      gstTotal += tax;
+    }
   }
-  document.getElementById('inv-subtotal').textContent = '₹'+subtotal.toFixed(2);
+  document.getElementById('inv-subtotal').textContent  = '₹'+subtotal.toFixed(2);
   document.getElementById('inv-gst-total').textContent = '₹'+gstTotal.toFixed(2);
-  document.getElementById('inv-grand').textContent = '₹'+(subtotal+gstTotal).toFixed(2);
+  document.getElementById('inv-grand').textContent     = '₹'+(subtotal+gstTotal).toFixed(2);
 }
 
 function genInvNumber(){
