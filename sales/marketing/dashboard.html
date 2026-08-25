@@ -176,6 +176,7 @@
   <button class="tab-btn" onclick="switchTab('samples',this)">📦 Samples</button>
   <button class="tab-btn" onclick="switchTab('content',this)">📸 Content</button>
   <button class="tab-btn" onclick="switchTab('earnings',this)">💰 Earnings</button>
+  <button class="tab-btn" onclick="switchTab('invoice',this)">🧾 Invoice</button>
 </div>
 
 <!-- ═══════════════ COUPONS TAB ═══════════════ -->
@@ -243,6 +244,83 @@
     <div id="content-list">
       <div class="empty"><div class="empty-icon">📸</div><div class="empty-text">No content submitted yet.<br>Submit your first draft!</div></div>
     </div>
+  </div>
+</div>
+
+<!-- ═══════════════ INVOICE TAB ═══════════════ -->
+<div id="tab-invoice" class="content" style="display:none">
+  <!-- View toggle -->
+  <div style="display:flex;gap:8px;margin-bottom:14px">
+    <button id="rinv-new-btn" onclick="showRepInvView('new')" style="flex:1;padding:10px;border:none;border-radius:8px;font-weight:700;font-size:.85rem;background:#CC0000;color:#fff;cursor:pointer">➕ New Invoice</button>
+    <button id="rinv-hist-btn" onclick="showRepInvView('history')" style="flex:1;padding:10px;border:1px solid #E5E7EB;border-radius:8px;font-weight:700;font-size:.85rem;background:#fff;color:#374151;cursor:pointer">📋 My Invoices</button>
+  </div>
+
+  <!-- New Invoice Form -->
+  <div id="rinv-new-section">
+    <div class="section" style="border-top:3px solid #CC0000">
+      <div class="section-title" style="margin-bottom:12px;color:#CC0000">Invoice Details</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div><div style="font-size:.7rem;color:#6B7280;font-weight:600;margin-bottom:4px">INV #</div>
+          <input id="rinv-number" style="width:100%;border:1px solid #E5E7EB;border-radius:6px;padding:8px;font-size:.83rem;background:#F9FAFB" readonly/></div>
+        <div><div style="font-size:.7rem;color:#6B7280;font-weight:600;margin-bottom:4px">DATE</div>
+          <input id="rinv-date" type="date" style="width:100%;border:1px solid #E5E7EB;border-radius:6px;padding:8px;font-size:.83rem"/></div>
+      </div>
+      <div style="margin-bottom:8px"><div style="font-size:.7rem;color:#6B7280;font-weight:600;margin-bottom:4px">DUE DATE</div>
+        <input id="rinv-due" type="date" style="width:100%;border:1px solid #E5E7EB;border-radius:6px;padding:8px;font-size:.83rem"/></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title" style="margin-bottom:12px">Bill To</div>
+      <input id="rinv-search" placeholder="Search by company or GSTIN…" oninput="searchRepInvCustomers(this.value)" style="width:100%;border:1px solid #E5E7EB;border-radius:6px;padding:8px;font-size:.83rem;margin-bottom:6px"/>
+      <div id="rinv-search-results" style="background:#fff;border:1px solid #E5E7EB;border-radius:6px;display:none;max-height:160px;overflow-y:auto;margin-bottom:8px"></div>
+      <input id="rinv-co-name" placeholder="Company Name *" style="width:100%;border:1px solid #E5E7EB;border-radius:6px;padding:8px;font-size:.83rem;margin-bottom:6px"/>
+      <input id="rinv-co-gstin" placeholder="GSTIN" style="width:100%;border:1px solid #E5E7EB;border-radius:6px;padding:8px;font-size:.83rem;margin-bottom:6px"/>
+      <input id="rinv-co-addr" placeholder="Address" style="width:100%;border:1px solid #E5E7EB;border-radius:6px;padding:8px;font-size:.83rem;margin-bottom:6px"/>
+      <input id="rinv-co-phone" placeholder="Phone" style="width:100%;border:1px solid #E5E7EB;border-radius:6px;padding:8px;font-size:.83rem;margin-bottom:6px"/>
+      <input id="rinv-co-email" placeholder="Email" style="width:100%;border:1px solid #E5E7EB;border-radius:6px;padding:8px;font-size:.83rem"/>
+    </div>
+
+    <div class="section">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="section-title">Items</div>
+        <button onclick="addRepInvRow()" style="background:#CC0000;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:.78rem;font-weight:700;cursor:pointer">+ Add Item</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:.78rem">
+          <thead><tr style="background:#CC0000;color:#fff">
+            <th style="padding:8px;text-align:left">Description</th>
+            <th style="padding:8px;text-align:center;width:50px">Qty</th>
+            <th style="padding:8px;text-align:right;width:70px">Rate ₹</th>
+            <th style="padding:8px;text-align:center;width:45px">Disc%</th>
+            <th style="padding:8px;text-align:center;width:45px">GST%</th>
+            <th style="padding:8px;text-align:right;width:70px">Total</th>
+            <th style="width:24px"></th>
+          </tr></thead>
+          <tbody id="rinv-items-body"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:12px;text-align:right;font-size:.85rem">
+        <div style="color:#6B7280">Subtotal: <strong id="rinv-subtotal">₹0.00</strong></div>
+        <div style="color:#6B7280">GST: <strong id="rinv-gst-total">₹0.00</strong></div>
+        <div style="font-size:1rem;font-weight:800;color:#CC0000;margin-top:4px">Grand Total: <span id="rinv-grand">₹0.00</span></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title" style="margin-bottom:8px">Notes</div>
+      <textarea id="rinv-terms" rows="2" placeholder="Payment terms, delivery notes…" style="width:100%;border:1px solid #E5E7EB;border-radius:6px;padding:8px;font-size:.83rem;resize:none">Payment due on delivery. All disputes subject to Lucknow jurisdiction.</textarea>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-bottom:20px">
+      <button onclick="generateRepInvoicePDF()" style="flex:1;background:#CC0000;color:#fff;border:none;border-radius:10px;padding:14px;font-size:.9rem;font-weight:800;cursor:pointer">⬇ Download PDF</button>
+      <button onclick="sendRepInvoiceWhatsApp()" style="flex:1;background:#25D366;color:#fff;border:none;border-radius:10px;padding:14px;font-size:.9rem;font-weight:800;cursor:pointer">📲 WhatsApp</button>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div id="rinv-history-section" style="display:none">
+    <div id="rinv-recon-cards" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px"></div>
+    <div id="rinv-history-list"></div>
   </div>
 </div>
 
@@ -501,7 +579,7 @@
 
   // ─── Tab switching ──────────────────────────────────────────
   function switchTab(name, btn) {
-    ['coupons','samples','content','earnings'].forEach(t => {
+    ['coupons','samples','content','earnings','invoice'].forEach(t => {
       document.getElementById('tab-' + t).style.display = t === name ? 'block' : 'none';
     });
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -511,6 +589,7 @@
     if (name === 'samples') loadSamples();
     if (name === 'content') loadContent();
     if (name === 'earnings') loadEarnings();
+    if (name === 'invoice') initRepInvoiceTab();
   }
 
   // ─── Stats ──────────────────────────────────────────────────
@@ -1128,6 +1207,311 @@
     localStorage.removeItem('influencer');
     location.href = 'login.html';
   }
-</script>
+
+  // ─── REP INVOICE ─────────────────────────────────────────────
+  const RINV_PRODUCTS = [
+    {name:'Idli & Dosa Batter 2kg', hsn:'10063090', rate:250, gst:5},
+    {name:'Idli & Dosa Batter 1kg', hsn:'10063090', rate:140, gst:5},
+    {name:'Idli & Dosa Batter 500g', hsn:'10063090', rate:75, gst:5},
+    {name:'Podi Chutney 30g', hsn:'09109100', rate:45, gst:5},
+    {name:'Custom Item', hsn:'', rate:0, gst:5},
+  ];
+
+  function genRepInvNumber(){
+    const d=new Date(); const dd=String(d.getDate()).padStart(2,'0');
+    const mm=String(d.getMonth()+1).padStart(2,'0');
+    const rand=Math.floor(100+Math.random()*900);
+    return `AFF-${mm}${dd}-${rand}`;
+  }
+
+  function initRepInvoiceTab(){
+    const today=new Date().toISOString().split('T')[0];
+    const n=document.getElementById('rinv-number');
+    const dt=document.getElementById('rinv-date');
+    const du=document.getElementById('rinv-due');
+    if(n&&!n.value) n.value=genRepInvNumber();
+    if(dt&&!dt.value) dt.value=today;
+    if(du&&!du.value) du.value=today;
+    if(!document.getElementById('rinv-items-body').rows.length) addRepInvRow();
+  }
+
+  function showRepInvView(v){
+    document.getElementById('rinv-new-section').style.display=v==='new'?'block':'none';
+    document.getElementById('rinv-history-section').style.display=v==='history'?'block':'none';
+    document.getElementById('rinv-new-btn').style.background=v==='new'?'#CC0000':'#fff';
+    document.getElementById('rinv-new-btn').style.color=v==='new'?'#fff':'#374151';
+    document.getElementById('rinv-hist-btn').style.background=v==='history'?'#CC0000':'#fff';
+    document.getElementById('rinv-hist-btn').style.color=v==='history'?'#fff':'#374151';
+    if(v==='history') loadRepInvHistory();
+  }
+
+  function rinvIStyle(){ return 'background:#F9FAFB;border:1px solid #E5E7EB;border-radius:6px;padding:4px 6px;width:100%;font-size:.75rem'; }
+
+  function addRepInvRow(){
+    const tbody=document.getElementById('rinv-items-body');
+    const idx=tbody.rows.length;
+    const row=tbody.insertRow();
+    row.innerHTML=`
+      <td style="padding:4px">
+        <input id="rinv-desc-${idx}" style="${rinvIStyle()}" placeholder="Item name" list="rinv-prod-list-${idx}"/>
+        <datalist id="rinv-prod-list-${idx}">${RINV_PRODUCTS.map(p=>`<option value="${p.name}">`).join('')}</datalist>
+        <select onchange="fillRepInvRow(this,${idx})" style="background:#F9FAFB;border:none;border-top:1px solid #E5E7EB;border-radius:0 0 4px 4px;padding:2px;width:100%;font-size:.7rem;margin-top:2px;color:#6B7280">
+          <option value="">— quick fill —</option>
+          ${RINV_PRODUCTS.map((p,i)=>`<option value="${i}">${p.name}</option>`).join('')}
+        </select>
+      </td>
+      <td style="padding:4px"><input id="rinv-qty-${idx}" type="number" min="1" value="1" style="${rinvIStyle()}" oninput="calcRepInvRow(${idx})"/></td>
+      <td style="padding:4px"><input id="rinv-rate-${idx}" type="number" min="0" value="0" style="${rinvIStyle()}" oninput="calcRepInvRow(${idx})"/></td>
+      <td style="padding:4px"><input id="rinv-disc-${idx}" type="number" min="0" max="100" value="0" style="${rinvIStyle()}" oninput="calcRepInvRow(${idx})"/></td>
+      <td style="padding:4px"><input id="rinv-gst-${idx}" type="number" min="0" value="5" style="${rinvIStyle()}" oninput="calcRepInvRow(${idx})"/></td>
+      <td id="rinv-amt-${idx}" style="text-align:right;padding:4px;font-weight:700;color:#CC0000;font-size:.8rem">₹0</td>
+      <td style="padding:4px"><button onclick="this.closest('tr').remove();calcRepInvTotal()" style="background:#fee2e2;color:#CC0000;border:none;border-radius:4px;padding:3px 6px;cursor:pointer;font-size:.7rem">✕</button></td>`;
+  }
+
+  function fillRepInvRow(sel,idx){
+    const p=RINV_PRODUCTS[parseInt(sel.value)];
+    if(!p) return;
+    const d=document.getElementById('rinv-desc-'+idx);
+    if(d&&!d.value) d.value=p.name;
+    document.getElementById('rinv-rate-'+idx).value=p.rate;
+    document.getElementById('rinv-gst-'+idx).value=p.gst;
+    calcRepInvRow(idx);
+  }
+
+  function calcRepInvRow(idx){
+    const qty=parseFloat(document.getElementById('rinv-qty-'+idx)?.value)||0;
+    const rate=parseFloat(document.getElementById('rinv-rate-'+idx)?.value)||0;
+    const disc=parseFloat(document.getElementById('rinv-disc-'+idx)?.value)||0;
+    const gst=parseFloat(document.getElementById('rinv-gst-'+idx)?.value)||0;
+    const total=qty*(rate*(1-disc/100))*(1+gst/100);
+    const el=document.getElementById('rinv-amt-'+idx);
+    if(el) el.textContent='₹'+total.toFixed(2);
+    calcRepInvTotal();
+  }
+
+  function calcRepInvTotal(){
+    const rows=document.getElementById('rinv-items-body').rows;
+    let sub=0,tax=0;
+    for(let i=0;i<rows.length;i++){
+      const qty=parseFloat(rows[i].querySelector('input[id^="rinv-qty"]')?.value)||0;
+      const rate=parseFloat(rows[i].querySelector('input[id^="rinv-rate"]')?.value)||0;
+      const disc=parseFloat(rows[i].querySelector('input[id^="rinv-disc"]')?.value)||0;
+      const gst=parseFloat(rows[i].querySelector('input[id^="rinv-gst"]')?.value)||0;
+      const base=qty*rate*(1-disc/100);
+      sub+=base; tax+=base*gst/100;
+    }
+    document.getElementById('rinv-subtotal').textContent='₹'+sub.toFixed(2);
+    document.getElementById('rinv-gst-total').textContent='₹'+tax.toFixed(2);
+    document.getElementById('rinv-grand').textContent='₹'+(sub+tax).toFixed(2);
+  }
+
+  function rinvVal(id){ return document.getElementById(id)?.value||''; }
+
+  function buildRepInvHtml(invNum, itemRows, subtotal, gstTotal, grand){
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8"/>
+    <style>
+      *{margin:0;padding:0;box-sizing:border-box}
+      body{font-family:Arial,sans-serif;font-size:13px;color:#1a1a1a;padding:40px;max-width:800px;margin:0 auto}
+      .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px;padding-bottom:20px;border-bottom:3px solid #CC0000}
+      .inv-title{font-size:28px;font-weight:900;color:#CC0000;letter-spacing:2px}
+      .inv-num{font-size:12px;color:#666;margin-top:4px}
+      .party-box h4{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#999;margin-bottom:8px}
+      .party-box p{font-size:13px;line-height:1.7;color:#222}
+      .party-box strong{font-size:14px;color:#CC0000}
+      .parties{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:28px}
+      table{width:100%;border-collapse:collapse;margin-bottom:20px}
+      thead tr{background:#CC0000;color:#fff}
+      thead th{padding:10px 12px;text-align:left;font-size:11px;font-weight:700}
+      tbody tr:nth-child(even){background:#fff5f5}
+      tbody td{padding:9px 12px;border-bottom:1px solid #eee;font-size:12px}
+      .totals{margin-left:auto;width:260px}
+      .totals table{margin:0}
+      .totals td{padding:6px 12px;font-size:13px}
+      .totals tr.grand td{background:#CC0000;color:#fff;font-weight:700;font-size:15px;padding:10px 12px}
+      .terms{margin-top:20px;font-size:11px;color:#666;background:#fff5f5;padding:12px;border-radius:4px;border-left:3px solid #CC0000}
+      .footer{margin-top:36px;padding-top:14px;border-top:1px solid #ddd;display:flex;justify-content:space-between;font-size:11px;color:#999}
+    </style></head><body>
+    <div class="header">
+      <div>
+        <img src="https://sales.absolutefreshfood.com/images/aff-logo.png" alt="Absolute Fresh" style="height:55px;width:auto;display:block;margin-bottom:6px" crossorigin="anonymous"/>
+        <div style="font-size:11px;color:#555;margin-top:4px">Stone-Ground Daily · Lucknow, UP</div>
+        <div style="font-size:11px;color:#555">+91 83187 67689 | hello@absolutefresh.com</div>
+        <div style="font-size:10px;color:#999;margin-top:3px">FSSAI: 12724055000349 | GSTIN: 09TULPS3880J1ZB</div>
+        <div style="font-size:10px;color:#CC0000;margin-top:3px">Rep: ${currentInfluencer?.name||''}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="inv-title">INVOICE</div>
+        <div class="inv-num"># ${invNum}</div>
+        <div style="font-size:12px;color:#555;margin-top:8px">Date: <strong>${rinvVal('rinv-date')}</strong></div>
+        <div style="font-size:12px;color:#555">Due: <strong>${rinvVal('rinv-due')||'On delivery'}</strong></div>
+      </div>
+    </div>
+    <div class="parties">
+      <div class="party-box"><h4>Bill To</h4>
+        <p><strong>${rinvVal('rinv-co-name')||'Company Name'}</strong><br>
+        ${rinvVal('rinv-co-addr')}<br>
+        ${rinvVal('rinv-co-gstin')?'GSTIN: '+rinvVal('rinv-co-gstin'):''}<br>
+        ${rinvVal('rinv-co-phone')?'+91 '+rinvVal('rinv-co-phone'):''}
+        ${rinvVal('rinv-co-email')?'<br>'+rinvVal('rinv-co-email'):''}</p>
+      </div>
+      <div class="party-box"><h4>Delivery Details</h4><p>As per order</p></div>
+    </div>
+    <table><thead><tr>
+      <th>Description</th><th>HSN</th><th style="text-align:center">Qty</th>
+      <th style="text-align:right">Rate</th><th style="text-align:center">GST</th>
+      <th style="text-align:right">Tax</th><th style="text-align:right">Total</th>
+    </tr></thead><tbody>${itemRows}</tbody></table>
+    <div class="totals"><table>
+      <tr><td>Subtotal</td><td style="text-align:right">Rs.${subtotal.toFixed(2)}</td></tr>
+      <tr><td>GST</td><td style="text-align:right">Rs.${gstTotal.toFixed(2)}</td></tr>
+      <tr class="grand"><td>Grand Total</td><td style="text-align:right">Rs.${grand.toFixed(2)}</td></tr>
+    </table></div>
+    <div class="terms"><strong>Terms &amp; Conditions:</strong> ${rinvVal('rinv-terms')||'Payment due on delivery.'}</div>
+    <div class="footer"><div>Thank you for your business!</div><div>absolutefreshfood.com</div></div>
+    </body></html>`;
+  }
+
+  function buildRepInvItems(){
+    const rows=document.getElementById('rinv-items-body').rows;
+    let itemRows='', subtotal=0, gstTotal=0;
+    const itemsData=[];
+    for(let i=0;i<rows.length;i++){
+      const name=rows[i].querySelector('input[id^="rinv-desc"]')?.value.trim()||'Item';
+      const hsn=rows[i].querySelector('input[id^="rinv-qty"]')?.closest('tr').querySelector('input[id^="rinv-rate"]') ? '' : '';
+      const hsnEl=rows[i].cells[0]?.querySelector('input[id^="rinv-desc"]');
+      const qty=parseFloat(rows[i].querySelector('input[id^="rinv-qty"]')?.value)||0;
+      const rate=parseFloat(rows[i].querySelector('input[id^="rinv-rate"]')?.value)||0;
+      const disc=parseFloat(rows[i].querySelector('input[id^="rinv-disc"]')?.value)||0;
+      const gst=parseFloat(rows[i].querySelector('input[id^="rinv-gst"]')?.value)||0;
+      const base=qty*rate*(1-disc/100);
+      const tax=base*gst/100;
+      const total=base+tax;
+      subtotal+=base; gstTotal+=tax;
+      const discCell=disc>0?`<span style="color:#f59e0b;font-size:10px"> -${disc}%</span>`:'';
+      itemRows+=`<tr><td>${name}</td><td></td><td style="text-align:center">${qty}</td><td style="text-align:right">₹${rate.toFixed(2)}${discCell}</td><td style="text-align:center">${gst}%</td><td style="text-align:right">₹${tax.toFixed(2)}</td><td style="text-align:right">₹${total.toFixed(2)}</td></tr>`;
+      itemsData.push({name,qty,rate,disc,gst});
+    }
+    return {itemRows, subtotal, gstTotal, itemsData};
+  }
+
+  function generateRepInvoicePDF(){
+    const {itemRows, subtotal, gstTotal, itemsData}=buildRepInvItems();
+    const grand=subtotal+gstTotal;
+    const invNum=rinvVal('rinv-number')||genRepInvNumber();
+    saveRepInvoiceToDB(invNum, grand, subtotal, gstTotal, itemsData);
+    const html=buildRepInvHtml(invNum, itemRows, subtotal, gstTotal, grand);
+    const loadHtml2pdf=()=>new Promise(res=>{
+      if(window.html2pdf){res();return;}
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+      s.onload=res; document.head.appendChild(s);
+    });
+    loadHtml2pdf().then(()=>{
+      const el=document.createElement('div');
+      el.innerHTML=html; el.style.position='absolute'; el.style.left='-9999px';
+      document.body.appendChild(el);
+      html2pdf().set({margin:10,filename:`Invoice-${invNum}.pdf`,image:{type:'jpeg',quality:.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}})
+        .from(el.firstChild).save().then(()=>document.body.removeChild(el));
+    });
+  }
+
+  function sendRepInvoiceWhatsApp(){
+    const phone=rinvVal('rinv-co-phone').replace(/\D/g,'');
+    if(!phone){alert('Please enter customer phone number first.');return;}
+    const invNum=rinvVal('rinv-number')||genRepInvNumber();
+    const grand=document.getElementById('rinv-grand')?.textContent||'';
+    const msg=`Hello! 🙏\n\nPlease find Invoice *${invNum}* from *Absolute Fresh Food*.\n\n*Bill To:* ${rinvVal('rinv-co-name')}\n*Amount:* ${grand}\n*Date:* ${rinvVal('rinv-date')}\n\n_(Attach the PDF downloaded to your device)_\n\nFor queries: +91 83187 67689`;
+    generateRepInvoicePDF();
+    setTimeout(()=>window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`,'_blank'),1500);
+  }
+
+  async function saveRepInvoiceToDB(invNum, grand, subtotal, gstTotal, itemsData){
+    try{
+      await db.from('b2b_invoices').insert({
+        invoice_number:invNum,
+        invoice_date:rinvVal('rinv-date')||new Date().toISOString().split('T')[0],
+        due_date:rinvVal('rinv-due')||null,
+        company_name:rinvVal('rinv-co-name'),
+        company_gstin:rinvVal('rinv-co-gstin'),
+        company_address:rinvVal('rinv-co-addr'),
+        company_phone:rinvVal('rinv-co-phone'),
+        company_email:rinvVal('rinv-co-email'),
+        subtotal, gst_total:gstTotal, grand_total:grand,
+        items:itemsData,
+        our_gstin:'09TULPS3880J1ZB',
+        terms:rinvVal('rinv-terms'),
+        status:'sent',
+        created_by:currentInfluencer?.id,
+        rep_name:currentInfluencer?.name
+      });
+    }catch(e){console.error('Save invoice error',e);}
+  }
+
+  async function searchRepInvCustomers(q){
+    if(!q||q.length<2){document.getElementById('rinv-search-results').style.display='none';return;}
+    const {data}=await db.from('b2b_invoices')
+      .select('company_name,company_gstin,company_address,company_phone,company_email')
+      .or(`company_name.ilike.%${q}%,company_gstin.ilike.%${q}%`)
+      .order('created_at',{ascending:false}).limit(10);
+    const seen=new Set(); const unique=(data||[]).filter(r=>{
+      const k=r.company_gstin||r.company_name; if(seen.has(k))return false; seen.add(k);return true;
+    });
+    const el=document.getElementById('rinv-search-results');
+    if(!unique.length){el.style.display='none';return;}
+    el.innerHTML=unique.map(r=>`<div onclick='fillRepInvCustomer(${JSON.stringify(r)})' style="padding:8px 10px;cursor:pointer;border-bottom:1px solid #E5E7EB;font-size:.82rem;hover:background:#F9FAFB">
+      <strong>${r.company_name}</strong>${r.company_gstin?` <span style="color:#6B7280;font-size:.72rem">${r.company_gstin}</span>`:''}
+      <div style="font-size:.72rem;color:#9CA3AF">${r.company_address||''}</div>
+    </div>`).join('');
+    el.style.display='block';
+  }
+
+  function fillRepInvCustomer(r){
+    document.getElementById('rinv-co-name').value=r.company_name||'';
+    document.getElementById('rinv-co-gstin').value=r.company_gstin||'';
+    document.getElementById('rinv-co-addr').value=r.company_address||'';
+    document.getElementById('rinv-co-phone').value=r.company_phone||'';
+    document.getElementById('rinv-co-email').value=r.company_email||'';
+    document.getElementById('rinv-search').value='';
+    document.getElementById('rinv-search-results').style.display='none';
+  }
+
+  async function loadRepInvHistory(){
+    const el=document.getElementById('rinv-history-list');
+    el.innerHTML='<div style="text-align:center;color:#6B7280;padding:20px">Loading…</div>';
+    const {data}=await db.from('b2b_invoices')
+      .select('*').eq('created_by',currentInfluencer?.id)
+      .order('created_at',{ascending:false}).limit(50);
+    const list=data||[];
+    const total=list.reduce((s,r)=>s+(r.grand_total||0),0);
+    const paid=list.filter(r=>r.status==='paid').reduce((s,r)=>s+(r.grand_total||0),0);
+    const out=total-paid;
+    document.getElementById('rinv-recon-cards').innerHTML=[
+      {label:'Total Billed',val:'₹'+total.toFixed(0),color:'#CC0000'},
+      {label:'Collected',val:'₹'+paid.toFixed(0),color:'#16A34A'},
+      {label:'Outstanding',val:'₹'+out.toFixed(0),color:'#D97706'}
+    ].map(c=>`<div style="background:#fff;border:1px solid #E5E7EB;border-top:3px solid ${c.color};border-radius:8px;padding:10px;text-align:center">
+      <div style="font-size:1rem;font-weight:800;color:${c.color}">${c.val}</div>
+      <div style="font-size:.65rem;color:#6B7280;margin-top:2px">${c.label}</div>
+    </div>`).join('');
+    if(!list.length){el.innerHTML='<div style="text-align:center;color:#6B7280;padding:30px">No invoices yet.</div>';return;}
+    el.innerHTML=list.map(r=>`
+      <div style="background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:12px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:6px">
+          <div><div style="font-weight:700;color:#111827;font-size:.88rem">${r.company_name}</div>
+            <div style="font-size:.72rem;color:#6B7280">#${r.invoice_number} · ${r.invoice_date}</div></div>
+          <div style="text-align:right"><div style="font-weight:800;color:#CC0000">₹${(r.grand_total||0).toFixed(2)}</div>
+            <span style="font-size:.68rem;padding:2px 8px;border-radius:10px;font-weight:600;${r.status==='paid'?'background:#D1FAE5;color:#065F46':r.status==='overdue'?'background:#FEE2E2;color:#991B1B':'background:#FEF3C7;color:#92400E'}">${r.status||'sent'}</span></div>
+        </div>
+        <div style="display:flex;gap:6px">
+          ${r.status!=='paid'?`<button onclick="markRepInvPaid('${r.id}')" style="flex:1;background:#D1FAE5;color:#065F46;border:none;border-radius:6px;padding:6px;font-size:.75rem;font-weight:600;cursor:pointer">✓ Mark Paid</button>`:''}
+        </div>
+      </div>`).join('');
+  }
+
+  async function markRepInvPaid(id){
+    await db.from('b2b_invoices').update({status:'paid',payment_date:new Date().toISOString().split('T')[0]}).eq('id',id);
+    loadRepInvHistory();
+  }
+
 </body>
 </html>
