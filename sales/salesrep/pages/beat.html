@@ -574,13 +574,15 @@
   async function loadBeatInvProducts(){
     if(beatInvProducts.length) return;
     const{data}=await db.from('products').select('name,mrp').eq('is_active',true).order('name');
-    beatInvProducts = (data||[]).map(p=>({name:p.name, hsn:'10063090', rate:parseFloat(p.mrp)||0, gst:5}));
-    beatInvProducts.push({name:'Custom Item', hsn:'', rate:0, gst:5});
+    beatInvProducts = (data||[]).map(p=>({id:p.id, name:p.name, hsn:'10063090', mrp:parseFloat(p.mrp)||0, gst:5}));
+    beatInvProducts.push({id:null, name:'Custom Item', hsn:'', mrp:0, gst:5});
   }
 
   async function openInvModal(outletId, outletName, area, phone){
     await loadBeatInvProducts();
-    beatInvOutlet = {id:outletId, name:outletName, area, phone};
+    const outletData = myOutlets.find(o=>o.id===outletId);
+    const tier = outletData?.price_tier || 4;
+    beatInvOutlet = {id:outletId, name:outletName, area, phone, tier};
     document.getElementById('inv-outlet-name').textContent = outletName + (area?' — '+area:'');
     document.getElementById('bi-phone').value = phone||'';
     document.getElementById('bi-addr').value = area||'';
@@ -596,19 +598,38 @@
   function closeInvModal(){ document.getElementById('inv-modal').classList.remove('show'); }
 
   function addBiRow(){
-    const idx = document.getElementById('bi-items').children.length;
     const opts = beatInvProducts.map((p,i)=>`<option value="${i}">${p.name}</option>`).join('');
+    const tier = beatInvOutlet.tier || 4;
     const row = document.createElement('div');
-    row.style.cssText = 'display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:6px;margin-bottom:8px;align-items:center';
+    row.style.cssText = 'display:grid;grid-template-columns:2fr 60px 80px 80px auto;gap:6px;margin-bottom:8px;align-items:center';
     row.innerHTML = `
-      <select class="finp bi-prod" style="font-size:.78rem;padding:6px" onchange="calcBiTotals()">
+      <select class="finp bi-prod" style="font-size:.78rem;padding:6px" onchange="fillBiRow(this)">
         <option value="">— Product —</option>${opts}
       </select>
+      <select class="finp bi-tier" style="font-size:.75rem;padding:6px" onchange="fillBiRow(this.closest('div').querySelector('.bi-prod'))">
+        <option value="1"${tier==1?' selected':''}>T1</option>
+        <option value="2"${tier==2?' selected':''}>T2</option>
+        <option value="3"${tier==3?' selected':''}>T3</option>
+        <option value="4"${tier==4?' selected':''}>T4</option>
+      </select>
       <input type="number" class="finp bi-qty" placeholder="Qty" min="1" value="1" style="font-size:.82rem;padding:6px;text-align:center" oninput="calcBiTotals()"/>
-      <input type="number" class="finp bi-disc" placeholder="Disc%" min="0" max="100" value="0" style="font-size:.82rem;padding:6px;text-align:center" oninput="calcBiTotals()"/>
+      <input type="number" class="finp bi-rate" placeholder="Rate" style="font-size:.82rem;padding:6px;text-align:right;color:#FBBF24" oninput="calcBiTotals()" readonly/>
       <button onclick="this.parentElement.remove();calcBiTotals()" style="background:none;border:1px solid #991b1b;color:#F87171;border-radius:5px;padding:4px 8px;cursor:pointer;font-size:.8rem">✕</button>
     `;
     document.getElementById('bi-items').appendChild(row);
+  }
+
+  function fillBiRow(prodSel){
+    const row = prodSel.closest('div');
+    const idx = parseInt(prodSel.value);
+    const p = beatInvProducts[idx];
+    const tierSel = row.querySelector('.bi-tier');
+    const t = parseInt(tierSel?.value||4);
+    if(!p || idx==='') return;
+    // Get tier price from tierPrices map, fall back to MRP
+    const tPrice = (p.id && tierPrices[p.id] && tierPrices[p.id][t]) ? tierPrices[p.id][t] : p.mrp;
+    row.querySelector('.bi-rate').value = tPrice.toFixed(2);
+    calcBiTotals();
   }
 
   function calcBiTotals(){
@@ -616,10 +637,10 @@
     document.querySelectorAll('#bi-items > div').forEach(row=>{
       const idx = parseInt(row.querySelector('.bi-prod').value);
       const p = beatInvProducts[idx];
-      if(!p || idx==='') return;
+      if(!p) return;
       const qty = parseFloat(row.querySelector('.bi-qty').value)||0;
-      const disc = parseFloat(row.querySelector('.bi-disc').value)||0;
-      const base = qty * p.rate * (1 - disc/100);
+      const rate = parseFloat(row.querySelector('.bi-rate')?.value)||0;
+      const base = qty * rate;
       const tax = base * p.gst/100;
       sub += base; gstAmt += tax;
     });
@@ -637,8 +658,9 @@
       const p = beatInvProducts[idx];
       if(!p) return null;
       const qty = parseFloat(row.querySelector('.bi-qty').value)||0;
-      const disc = parseFloat(row.querySelector('.bi-disc').value)||0;
-      return {name:p.name, hsn:p.hsn, qty, mrp:p.rate, disc, gst:p.gst};
+      const rate = parseFloat(row.querySelector('.bi-rate')?.value)||0;
+      const disc = p.mrp>0 ? Math.round((1 - rate/p.mrp)*100*10)/10 : 0;
+      return {name:p.name, hsn:p.hsn, qty, mrp:p.mrp, rate, disc, gst:p.gst};
     }).filter(Boolean);
     if(!items.length){ alert('Add at least one product.'); return; }
 
