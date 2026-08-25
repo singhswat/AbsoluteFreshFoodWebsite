@@ -11,7 +11,13 @@
   </script>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Marketing Admin — Absolute Fresh</title>
+  <title>AFF Admin</title>
+  <link rel="manifest" href="admin-manifest.json"/>
+  <meta name="theme-color" content="#0F172A"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="AFF Admin"/>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
     body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0F172A;color:#CBD5E1;min-height:100vh}
@@ -184,22 +190,35 @@
   </div>
 
   <!-- Tab Nav -->
-  <div class="tab-nav">
-    <button class="tab-btn active" onclick="switchTab('home',this)">🏠 Home</button>
-    <button class="tab-btn" onclick="switchTab('weborders',this)">🛒 Orders</button>
-    <button class="tab-btn" onclick="switchTab('coupons',this)">🎟️ Coupons</button>
-    <button class="tab-btn" onclick="switchTab('serviceareas',this)">📍 Areas</button>
-    <button class="tab-btn" onclick="switchTab('influencers',this)">👥 Influencers</button>
-    <button class="tab-btn" onclick="switchTab('campaigns',this)">📣 Campaigns</button>
-    <button class="tab-btn" onclick="switchTab('samples',this)">📦 Samples</button>
-    <button class="tab-btn" onclick="switchTab('reviews',this)">📸 Content</button>
-    <button class="tab-btn" onclick="switchTab('payouts',this)">💰 Payouts</button>
-    <button class="tab-btn" onclick="switchTab('analytics',this)">📊 Analytics</button>
-    <button class="tab-btn" onclick="switchTab('products',this)">🥬 Products</button>
-    <button class="tab-btn" onclick="switchTab('salesreps',this)">👷 Reps</button>
-    <button class="tab-btn" onclick="switchTab('beatplans',this)">🗺️ Beat Plans</button>
-    <button class="tab-btn" onclick="switchTab('salesdash',this)">📊 Sales Ops</button>
-    <button class="tab-btn" onclick="switchTab('outlets',this)">🏪 Outlets</button>
+  <div style="background:#0A0A0A;border-bottom:1px solid #1E293B;padding:0 12px">
+    <!-- Section toggle -->
+    <div style="display:flex;gap:0;border-bottom:1px solid #1E293B;margin-bottom:0">
+      <button id="section-admin-btn" onclick="showSection('admin')" style="padding:8px 20px;background:transparent;border:none;border-bottom:2px solid #22c55e;color:#22c55e;font-size:.78rem;font-weight:700;cursor:pointer;letter-spacing:.04em;text-transform:uppercase">⚙️ Admin</button>
+      <button id="section-perf-btn"  onclick="showSection('perf')"  style="padding:8px 20px;background:transparent;border:none;border-bottom:2px solid transparent;color:#475569;font-size:.78rem;font-weight:700;cursor:pointer;letter-spacing:.04em;text-transform:uppercase">📊 Performance</button>
+    </div>
+    <!-- Admin tabs -->
+    <div id="section-admin" class="tab-nav" style="border-bottom:none;padding:4px 0">
+      <button class="tab-btn active" onclick="switchTab('home',this)">🏠 Home</button>
+      <button class="tab-btn" onclick="switchTab('weborders',this)">🛒 Orders</button>
+      <button class="tab-btn" onclick="switchTab('coupons',this)">🎟️ Coupons</button>
+      <button class="tab-btn" onclick="switchTab('influencers',this)">👥 Influencers</button>
+      <button class="tab-btn" onclick="switchTab('campaigns',this)">📣 Campaigns</button>
+      <button class="tab-btn" onclick="switchTab('samples',this)">📦 Samples</button>
+      <button class="tab-btn" onclick="switchTab('reviews',this)">📸 Content</button>
+      <button class="tab-btn" onclick="switchTab('payouts',this)">💰 Payouts</button>
+      <button class="tab-btn" onclick="switchTab('products',this)">🥬 Products</button>
+      <button class="tab-btn" onclick="switchTab('salesreps',this)">👷 Reps</button>
+      <button class="tab-btn" onclick="switchTab('outlets',this)">🏪 Outlets</button>
+      <button class="tab-btn" onclick="switchTab('serviceareas',this)">📍 Areas</button>
+      <button class="tab-btn" onclick="switchTab('invoice',this)">🧾 Invoice</button>
+    </div>
+    <!-- Performance tabs -->
+    <div id="section-perf" class="tab-nav" style="border-bottom:none;padding:4px 0;display:none">
+      <button class="tab-btn" onclick="switchTab('analytics',this)">📊 Analytics</button>
+      <button class="tab-btn" onclick="switchTab('salesdash',this)">📊 Sales Ops</button>
+      <button class="tab-btn" onclick="switchTab('beatplans',this)">🗺️ Beat Plans</button>
+      <button class="tab-btn" onclick="switchTab('repperf',this)">🏆 Rep Performance</button>
+    </div>
   </div>
 
   <div class="page-wrap">
@@ -354,12 +373,37 @@
         <h3 style="color:#F1F5F9;font-size:1.1rem;margin-bottom:20px">Create Coupon</h3>
         <div style="display:flex;flex-direction:column;gap:14px">
           <div>
-            <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Code</label>
-            <input id="cpn-code" style="width:100%;background:#0F172A;border:1.5px solid #334155;color:#fff;border-radius:8px;padding:10px 12px;font-size:.95rem;text-transform:uppercase" placeholder="e.g. READY5MIN" oninput="this.value=this.value.toUpperCase()"/>
+            <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Coupon Type</label>
+            <select id="cpn-type" onchange="onCouponTypeChange()" style="width:100%;background:#0F172A;border:1.5px solid #334155;color:#fff;border-radius:8px;padding:10px 12px;font-size:.95rem">
+              <option value="standard">Standard — % Discount</option>
+              <option value="free_sample">🎁 Influencer Free Sample (100% off, 1 use)</option>
+              <option value="bogo">Buy 1 Get 1 Free</option>
+              <option value="rakhigift">🎁 Rakhi Gift — Buy 1kg + 500g Free + Podi Chutney</option>
+            </select>
           </div>
           <div>
+            <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Code</label>
+            <input id="cpn-code" style="width:100%;background:#0F172A;border:1.5px solid #334155;color:#fff;border-radius:8px;padding:10px 12px;font-size:.95rem;text-transform:uppercase" placeholder="e.g. SWATI-FREE" oninput="this.value=this.value.toUpperCase()"/>
+          </div>
+          <!-- Influencer field — shown for free_sample only -->
+          <div id="cpn-influencer-row" style="display:none">
+            <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Influencer Name</label>
+            <input id="cpn-influencer-name" style="width:100%;background:#0F172A;border:1.5px solid #7c3aed;color:#fff;border-radius:8px;padding:10px 12px;font-size:.95rem;margin-bottom:8px" placeholder="e.g. Priya Sharma"/>
+            <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Instagram Handle</label>
+            <input id="cpn-influencer-handle" style="width:100%;background:#0F172A;border:1.5px solid #7c3aed;color:#fff;border-radius:8px;padding:10px 12px;font-size:.95rem;margin-bottom:8px" placeholder="@priyasharama"/>
+            <div style="background:#1a0533;border:1px solid #7c3aed;border-radius:8px;padding:10px;font-size:.75rem;color:#c4b5fd;line-height:1.6">
+              📋 <strong>Free Sample Rules:</strong> Approved influencers only · 1 pack · Min 3 Reels · Tag @absolutefreshfood · Post within 7 days · Lucknow only · Non-transferable
+            </div>
+          </div>
+          <!-- Discount % — hidden for free_sample -->
+          <div id="cpn-discount-row">
             <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Discount %</label>
             <input id="cpn-discount" type="number" min="1" max="100" value="10" style="width:100%;background:#0F172A;border:1.5px solid #334155;color:#fff;border-radius:8px;padding:10px 12px;font-size:.95rem"/>
+          </div>
+          <!-- Max uses -->
+          <div id="cpn-maxuses-row" style="display:none">
+            <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Max Uses</label>
+            <input id="cpn-maxuses" type="number" min="1" value="1" style="width:100%;background:#0F172A;border:1.5px solid #334155;color:#fff;border-radius:8px;padding:10px 12px;font-size:.95rem"/>
           </div>
           <div>
             <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Expires On</label>
@@ -380,6 +424,40 @@
         <div style="display:flex;gap:10px;margin-top:22px">
           <button onclick="saveCoupon()" style="flex:1;background:#CC0000;color:#fff;border:none;border-radius:8px;padding:11px;font-weight:700;cursor:pointer">Save Coupon</button>
           <button onclick="document.getElementById('coupon-modal').style.display='none'" style="flex:1;background:#1E293B;color:#94A3B8;border:1px solid #334155;border-radius:8px;padding:11px;cursor:pointer">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Edit Coupon Modal ── -->
+    <div id="coupon-edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;align-items:center;justify-content:center;padding:16px">
+      <div style="background:#1E293B;border-radius:16px;padding:28px;width:100%;max-width:420px;border:1px solid #334155">
+        <h3 style="color:#F1F5F9;font-size:1.1rem;margin-bottom:4px">Edit Coupon</h3>
+        <div id="edit-cpn-code-label" style="color:#4ADE80;font-size:.8rem;font-family:monospace;margin-bottom:20px"></div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div>
+            <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Discount %</label>
+            <input id="edit-cpn-discount" type="number" min="1" max="100" style="width:100%;background:#0F172A;border:1.5px solid #334155;color:#fff;border-radius:8px;padding:10px 12px;font-size:.95rem"/>
+          </div>
+          <div>
+            <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Expires On</label>
+            <input id="edit-cpn-expires" type="date" style="width:100%;background:#0F172A;border:1.5px solid #334155;color:#fff;border-radius:8px;padding:10px 12px;font-size:.95rem"/>
+          </div>
+          <div>
+            <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Max Uses (blank = unlimited)</label>
+            <input id="edit-cpn-maxuses" type="number" min="1" style="width:100%;background:#0F172A;border:1.5px solid #334155;color:#fff;border-radius:8px;padding:10px 12px;font-size:.95rem"/>
+          </div>
+          <div>
+            <label style="color:#94A3B8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Status</label>
+            <select id="edit-cpn-status" style="width:100%;background:#0F172A;border:1.5px solid #334155;color:#fff;border-radius:8px;padding:10px 12px;font-size:.95rem">
+              <option value="active">Active</option>
+              <option value="paused">Paused</option>
+              <option value="expired">Expired</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:22px">
+          <button onclick="saveEditCoupon()" style="flex:1;background:#16A34A;color:#fff;border:none;border-radius:8px;padding:11px;font-weight:700;cursor:pointer">Save Changes</button>
+          <button onclick="document.getElementById('coupon-edit-modal').style.display='none'" style="flex:1;background:#1E293B;color:#94A3B8;border:1px solid #334155;border-radius:8px;padding:11px;cursor:pointer">Cancel</button>
         </div>
       </div>
     </div>
@@ -475,6 +553,81 @@
       </div>
     </div>
 
+    <!-- ═══════════ INVOICE ═══════════ -->
+    <div id="tab-invoice" style="display:none;padding:16px">
+      <div style="max-width:760px;margin:0 auto">
+        <div style="font-size:1.1rem;font-weight:800;color:#4ADE80;margin-bottom:20px">🧾 Generate Invoice</div>
+
+        <!-- Company Details -->
+        <div style="background:#1E293B;border:1px solid #334155;border-radius:12px;padding:16px;margin-bottom:14px">
+          <div style="font-size:.72rem;font-weight:700;color:#64748B;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px">Bill To — Company Details</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div><label style="font-size:.7rem;color:#64748B">Company Name*</label><input id="inv-co-name" placeholder="Hotel Saravana, ABC Café..." style="width:100%;margin-top:4px;background:#0F172A;border:1px solid #334155;border-radius:6px;padding:8px;color:#CBD5E1;font-size:.83rem"/></div>
+            <div><label style="font-size:.7rem;color:#64748B">GSTIN</label><input id="inv-co-gstin" placeholder="29XXXXX..." style="width:100%;margin-top:4px;background:#0F172A;border:1px solid #334155;border-radius:6px;padding:8px;color:#CBD5E1;font-size:.83rem"/></div>
+            <div style="grid-column:1/-1"><label style="font-size:.7rem;color:#64748B">Address</label><textarea id="inv-co-addr" rows="2" placeholder="Full address..." style="width:100%;margin-top:4px;background:#0F172A;border:1px solid #334155;border-radius:6px;padding:8px;color:#CBD5E1;font-size:.83rem;resize:none"></textarea></div>
+            <div><label style="font-size:.7rem;color:#64748B">Phone (WhatsApp)</label><input id="inv-co-phone" placeholder="98XXXXXXXX" style="width:100%;margin-top:4px;background:#0F172A;border:1px solid #334155;border-radius:6px;padding:8px;color:#CBD5E1;font-size:.83rem"/></div>
+            <div><label style="font-size:.7rem;color:#64748B">Email</label><input id="inv-co-email" type="email" placeholder="accounts@company.com" style="width:100%;margin-top:4px;background:#0F172A;border:1px solid #334155;border-radius:6px;padding:8px;color:#CBD5E1;font-size:.83rem"/></div>
+          </div>
+        </div>
+
+        <!-- Invoice Meta -->
+        <div style="background:#1E293B;border:1px solid #334155;border-radius:12px;padding:16px;margin-bottom:14px">
+          <div style="font-size:.72rem;font-weight:700;color:#64748B;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px">Invoice Details</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px">
+            <div><label style="font-size:.7rem;color:#64748B">Invoice No.</label><input id="inv-number" placeholder="Auto" style="width:100%;margin-top:4px;background:#0F172A;border:1px solid #334155;border-radius:6px;padding:8px;color:#CBD5E1;font-size:.83rem"/></div>
+            <div><label style="font-size:.7rem;color:#64748B">Date</label><input id="inv-date" type="date" style="width:100%;margin-top:4px;background:#0F172A;border:1px solid #334155;border-radius:6px;padding:8px;color:#CBD5E1;font-size:.83rem"/></div>
+            <div><label style="font-size:.7rem;color:#64748B">Due Date</label><input id="inv-due" type="date" style="width:100%;margin-top:4px;background:#0F172A;border:1px solid #334155;border-radius:6px;padding:8px;color:#CBD5E1;font-size:.83rem"/></div>
+            <div><label style="font-size:.7rem;color:#64748B">Our GSTIN</label><input id="inv-gstin-self" placeholder="GSTIN" style="width:100%;margin-top:4px;background:#0F172A;border:1px solid #334155;border-radius:6px;padding:8px;color:#CBD5E1;font-size:.83rem"/></div>
+          </div>
+          <div style="margin-top:10px"><label style="font-size:.7rem;color:#64748B">Delivery Notes</label><input id="inv-delivery-notes" placeholder="e.g. Daily delivery 6–8 AM, Vrindavan Colony" style="width:100%;margin-top:4px;background:#0F172A;border:1px solid #334155;border-radius:6px;padding:8px;color:#CBD5E1;font-size:.83rem"/></div>
+        </div>
+
+        <!-- Line Items -->
+        <div style="background:#1E293B;border:1px solid #334155;border-radius:12px;padding:16px;margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div style="font-size:.72rem;font-weight:700;color:#64748B;letter-spacing:.1em;text-transform:uppercase">Line Items</div>
+            <button onclick="addInvRow()" style="background:#14532d;color:#4ADE80;border:1px solid #166534;border-radius:6px;padding:5px 12px;cursor:pointer;font-size:.75rem;font-weight:700">+ Add Item</button>
+          </div>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:.78rem">
+              <thead><tr style="background:#0F172A">
+                <th style="padding:8px;text-align:left;color:#64748B;font-weight:600;font-size:.68rem">PRODUCT</th>
+                <th style="padding:8px;color:#64748B;font-weight:600;font-size:.68rem">HSN</th>
+                <th style="padding:8px;color:#64748B;font-weight:600;font-size:.68rem">QTY</th>
+                <th style="padding:8px;color:#64748B;font-weight:600;font-size:.68rem">RATE (₹)</th>
+                <th style="padding:8px;color:#64748B;font-weight:600;font-size:.68rem">GST %</th>
+                <th style="padding:8px;color:#64748B;font-weight:600;font-size:.68rem;text-align:right">AMOUNT</th>
+                <th style="padding:8px"></th>
+              </tr></thead>
+              <tbody id="inv-items-body"></tbody>
+            </table>
+          </div>
+          <!-- Totals -->
+          <div style="margin-top:16px;border-top:1px solid #334155;padding-top:12px;display:flex;justify-content:flex-end">
+            <table style="width:260px;font-size:.83rem">
+              <tr><td style="padding:4px 8px;color:#94A3B8">Subtotal</td><td id="inv-subtotal" style="text-align:right;padding:4px 8px;color:#CBD5E1">₹0.00</td></tr>
+              <tr><td style="padding:4px 8px;color:#94A3B8">GST</td><td id="inv-gst-total" style="text-align:right;padding:4px 8px;color:#CBD5E1">₹0.00</td></tr>
+              <tr style="background:#14532d;border-radius:6px"><td style="padding:8px;color:#4ADE80;font-weight:700;border-radius:6px 0 0 6px">Grand Total</td><td id="inv-grand" style="text-align:right;padding:8px;color:#4ADE80;font-weight:800;font-size:1rem;border-radius:0 6px 6px 0">₹0.00</td></tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- Terms -->
+        <div style="background:#1E293B;border:1px solid #334155;border-radius:12px;padding:16px;margin-bottom:20px">
+          <div style="font-size:.72rem;font-weight:700;color:#64748B;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">Terms & Notes</div>
+          <textarea id="inv-terms" rows="2" style="width:100%;background:#0F172A;border:1px solid #334155;border-radius:6px;padding:8px;color:#CBD5E1;font-size:.83rem;resize:none">Payment due on delivery. All disputes subject to Lucknow jurisdiction.</textarea>
+        </div>
+
+        <!-- Actions -->
+        <button onclick="generateInvoicePDF()" style="width:100%;background:#1B5224;color:#fff;border:none;border-radius:10px;padding:14px;font-size:.95rem;font-weight:800;cursor:pointer;margin-bottom:12px">⬇ Generate Invoice PDF</button>
+
+        <div id="inv-send-btns" style="display:none;gap:10px">
+          <a id="inv-wa-btn" href="#" target="_blank" style="flex:1;background:#25D366;color:#fff;border:none;border-radius:10px;padding:12px;font-size:.85rem;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;display:block">📲 Send on WhatsApp</a>
+          <a id="inv-email-btn" href="#" style="flex:1;background:#1E3A5F;color:#93C5FD;border:1px solid #1d4ed8;border-radius:10px;padding:12px;font-size:.85rem;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;display:block">✉ Send via Email</a>
+        </div>
+      </div>
+    </div>
+
     <!-- ═══════════ ANALYTICS ═══════════ -->
     <div id="tab-analytics" style="display:none">
       <div class="section-head">Revenue Attribution</div>
@@ -523,6 +676,16 @@
 
     <!-- ═══════════ WEB ORDERS ═══════════ -->
     <div id="tab-weborders" style="display:none">
+
+      <!-- Dispatch WhatsApp -->
+      <div style="background:#0F1F13;border:1px solid #1E3A22;border-radius:10px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <span style="font-size:1.2rem">📤</span>
+        <div style="flex:1">
+          <div style="font-size:.82rem;font-weight:700;color:#4ADE80">Send Dispatch Messages</div>
+          <div style="font-size:.73rem;color:#64748B;margin-top:2px">Opens WhatsApp for each rep with their tomorrow's orders + route link</div>
+        </div>
+        <button onclick="sendDispatchMessages()" style="padding:8px 18px;background:#22c55e;color:#000;border:none;border-radius:8px;font-weight:700;font-size:.82rem;cursor:pointer">Send to Reps 🚀</button>
+      </div>
 
       <!-- Cutoff setting -->
       <div style="background:#1E293B;border:1px solid #334155;border-radius:10px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
@@ -659,7 +822,8 @@
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>
         </select>
-        <span id="outlets-count" style="font-size:.78rem;color:#64748B;margin-left:auto"></span>
+        <button class="add-btn" onclick="openAddOutletModal()" style="margin-left:auto">+ Add Outlet</button>
+        <span id="outlets-count" style="font-size:.78rem;color:#64748B"></span>
       </div>
       <div class="grid-wrap">
         <table>
@@ -672,8 +836,9 @@
             <th>Avg kg/day</th>
             <th>Status</th>
             <th>Added</th>
+            <th></th>
           </tr></thead>
-          <tbody id="outlets-tbody"><tr class="empty-row"><td colspan="8">Loading…</td></tr></tbody>
+          <tbody id="outlets-tbody"><tr class="empty-row"><td colspan="9">Loading…</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -685,8 +850,8 @@
       </div>
       <p style="color:#94A3B8;font-size:.8rem;margin-bottom:12px">These are the pincodes where you currently deliver. Customers must enter a matching pincode to place an order.</p>
       <table class="tbl">
-        <thead><tr><th>Pincode</th><th>Area Name</th><th>Status</th><th>Added</th><th>Actions</th></tr></thead>
-        <tbody id="areas-tbody"><tr><td colspan="5" style="text-align:center;color:#64748B;padding:20px">Loading…</td></tr></tbody>
+        <thead><tr><th>Pincode</th><th>Area Name</th><th>Assigned Rep</th><th>Status</th><th>Added</th><th>Actions</th></tr></thead>
+        <tbody id="areas-tbody"><tr><td colspan="6" style="text-align:center;color:#64748B;padding:20px">Loading…</td></tr></tbody>
       </table>
     </div>
 
@@ -736,6 +901,12 @@
       </div>
     </div>
 
+    <!-- ═══════════ REP PERFORMANCE ═══════════ -->
+    <div id="tab-repperf" style="display:none">
+      <div class="toolbar"><button class="t-btn active" onclick="loadRepPerf()">↻ Refresh</button></div>
+      <div id="repperf-body" style="padding:12px 16px"></div>
+    </div>
+
     <!-- ═══════════ BEAT PLANS ═══════════ -->
     <div id="tab-beatplans" style="display:none">
       <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
@@ -782,6 +953,109 @@
 </div>
 
 <!-- ════ MODAL: Add / Edit Product ════ -->
+<!-- ── Outlet Edit Modal ── -->
+<div class="modal-overlay" id="outlet-edit-modal" style="display:none;align-items:center;justify-content:center">
+  <div class="sheet" style="max-width:460px;width:100%">
+    <div class="handle"></div>
+    <h3>Edit Outlet</h3>
+    <input type="hidden" id="oe-id"/>
+    <div class="sfield"><label class="slabel">Outlet Name</label><input id="oe-name" class="sinp" placeholder="Name"/></div>
+    <div class="sfield"><label class="slabel">Area</label><input id="oe-area" class="sinp" placeholder="Area / Colony"/></div>
+    <div class="sfield"><label class="slabel">Owner Name</label><input id="oe-owner" class="sinp" placeholder="Owner Name"/></div>
+    <div class="sfield"><label class="slabel">Phone</label><input id="oe-phone" class="sinp" placeholder="Phone"/></div>
+    <div class="sfield"><label class="slabel">Avg kg/day</label><input id="oe-avg" class="sinp" type="number" step="0.1" placeholder="0.0"/></div>
+    <div class="sfield"><label class="slabel">Status</label>
+      <select id="oe-status" class="sinp">
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+      </select>
+    </div>
+    <div class="sfield"><label class="slabel">Tier</label>
+      <select id="oe-tier" class="sinp">
+        <option value="gold">🥇 Gold — Super Store (≥20 kg/week)</option>
+        <option value="silver">🥈 Silver — Mid Store (10–19 kg/week)</option>
+        <option value="bronze">🥉 Bronze — Small Store (5–9 kg/week)</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button onclick="saveOutlet()" style="flex:1;padding:10px;background:#22c55e;color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer">Save</button>
+      <button onclick="document.getElementById('outlet-edit-modal').style.display='none'" style="flex:1;padding:10px;background:#1E293B;color:#94A3B8;border:none;border-radius:8px;cursor:pointer">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Add Outlet Modal ── -->
+<div class="modal-overlay" id="outlet-add-modal" style="display:none;align-items:center;justify-content:center">
+  <div class="sheet" style="max-width:460px;width:100%">
+    <div class="handle"></div>
+    <h3 style="color:#F1F5F9;margin-bottom:4px">Add Outlet</h3>
+    <div class="sheet-sub">Add a new outlet and assign a sales rep</div>
+    <div style="display:grid;gap:10px;margin-top:14px">
+      <div>
+        <label class="slabel">Outlet Name *</label>
+        <input id="oa-name" class="sinp" placeholder="e.g. Sri Ram Provision Store"/>
+      </div>
+      <div>
+        <label class="slabel">Contact Person</label>
+        <input id="oa-contact" class="sinp" placeholder="Owner name"/>
+      </div>
+      <div>
+        <label class="slabel">Phone</label>
+        <input id="oa-phone" class="sinp" placeholder="9876543210" type="tel"/>
+      </div>
+      <div>
+        <label class="slabel">Address</label>
+        <input id="oa-address" class="sinp" placeholder="Street, Area, City"/>
+      </div>
+      <div>
+        <label class="slabel">Assigned Rep</label>
+        <select id="oa-rep" class="sinp">
+          <option value="">— Unassigned —</option>
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label class="slabel">Tier</label>
+          <select id="oa-tier" class="sinp">
+            <option value="bronze">🥉 Bronze (5 kg/wk)</option>
+            <option value="silver">🥈 Silver (10 kg/wk)</option>
+            <option value="gold">🥇 Gold (20 kg/wk)</option>
+          </select>
+        </div>
+        <div>
+          <label class="slabel">Avg kg/day</label>
+          <input id="oa-avgkg" class="sinp" type="number" step="0.1" placeholder="1.5"/>
+        </div>
+      </div>
+    </div>
+    <div id="oa-err" style="background:#450a0a;border:1px solid #7f1d1d;color:#FCA5A5;border-radius:8px;padding:10px;font-size:.8rem;margin-top:10px;display:none"></div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button onclick="saveNewOutlet()" style="flex:1;padding:10px;background:#22c55e;color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer">Add Outlet</button>
+      <button onclick="document.getElementById('outlet-add-modal').style.display='none'" style="flex:1;padding:10px;background:#1E293B;color:#94A3B8;border:none;border-radius:8px;cursor:pointer">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Visit Notes Modal ── -->
+<div class="modal-overlay" id="visit-notes-modal" style="display:none;align-items:center;justify-content:center">
+  <div class="sheet" style="max-width:520px;width:100%;max-height:85vh;overflow-y:auto">
+    <div class="handle"></div>
+    <h3 style="color:#F1F5F9;margin-bottom:2px">📝 Visit Notes</h3>
+    <div id="vn-outlet-name" style="color:#94A3B8;font-size:.85rem;margin-bottom:14px"></div>
+    <!-- Add note form -->
+    <div style="background:#0f172a;border:1px solid #1e293b;border-radius:10px;padding:14px;margin-bottom:14px">
+      <label class="slabel">New Note</label>
+      <textarea id="vn-note" class="sinp" style="min-height:70px;resize:vertical" placeholder="What happened during this visit?"></textarea>
+      <label class="slabel" style="margin-top:10px">Next Action</label>
+      <input id="vn-next-action" class="sinp" placeholder="e.g. Follow up on payment next Tuesday"/>
+      <button onclick="saveVisitNote()" style="margin-top:10px;width:100%;padding:9px;background:#22c55e;color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer">+ Save Note</button>
+    </div>
+    <!-- Notes list -->
+    <div id="vn-list" style="display:flex;flex-direction:column;gap:10px"></div>
+    <button onclick="document.getElementById('visit-notes-modal').style.display='none'" style="margin-top:16px;width:100%;padding:10px;background:#1E293B;color:#94A3B8;border:none;border-radius:8px;cursor:pointer">Close</button>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-product">
   <div class="sheet">
     <div class="handle"></div>
@@ -1166,17 +1440,30 @@
     location.href = '../login.html';
   }
 
+  // ── Section toggle (Admin / Performance) ─────────────────────
+  function showSection(sec) {
+    const isAdmin = sec === 'admin';
+    document.getElementById('section-admin').style.display = isAdmin ? 'flex' : 'none';
+    document.getElementById('section-perf').style.display  = isAdmin ? 'none' : 'flex';
+    document.getElementById('section-admin-btn').style.borderBottomColor = isAdmin ? '#22c55e' : 'transparent';
+    document.getElementById('section-admin-btn').style.color = isAdmin ? '#22c55e' : '#475569';
+    document.getElementById('section-perf-btn').style.borderBottomColor  = isAdmin ? 'transparent' : '#22c55e';
+    document.getElementById('section-perf-btn').style.color  = isAdmin ? '#475569' : '#22c55e';
+  }
+
   // ── Tab switching ────────────────────────────────────────────
   function switchTab(name, btn) {
-    ['home','influencers','coupons','campaigns','samples','reviews','payouts','analytics','weborders','products','salesreps','beatplans','salesdash','serviceareas','outlets'].forEach(t => {
+    ['home','influencers','coupons','campaigns','samples','reviews','payouts','analytics','weborders','products','salesreps','beatplans','salesdash','serviceareas','outlets','repperf'].forEach(t => {
       document.getElementById('tab-' + t).style.display = t === name ? 'block' : 'none';
     });
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
 
+    if (name === 'influencers') loadInfluencers();
     if (name === 'coupons') loadCoupons();
     if (name === 'serviceareas') loadServiceAreas();
     if (name === 'outlets') loadOutlets();
+    if (name === 'repperf') loadRepPerf();
     if (name === 'campaigns') loadCampaigns();
     if (name === 'samples') loadSamples();
     if (name === 'reviews') loadContentReviews();
@@ -1312,43 +1599,201 @@
     const repId  = document.getElementById('outlets-rep-filter').value;
     const status = document.getElementById('outlets-status-filter').value;
 
-    let q = db.from('outlets').select('*, users(name)').order('created_at', { ascending: false });
+    let q = db.from('outlets').select('id,name,area,owner_name,phone,rep_id,avg_kg_day,status,tier,created_at').order('created_at', { ascending: false });
     if (repId)  q = q.eq('rep_id', repId);
     if (status) q = q.eq('status', status);
 
     const { data, error } = await q;
     const tbody = document.getElementById('outlets-tbody');
-    if (error || !data?.length) {
-      tbody.innerHTML = '<tr class="empty-row"><td colspan="8">No outlets found</td></tr>';
+    if (error) {
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="8">Error: ${error.message}</td></tr>`;
       document.getElementById('outlets-count').textContent = '';
       return;
     }
+    if (!data?.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="9">No outlets found</td></tr>';
+      document.getElementById('outlets-count').textContent = '';
+      return;
+    }
+    // Fetch rep names separately
+    const repIds = [...new Set(data.map(o => o.rep_id).filter(Boolean))];
+    const repMap = {};
+    if (repIds.length) {
+      const { data: repData } = await db.from('users').select('id,name').in('id', repIds);
+      (repData||[]).forEach(r => repMap[r.id] = r.name);
+    }
     document.getElementById('outlets-count').textContent = `${data.length} outlet${data.length!==1?'s':''}`;
+    // Cache by id for safe edit access
+    window._outletCache = {};
+    data.forEach(o => window._outletCache[o.id] = o);
     tbody.innerHTML = data.map(o => `
       <tr>
-        <td class="bold">${o.name||'—'}</td>
+        <td class="bold">${o.name||'—'} ${{gold:'🥇',silver:'🥈',bronze:'🥉'}[o.tier]||'🥉'}</td>
         <td>${o.area||'—'}</td>
         <td>${o.owner_name||'—'}</td>
         <td>${o.phone||'—'}</td>
-        <td>${o.users?.name||'—'}</td>
+        <td>${repMap[o.rep_id]||'—'}</td>
         <td class="mono">${parseFloat(o.avg_kg_day||0).toFixed(1)}</td>
         <td><span class="pill ${o.status==='active'?'pill-approved':'pill-rejected'}">${o.status||'—'}</span></td>
         <td style="font-size:.75rem;color:#64748B">${o.created_at ? new Date(o.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '—'}</td>
+        <td style="white-space:nowrap">
+          <button onclick="openEditOutlet('${o.id}')" style="padding:3px 10px;border-radius:6px;border:none;background:#1E293B;color:#94A3B8;font-size:.75rem;cursor:pointer;margin-right:4px">✏️ Edit</button>
+          <button onclick="openVisitNotes('${o.id}')" style="padding:3px 10px;border-radius:6px;border:none;background:#0f2a1a;color:#4ADE80;font-size:.75rem;cursor:pointer;margin-right:4px">📝 Notes</button>
+          <button onclick="deleteOutlet('${o.id}')" style="padding:3px 10px;border-radius:6px;border:none;background:#3D1A1A;color:#F87171;font-size:.75rem;cursor:pointer">🗑 Delete</button>
+        </td>
       </tr>`).join('');
   }
 
+  function openEditOutlet(id) {
+    const o = window._outletCache[id];
+    document.getElementById('oe-id').value     = o.id;
+    document.getElementById('oe-name').value   = o.name||'';
+    document.getElementById('oe-area').value   = o.area||'';
+    document.getElementById('oe-owner').value  = o.owner_name||'';
+    document.getElementById('oe-phone').value  = o.phone||'';
+    document.getElementById('oe-avg').value    = o.avg_kg_day||0;
+    document.getElementById('oe-status').value = o.status||'active';
+    document.getElementById('oe-tier').value   = o.tier||'bronze';
+    document.getElementById('outlet-edit-modal').style.display = 'flex';
+  }
+
+  async function saveOutlet() {
+    const id = document.getElementById('oe-id').value;
+    const updates = {
+      name:       document.getElementById('oe-name').value.trim(),
+      area:       document.getElementById('oe-area').value.trim(),
+      owner_name: document.getElementById('oe-owner').value.trim(),
+      phone:      document.getElementById('oe-phone').value.trim()||null,
+      avg_kg_day: parseFloat(document.getElementById('oe-avg').value)||0,
+      status:     document.getElementById('oe-status').value,
+      tier:       document.getElementById('oe-tier').value,
+    };
+    const { error } = await db.from('outlets').update(updates).eq('id', id);
+    if (error) { alert('Save failed: ' + error.message); return; }
+    document.getElementById('outlet-edit-modal').style.display = 'none';
+    loadOutlets();
+  }
+
+  async function deleteOutlet(id) {
+    const name = (window._outletCache[id]||{}).name || id;
+    if (!confirm(`Delete outlet "${name}"? This will also remove it from any beat plans. Cannot be undone.`)) return;
+    // Remove from beat plans first
+    const { error: bpErr } = await db.from('monthly_beat_items').delete().eq('outlet_id', id);
+    if (bpErr) { alert('Failed to remove from beat plans: ' + bpErr.message); return; }
+    const { error } = await db.from('outlets').delete().eq('id', id);
+    if (error) { alert('Delete failed: ' + error.message); return; }
+    loadOutlets();
+  }
+
+  // ── Add Outlet ───────────────────────────────────────────────
+  async function openAddOutletModal() {
+    // populate rep dropdown
+    const { data: reps } = await db.from('users').select('id,name').eq('role','sales_rep').order('name');
+    const sel = document.getElementById('oa-rep');
+    sel.innerHTML = '<option value="">— Unassigned —</option>' + (reps||[]).map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
+    // clear fields
+    ['oa-name','oa-contact','oa-phone','oa-address','oa-avgkg'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('oa-tier').value = 'bronze';
+    document.getElementById('oa-err').style.display = 'none';
+    document.getElementById('outlet-add-modal').style.display = 'flex';
+  }
+
+  async function saveNewOutlet() {
+    const name = document.getElementById('oa-name').value.trim();
+    if (!name) { const e=document.getElementById('oa-err'); e.textContent='Outlet name is required'; e.style.display='block'; return; }
+    const payload = {
+      name,
+      owner_name: document.getElementById('oa-contact').value.trim()||null,
+      phone:      document.getElementById('oa-phone').value.trim()||null,
+      area:       document.getElementById('oa-address').value.trim()||null,
+      rep_id:     document.getElementById('oa-rep').value||null,
+      tier:       document.getElementById('oa-tier').value,
+      avg_kg_day: parseFloat(document.getElementById('oa-avgkg').value)||0,
+      status:     'active',
+    };
+    const { error } = await db.from('outlets').insert(payload);
+    if (error) { const e=document.getElementById('oa-err'); e.textContent=error.message; e.style.display='block'; return; }
+    document.getElementById('outlet-add-modal').style.display = 'none';
+    loadOutlets();
+  }
+
+  // ── Visit Notes ──────────────────────────────────────────────
+  let _vnOutletId = null;
+
+  async function openVisitNotes(outletId) {
+    _vnOutletId = outletId;
+    const o = window._outletCache[outletId] || {};
+    document.getElementById('vn-outlet-name').textContent = o.name || outletId;
+    document.getElementById('vn-note').value = '';
+    document.getElementById('vn-next-action').value = '';
+    document.getElementById('visit-notes-modal').style.display = 'flex';
+    await loadVisitNotes();
+  }
+
+  async function loadVisitNotes() {
+    const list = document.getElementById('vn-list');
+    list.innerHTML = '<div style="color:#64748B;font-size:.85rem">Loading...</div>';
+    const { data, error } = await db.from('outlet_visit_notes')
+      .select('*, users(name)')
+      .eq('outlet_id', _vnOutletId)
+      .order('visited_at', { ascending: false });
+    if (error) { list.innerHTML = `<div style="color:#F87171">${error.message}</div>`; return; }
+    if (!data || !data.length) { list.innerHTML = '<div style="color:#64748B;font-size:.85rem;text-align:center;padding:20px">No visit notes yet.</div>'; return; }
+    list.innerHTML = data.map(n=>{
+      const d = new Date(n.visited_at||n.created_at);
+      const dateStr = d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric',timeZone:'Asia/Kolkata'});
+      const timeStr = d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Kolkata'});
+      return `<div style="background:#0f172a;border:1px solid #1e293b;border-radius:10px;padding:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="color:#4ADE80;font-size:.8rem;font-weight:600">${(n.users&&n.users.name)||'Admin'}</span>
+          <span style="color:#475569;font-size:.75rem">${dateStr} · ${timeStr}</span>
+        </div>
+        <div style="color:#CBD5E1;font-size:.88rem;line-height:1.5">${n.note||''}</div>
+        ${n.next_action ? `<div style="margin-top:8px;padding:8px;background:#0d2a1a;border-radius:6px;color:#86efac;font-size:.8rem">→ Next: ${n.next_action}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  async function saveVisitNote() {
+    const note = document.getElementById('vn-note').value.trim();
+    if (!note) { alert('Please write a note before saving.'); return; }
+    const next_action = document.getElementById('vn-next-action').value.trim()||null;
+    const { error } = await db.from('outlet_visit_notes').insert({
+      outlet_id: _vnOutletId,
+      note,
+      next_action,
+      visited_at: new Date().toISOString(),
+    });
+    if (error) { alert('Save failed: ' + error.message); return; }
+    document.getElementById('vn-note').value = '';
+    document.getElementById('vn-next-action').value = '';
+    await loadVisitNotes();
+  }
+
   // ── Service Areas ────────────────────────────────────────────
+  let _areaReps = [];
   async function loadServiceAreas() {
-    const { data, error } = await db.from('service_areas').select('*').order('created_at', { ascending: false });
+    const [{ data, error }, { data: reps }] = await Promise.all([
+      db.from('service_areas').select('*').order('created_at', { ascending: false }),
+      db.from('users').select('id,name').eq('is_active', true).order('name')
+    ]);
+    _areaReps = reps || [];
     const tb = document.getElementById('areas-tbody');
     if (error || !data?.length) {
-      tb.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#64748B;padding:20px">${error ? error.message : 'No service areas yet. Add your first pincode.'}</td></tr>`;
+      tb.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#64748B;padding:20px">${error ? error.message : 'No service areas yet. Add your first pincode.'}</td></tr>`;
       return;
     }
+    const repOptions = _areaReps.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
     tb.innerHTML = data.map(a => `
       <tr>
         <td style="font-weight:700;font-size:.95rem">${a.pincode}</td>
         <td>${a.area_name || '—'}</td>
+        <td>
+          <select onchange="assignAreaRep('${a.id}',this.value)" class="sinp" style="font-size:.75rem;padding:4px 8px">
+            <option value="">— Unassigned —</option>
+            ${_areaReps.map(r => `<option value="${r.id}" ${a.rep_id===r.id?'selected':''}>${r.name}</option>`).join('')}
+          </select>
+        </td>
         <td><span style="padding:3px 10px;border-radius:999px;font-size:.72rem;font-weight:600;background:${a.is_active ? '#14532d' : '#3D1A1A'};color:${a.is_active ? '#4ADE80' : '#F87171'}">${a.is_active ? 'Active' : 'Paused'}</span></td>
         <td style="color:#64748B;font-size:.78rem">${new Date(a.created_at).toLocaleDateString('en-IN')}</td>
         <td>
@@ -1356,6 +1801,10 @@
           <button onclick="deleteArea('${a.id}')" style="padding:3px 10px;border-radius:6px;border:none;background:#3D1A1A;color:#F87171;font-size:.75rem;cursor:pointer">Delete</button>
         </td>
       </tr>`).join('');
+  }
+
+  async function assignAreaRep(areaId, repId) {
+    await db.from('service_areas').update({ rep_id: repId || null }).eq('id', areaId);
   }
 
   function openAreaModal() {
@@ -1414,6 +1863,7 @@
         <td style="color:#94A3B8;font-size:.76rem">${expires}</td>
         <td>${statusPill}</td>
         <td>
+          <button class="act-btn" style="background:#1e40af22;color:#93c5fd;border-color:#1e40af" onclick="editCoupon('${c.id}')">Edit</button>
           ${c.is_welcome_coupon ? '' : `<button class="act-btn approve" onclick="setWelcomeCoupon('${c.id}')">Set Welcome</button>`}
           ${c.status === 'active'
             ? `<button class="act-btn" onclick="toggleCoupon('${c.id}','paused')">Pause</button>`
@@ -1428,6 +1878,38 @@
 
   async function toggleCoupon(id, status) {
     await db.from('coupons').update({ status, updated_at: new Date().toISOString() }).eq('id', id);
+    loadCoupons();
+  }
+
+  let _editCouponId = null;
+
+  async function editCoupon(id) {
+    const { data: c } = await db.from('coupons').select('*').eq('id', id).single();
+    if (!c) return;
+    _editCouponId = id;
+    document.getElementById('edit-cpn-code-label').textContent = c.code;
+    document.getElementById('edit-cpn-discount').value = c.discount_value || '';
+    document.getElementById('edit-cpn-expires').value = c.expires_on ? c.expires_on.split('T')[0] : '';
+    document.getElementById('edit-cpn-maxuses').value = c.max_uses || '';
+    document.getElementById('edit-cpn-status').value = c.status || 'active';
+    document.getElementById('coupon-edit-modal').style.display = 'flex';
+  }
+
+  async function saveEditCoupon() {
+    if (!_editCouponId) return;
+    const discount  = parseFloat(document.getElementById('edit-cpn-discount').value);
+    const expires   = document.getElementById('edit-cpn-expires').value;
+    const maxUses   = document.getElementById('edit-cpn-maxuses').value;
+    const status    = document.getElementById('edit-cpn-status').value;
+    const { error } = await db.from('coupons').update({
+      discount_value: isNaN(discount) ? undefined : discount,
+      expires_on:     expires ? new Date(expires).toISOString() : null,
+      max_uses:       maxUses ? parseInt(maxUses) : null,
+      status,
+      updated_at:     new Date().toISOString()
+    }).eq('id', _editCouponId);
+    if (error) { alert('Error: ' + error.message); return; }
+    document.getElementById('coupon-edit-modal').style.display = 'none';
     loadCoupons();
   }
 
@@ -1446,33 +1928,60 @@
     document.getElementById('cpn-discount').value = '10';
     document.getElementById('cpn-welcome').checked = false;
     document.getElementById('cpn-firstonly').value = 'true';
+    document.getElementById('cpn-type').value = 'standard';
+    document.getElementById('cpn-maxuses').value = '1';
+    document.getElementById('cpn-influencer-name').value = '';
+    document.getElementById('cpn-influencer-handle').value = '';
+    onCouponTypeChange();
     document.getElementById('coupon-modal').style.display = 'flex';
   }
 
+  function onCouponTypeChange() {
+    const type = document.getElementById('cpn-type').value;
+    const isSample = type === 'free_sample';
+    document.getElementById('cpn-influencer-row').style.display = isSample ? 'block' : 'none';
+    document.getElementById('cpn-discount-row').style.display = (isSample || type === 'bogo' || type === 'rakhigift') ? 'none' : 'block';
+    document.getElementById('cpn-maxuses-row').style.display = (isSample || type === 'bogo' || type === 'rakhigift') ? 'block' : 'none';
+    if (isSample) {
+      document.getElementById('cpn-discount').value = '100';
+      document.getElementById('cpn-maxuses').value = '1';
+      document.getElementById('cpn-firstonly').value = 'true';
+    }
+  }
+
   async function saveCoupon() {
-    const code = document.getElementById('cpn-code').value.trim().toUpperCase();
-    const discount = parseFloat(document.getElementById('cpn-discount').value);
+    const type    = document.getElementById('cpn-type').value;
+    const code    = document.getElementById('cpn-code').value.trim().toUpperCase();
     const expires = document.getElementById('cpn-expires').value;
-    const isWelcome = document.getElementById('cpn-welcome').checked;
-    const firstOnly = document.getElementById('cpn-firstonly').value === 'true';
+    const isWelcome  = document.getElementById('cpn-welcome').checked;
+    const firstOnly  = document.getElementById('cpn-firstonly').value === 'true';
+    const isSample   = type === 'free_sample';
+    const influencerName   = (document.getElementById('cpn-influencer-name').value || '').trim();
+    const influencerHandle = (document.getElementById('cpn-influencer-handle').value || '').trim();
+    const maxUses    = document.getElementById('cpn-maxuses').value ? parseInt(document.getElementById('cpn-maxuses').value) : null;
+    const discount   = isSample ? 100 : parseFloat(document.getElementById('cpn-discount').value);
 
-    if (!code || !discount || !expires) { alert('Please fill all fields.'); return; }
+    if (!code || !expires) { alert('Please fill all fields.'); return; }
+    if (isSample && !influencerName) { alert('Please enter the influencer name.'); return; }
 
-    // If setting as welcome coupon, clear the flag on others first
     if (isWelcome) {
       await db.from('coupons').update({ is_welcome_coupon: false }).eq('is_welcome_coupon', true);
     }
 
     const { error } = await db.from('coupons').insert({
       code,
-      discount_type: 'percentage',
+      discount_type: (type === 'bogo' || type === 'rakhigift') ? 'bogo' : 'percentage',
       discount_value: discount,
       first_order_only: firstOnly,
       times_used: 0,
       status: 'active',
       is_welcome_coupon: isWelcome,
       valid_from: new Date().toISOString(),
-      expires_on: new Date(expires).toISOString()
+      expires_on: new Date(expires).toISOString(),
+      coupon_type: type,
+      influencer_name: isSample ? influencerName : null,
+      influencer_handle: isSample ? influencerHandle : null,
+      max_uses: maxUses
     });
 
     if (error) { alert('Error: ' + error.message); return; }
@@ -1960,12 +2469,20 @@
     tbody.innerHTML = '<tr class="empty-row"><td colspan="8">Loading…</td></tr>';
 
     let query = db.from('web_orders').select('*').order('created_at', { ascending: false });
-    const today = new Date().toISOString().split('T')[0];
+    // IST = UTC+5:30 — shift boundaries so "today" means midnight-to-midnight IST
+    const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+    const nowIST = new Date(Date.now() + IST_OFFSET_MS);
+    const todayIST = nowIST.toISOString().split('T')[0];
     if (range === 'today') {
-      query = query.gte('created_at', today + 'T00:00:00').lte('created_at', today + 'T23:59:59');
+      // IST midnight = UTC 18:30 previous day
+      const startUTC = new Date(todayIST + 'T00:00:00+05:30').toISOString();
+      const endUTC   = new Date(todayIST + 'T23:59:59+05:30').toISOString();
+      query = query.gte('created_at', startUTC).lte('created_at', endUTC);
     } else if (range === 'yesterday') {
-      const y = new Date(Date.now() - 864e5).toISOString().split('T')[0];
-      query = query.gte('created_at', y + 'T00:00:00').lte('created_at', y + 'T23:59:59');
+      const yIST = new Date(Date.now() + IST_OFFSET_MS - 864e5).toISOString().split('T')[0];
+      const startUTC = new Date(yIST + 'T00:00:00+05:30').toISOString();
+      const endUTC   = new Date(yIST + 'T23:59:59+05:30').toISOString();
+      query = query.gte('created_at', startUTC).lte('created_at', endUTC);
     } else {
       query = query.limit(200);
     }
@@ -1980,7 +2497,7 @@
     updateWOStats(orders);
     tbody.innerHTML = orders.map(o => {
       const itemSummary = (o.items || []).map(i => `${i.name || i.pack || '—'}${i.qty > 1 ? ' ×'+i.qty : ''}`).join(', ') || '—';
-      const time = new Date(o.created_at).toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+      const time = new Date(o.created_at).toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', timeZone:'Asia/Kolkata' });
       const nextStatus = WO_STATUS_NEXT[o.status];
       const nextBtn = nextStatus
         ? `<button class="action-btn" onclick="advanceWOStatus('${o.id}','${nextStatus}')">${WO_STATUS_BTN[o.status]}</button>`
@@ -2088,6 +2605,78 @@
     if (error) { alert('Save failed: ' + error.message); return; }
     closeModal('modal-edit-weborder');
     loadWebOrders('today');
+  }
+
+  async function sendDispatchMessages() {
+    // Get tomorrow's date
+    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowISO = tomorrow.toISOString().split('T')[0];
+    const tomorrowLabel = tomorrow.toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'short' });
+
+    // Fetch tomorrow's active orders
+    const { data: orders, error: oErr } = await db.from('web_orders')
+      .select('*')
+      .eq('delivery_date', tomorrowISO)
+      .not('status', 'in', '("cancelled","delivered")')
+      .order('created_at');
+    if (oErr) { alert('Error fetching orders: ' + oErr.message); return; }
+    if (!orders?.length) { alert('No orders found for tomorrow (' + tomorrowLabel + ').'); return; }
+
+    // Fetch service areas with rep assignments
+    const { data: areas } = await db.from('service_areas').select('pincode,area_name,rep_id');
+    const pinToRep = {};
+    (areas||[]).forEach(a => { if (a.rep_id) pinToRep[a.pincode] = a.rep_id; });
+
+    // Fetch active reps
+    const { data: reps } = await db.from('users').select('id,name,phone').eq('is_active', true);
+    const repMap = {};
+    (reps||[]).forEach(r => repMap[r.id] = r);
+
+    // Group orders by rep
+    const repOrders = {};
+    const unassigned = [];
+    orders.forEach(o => {
+      const repId = pinToRep[o.customer_pincode];
+      if (!repId) { unassigned.push(o); return; }
+      if (!repOrders[repId]) repOrders[repId] = [];
+      repOrders[repId].push(o);
+    });
+
+    if (unassigned.length) {
+      alert(`⚠️ ${unassigned.length} order(s) have pincodes not assigned to any rep. Go to Areas tab and assign reps first.\n\nUnassigned pincodes: ${[...new Set(unassigned.map(o=>o.customer_pincode))].join(', ')}`);
+    }
+
+    const repIds = Object.keys(repOrders);
+    if (!repIds.length) { alert('No orders have assigned reps. Go to Areas tab and assign reps to pincodes first.'); return; }
+
+    // Open WhatsApp for each rep
+    let opened = 0;
+    repIds.forEach((repId, idx) => {
+      const rep = repMap[repId];
+      if (!rep?.phone) return;
+      const repOrderList = repOrders[repId];
+
+      // Format order list
+      const orderLines = repOrderList.map((o, i) => {
+        const itemSummary = (o.items||[]).map(it => `${it.name} ×${it.qty}`).join(', ');
+        return `${i+1}. ${o.customer_name}%0A   📍 ${o.customer_address}%0A   🛍 ${itemSummary} | ₹${o.total}%0A   📞 ${o.customer_phone}`;
+      }).join('%0A%0A');
+
+      // Google Maps route link
+      const stops = repOrderList.map(o => encodeURIComponent(o.customer_address + ', Lucknow')).join('/');
+      const mapsLink = `https://www.google.com/maps/dir/${stops}`;
+
+      const totalAmt = repOrderList.reduce((s,o) => s + parseFloat(o.total||0), 0);
+      const msg = `🌿 *Absolute Fresh — Delivery for ${tomorrowLabel}*%0A%0AHi ${rep.name}! Here are your ${repOrderList.length} deliveries:%0A%0A${orderLines}%0A%0A💰 Total collection: ₹${totalAmt}%0A%0A🗺️ Route: ${mapsLink}%0A%0AAll COD — collect payment at door. Reply DONE when finished. ✅`;
+
+      // Stagger to avoid popup blockers
+      setTimeout(() => {
+        window.open(`https://wa.me/91${rep.phone.replace(/\D/g,'')}?text=${msg}`, '_blank');
+      }, idx * 800);
+      opened++;
+    });
+
+    if (opened) alert(`✅ Opening WhatsApp for ${opened} rep(s). Click Send in each tab.`);
   }
 
   function saveCutoffTime() {
@@ -2332,6 +2921,7 @@
       <td>
         <button class="act-btn" onclick="openSetPassword('${r.id}','${esc(r.name)}')">Set PW</button>
         <button class="act-btn ${r.is_active ? 'danger' : 'approve'}" onclick="toggleRepActive('${r.id}',${r.is_active})">${r.is_active ? 'Deactivate' : 'Activate'}</button>
+        <button class="act-btn danger" onclick="deleteRep('${r.id}','${esc(r.name)}')">🗑 Delete</button>
       </td>
     </tr>`).join('');
   }
@@ -2380,6 +2970,13 @@
 
   async function toggleRepActive(id, current) {
     await db.from('users').update({ is_active: !current }).eq('id', id);
+    loadSalesReps();
+  }
+
+  async function deleteRep(id, name) {
+    if (!confirm(`Delete "${name}" permanently? This cannot be undone.`)) return;
+    const { error } = await db.from('users').delete().eq('id', id);
+    if (error) { alert('Delete failed: ' + error.message); return; }
     loadSalesReps();
   }
 
@@ -2666,6 +3263,250 @@
       </tr>`;
     }).join('');
   }
+
+  // ── Rep Performance ────────────────────────────────────────────
+  async function loadRepPerf() {
+    const el = document.getElementById('repperf-body');
+    el.innerHTML = '<p style="color:#64748B">Loading…</p>';
+    const { data: reps } = await db.from('users').select('id,name,phone').eq('role','sales_rep').order('name');
+    const { data: outlets } = await db.from('outlets').select('id,name,area,rep_id,avg_kg_day,tier,status').eq('status','active');
+    if (!reps?.length) { el.innerHTML = '<p style="color:#64748B">No reps found.</p>'; return; }
+
+    const TIER_TARGET = { gold: 20, silver: 10, bronze: 5 };
+    const TIER_EMOJI  = { gold: '🥇', silver: '🥈', bronze: '🥉' };
+
+    const outletsByRep = {};
+    (outlets||[]).forEach(o => {
+      if (!outletsByRep[o.rep_id]) outletsByRep[o.rep_id] = [];
+      outletsByRep[o.rep_id].push(o);
+    });
+
+    el.innerHTML = reps.map(rep => {
+      const repOutlets = outletsByRep[rep.id] || [];
+      const totalActual = repOutlets.reduce((s, o) => s + (parseFloat(o.avg_kg_day)||0) * 7, 0);
+      const totalTarget = repOutlets.reduce((s, o) => s + (TIER_TARGET[o.tier||'bronze']), 0);
+      const pct = totalTarget > 0 ? Math.min(100, Math.round(totalActual / totalTarget * 100)) : 0;
+      const barColor = pct >= 80 ? '#22c55e' : pct >= 50 ? '#f59e0b' : '#ef4444';
+
+      const outletRows = repOutlets.map(o => {
+        const actual = (parseFloat(o.avg_kg_day)||0) * 7;
+        const target = TIER_TARGET[o.tier||'bronze'];
+        const opct = target > 0 ? Math.min(100, Math.round(actual/target*100)) : 0;
+        const ocolor = opct >= 80 ? '#22c55e' : opct >= 50 ? '#f59e0b' : '#ef4444';
+        return `<tr>
+          <td style="font-size:.8rem;padding:6px 8px">${TIER_EMOJI[o.tier||'bronze']} ${o.name}</td>
+          <td style="font-size:.75rem;color:#94A3B8;padding:6px 8px">${o.area||'—'}</td>
+          <td style="font-size:.8rem;padding:6px 8px;text-align:center">${actual.toFixed(1)} kg</td>
+          <td style="font-size:.8rem;padding:6px 8px;text-align:center">${target} kg</td>
+          <td style="padding:6px 8px;min-width:80px">
+            <div style="background:#1E293B;border-radius:4px;height:6px">
+              <div style="background:${ocolor};width:${opct}%;height:6px;border-radius:4px"></div>
+            </div>
+            <div style="font-size:.65rem;color:${ocolor};margin-top:2px">${opct}%</div>
+          </td>
+        </tr>`;
+      }).join('');
+
+      return `<div style="background:#1E293B;border:1px solid #334155;border-radius:12px;margin-bottom:16px;overflow:hidden">
+        <div style="padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #334155">
+          <div style="flex:1">
+            <div style="font-weight:700;color:#F1F5F9;font-size:.95rem">${rep.name}</div>
+            <div style="font-size:.75rem;color:#64748B">${rep.phone||''} · ${repOutlets.length} outlets · ${totalActual.toFixed(1)} / ${totalTarget} kg/week</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:1.3rem;font-weight:800;color:${barColor}">${pct}%</div>
+            <div style="font-size:.65rem;color:#475569">of target</div>
+          </div>
+        </div>
+        <div style="background:#1E293B;border-radius:0;height:8px">
+          <div style="background:${barColor};width:${pct}%;height:8px;transition:width .4s"></div>
+        </div>
+        ${repOutlets.length ? `<table style="width:100%;border-collapse:collapse">
+          <thead><tr style="background:#0F172A">
+            <th style="font-size:.65rem;color:#475569;padding:6px 8px;text-align:left;font-weight:600">OUTLET</th>
+            <th style="font-size:.65rem;color:#475569;padding:6px 8px;text-align:left;font-weight:600">AREA</th>
+            <th style="font-size:.65rem;color:#475569;padding:6px 8px;text-align:center;font-weight:600">ACTUAL/WK</th>
+            <th style="font-size:.65rem;color:#475569;padding:6px 8px;text-align:center;font-weight:600">TARGET/WK</th>
+            <th style="font-size:.65rem;color:#475569;padding:6px 8px;font-weight:600">PROGRESS</th>
+          </tr></thead>
+          <tbody>${outletRows}</tbody>
+        </table>` : '<p style="padding:12px 16px;color:#475569;font-size:.8rem">No outlets assigned</p>'}
+      </div>`;
+    }).join('');
+  }
+
+// ── INVOICE TAB ──────────────────────────────────────────────
+const INV_PRODUCTS = [
+  {name:'Idli & Dosa Batter 1kg', hsn:'10063090', rate:140, gst:5},
+  {name:'Idli & Dosa Batter 500g', hsn:'10063090', rate:75, gst:5},
+  {name:'Podi Chutney 30g', hsn:'09109100', rate:45, gst:5},
+  {name:'Custom Item', hsn:'', rate:0, gst:5},
+];
+
+function addInvRow(){
+  const tbody = document.getElementById('inv-items-body');
+  const idx = tbody.rows.length;
+  const row = tbody.insertRow();
+  row.innerHTML = `
+    <td><select onchange="fillInvRow(this,${idx})" style="background:#0F172A;color:#CBD5E1;border:1px solid #334155;border-radius:6px;padding:4px;width:100%;font-size:.78rem">
+      <option value="">— Select —</option>
+      ${INV_PRODUCTS.map((p,i)=>`<option value="${i}">${p.name}</option>`).join('')}
+    </select></td>
+    <td><input id="inv-hsn-${idx}" style="${iStyle()}" placeholder="HSN"/></td>
+    <td><input id="inv-qty-${idx}" type="number" min="1" value="1" style="${iStyle()}" oninput="calcInvRow(${idx})"/></td>
+    <td><input id="inv-rate-${idx}" type="number" min="0" value="0" style="${iStyle()}" oninput="calcInvRow(${idx})"/></td>
+    <td><input id="inv-gst-${idx}" type="number" min="0" value="5" style="${iStyle()}" oninput="calcInvRow(${idx})"/></td>
+    <td id="inv-amt-${idx}" style="color:#4ADE80;font-weight:700;text-align:right;padding:4px 8px;font-size:.82rem">₹0</td>
+    <td><button onclick="this.closest('tr').remove();calcInvTotal()" style="background:#7f1d1d;color:#fff;border:none;border-radius:4px;padding:3px 8px;cursor:pointer;font-size:.75rem">✕</button></td>`;
+}
+function iStyle(){return 'background:#0F172A;color:#CBD5E1;border:1px solid #334155;border-radius:6px;padding:4px 6px;width:100%;font-size:.78rem';}
+function fillInvRow(sel,idx){
+  const p = INV_PRODUCTS[parseInt(sel.value)];
+  if(!p) return;
+  document.getElementById('inv-hsn-'+idx).value = p.hsn;
+  document.getElementById('inv-rate-'+idx).value = p.rate;
+  document.getElementById('inv-gst-'+idx).value = p.gst;
+  calcInvRow(idx);
+}
+function calcInvRow(idx){
+  const qty = parseFloat(document.getElementById('inv-qty-'+idx)?.value)||0;
+  const rate = parseFloat(document.getElementById('inv-rate-'+idx)?.value)||0;
+  const gst = parseFloat(document.getElementById('inv-gst-'+idx)?.value)||0;
+  const base = qty * rate;
+  const total = base + (base * gst / 100);
+  const el = document.getElementById('inv-amt-'+idx);
+  if(el) el.textContent = '₹' + total.toFixed(2);
+  calcInvTotal();
+}
+function calcInvTotal(){
+  const rows = document.getElementById('inv-items-body').rows;
+  let subtotal=0, gstTotal=0;
+  for(let i=0;i<rows.length;i++){
+    const qty = parseFloat(rows[i].querySelector('input[id^="inv-qty"]')?.value)||0;
+    const rate = parseFloat(rows[i].querySelector('input[id^="inv-rate"]')?.value)||0;
+    const gst = parseFloat(rows[i].querySelector('input[id^="inv-gst"]')?.value)||0;
+    const base = qty*rate;
+    subtotal += base;
+    gstTotal += base*gst/100;
+  }
+  document.getElementById('inv-subtotal').textContent = '₹'+subtotal.toFixed(2);
+  document.getElementById('inv-gst-total').textContent = '₹'+gstTotal.toFixed(2);
+  document.getElementById('inv-grand').textContent = '₹'+(subtotal+gstTotal).toFixed(2);
+}
+
+function genInvNumber(){
+  const d=new Date();
+  return 'AFF-'+d.getFullYear().toString().slice(2)+(d.getMonth()+1).toString().padStart(2,'0')+'-'+Math.floor(Math.random()*900+100);
+}
+
+function generateInvoicePDF(){
+  const v = id => document.getElementById(id)?.value||'';
+  const rows = document.getElementById('inv-items-body').rows;
+  let itemRows='', subtotal=0, gstTotal=0;
+  for(let i=0;i<rows.length;i++){
+    const name = rows[i].querySelector('select')?.options[rows[i].querySelector('select')?.selectedIndex]?.text||'Item';
+    const hsn = rows[i].querySelector('input[id^="inv-hsn"]')?.value||'';
+    const qty = parseFloat(rows[i].querySelector('input[id^="inv-qty"]')?.value)||0;
+    const rate = parseFloat(rows[i].querySelector('input[id^="inv-rate"]')?.value)||0;
+    const gst = parseFloat(rows[i].querySelector('input[id^="inv-gst"]')?.value)||0;
+    const base=qty*rate; const tax=base*gst/100; const total=base+tax;
+    subtotal+=base; gstTotal+=tax;
+    itemRows+=`<tr><td>${name}</td><td>${hsn}</td><td style="text-align:center">${qty}</td><td style="text-align:right">₹${rate.toFixed(2)}</td><td style="text-align:center">${gst}%</td><td style="text-align:right">₹${tax.toFixed(2)}</td><td style="text-align:right">₹${total.toFixed(2)}</td></tr>`;
+  }
+  const grand = subtotal+gstTotal;
+  const invNum = v('inv-number')||genInvNumber();
+  const win = window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>Invoice ${invNum}</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:Arial,sans-serif;font-size:13px;color:#1a1a1a;padding:40px;max-width:800px;margin:0 auto}
+    .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px;padding-bottom:20px;border-bottom:3px solid #1B5224}
+    .logo{font-size:22px;font-weight:900;color:#1B5224;letter-spacing:-0.5px}
+    .logo span{color:#E8A000}
+    .brand-sub{font-size:11px;color:#666;margin-top:3px}
+    .inv-meta{text-align:right}
+    .inv-title{font-size:28px;font-weight:900;color:#1B5224;letter-spacing:2px}
+    .inv-num{font-size:12px;color:#666;margin-top:4px}
+    .parties{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:28px}
+    .party-box h4{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#999;margin-bottom:8px}
+    .party-box p{font-size:13px;line-height:1.7;color:#222}
+    .party-box strong{font-size:15px;color:#1B5224}
+    table{width:100%;border-collapse:collapse;margin-bottom:20px}
+    thead tr{background:#1B5224;color:#fff}
+    thead th{padding:10px 12px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.05em}
+    tbody tr:nth-child(even){background:#f9f9f9}
+    tbody td{padding:9px 12px;border-bottom:1px solid #eee;font-size:12px}
+    .totals{margin-left:auto;width:260px}
+    .totals table{margin:0}
+    .totals td{padding:6px 12px;font-size:13px}
+    .totals tr.grand td{background:#1B5224;color:#fff;font-weight:700;font-size:15px;padding:10px 12px}
+    .footer{margin-top:40px;padding-top:16px;border-top:1px solid #ddd;display:flex;justify-content:space-between;font-size:11px;color:#999}
+    .terms{margin-top:24px;font-size:11px;color:#666;background:#f5f5f5;padding:12px;border-radius:4px}
+    .fssai{font-size:10px;color:#999;margin-top:4px}
+    @media print{body{padding:20px}button{display:none}}
+  </style></head><body>
+  <div class="header">
+    <div>
+      <div class="logo">Absolute <span>Fresh</span></div>
+      <div class="brand-sub">Stone-Ground Daily · Lucknow, UP</div>
+      <div style="font-size:11px;color:#555;margin-top:6px">📞 +91 83187 67689 &nbsp;|&nbsp; hello@absolutefresh.com</div>
+      <div class="fssai">FSSAI: 12724055000349 &nbsp;|&nbsp; GSTIN: ${v('inv-gstin-self')||'—'}</div>
+    </div>
+    <div class="inv-meta">
+      <div class="inv-title">INVOICE</div>
+      <div class="inv-num"># ${invNum}</div>
+      <div style="font-size:12px;color:#555;margin-top:8px">Date: <strong>${v('inv-date')||new Date().toLocaleDateString('en-IN')}</strong></div>
+      <div style="font-size:12px;color:#555">Due: <strong>${v('inv-due')||'On delivery'}</strong></div>
+    </div>
+  </div>
+  <div class="parties">
+    <div class="party-box">
+      <h4>Bill To</h4>
+      <p><strong>${v('inv-co-name')||'Company Name'}</strong><br>
+      ${v('inv-co-addr')||''}<br>
+      ${v('inv-co-gstin') ? 'GSTIN: '+v('inv-co-gstin') : ''}<br>
+      ${v('inv-co-phone') ? '📞 '+v('inv-co-phone') : ''}<br>
+      ${v('inv-co-email') ? '✉ '+v('inv-co-email') : ''}</p>
+    </div>
+    <div class="party-box">
+      <h4>Delivery Details</h4>
+      <p>${v('inv-delivery-notes')||'As per order'}</p>
+    </div>
+  </div>
+  <table>
+    <thead><tr>
+      <th>Description</th><th>HSN</th><th style="text-align:center">Qty</th>
+      <th style="text-align:right">Rate</th><th style="text-align:center">GST</th>
+      <th style="text-align:right">Tax Amt</th><th style="text-align:right">Total</th>
+    </tr></thead>
+    <tbody>${itemRows}</tbody>
+  </table>
+  <div class="totals">
+    <table>
+      <tr><td>Subtotal</td><td style="text-align:right">₹${subtotal.toFixed(2)}</td></tr>
+      <tr><td>GST</td><td style="text-align:right">₹${gstTotal.toFixed(2)}</td></tr>
+      <tr class="grand"><td>Grand Total</td><td style="text-align:right">₹${grand.toFixed(2)}</td></tr>
+    </table>
+  </div>
+  <div class="terms">
+    <strong>Terms & Conditions:</strong> ${v('inv-terms')||'Payment due on delivery. All disputes subject to Lucknow jurisdiction.'}
+  </div>
+  <div class="footer">
+    <div>Thank you for your business!</div>
+    <div>Absolute Fresh Food · absolutefreshfood.com</div>
+  </div>
+  <div style="margin-top:24px;text-align:center">
+    <button onclick="window.print()" style="background:#1B5224;color:#fff;border:none;padding:12px 32px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">⬇ Save / Print PDF</button>
+  </div>
+  </body></html>`);
+  win.document.close();
+
+  // WhatsApp message
+  const waMsg = `Hi! Please find attached Invoice *${invNum}* from Absolute Fresh Food.\n\nBill To: ${v('inv-co-name')}\nAmount: ₹${grand.toFixed(2)}\nDate: ${v('inv-date')||new Date().toLocaleDateString('en-IN')}\n\nFor queries: +91 83187 67689`;
+  document.getElementById('inv-wa-btn').href = `https://wa.me/91${v('inv-co-phone').replace(/\D/g,'')}?text=${encodeURIComponent(waMsg)}`;
+  document.getElementById('inv-email-btn').href = `mailto:${v('inv-co-email')}?subject=Invoice ${invNum} - Absolute Fresh Food&body=${encodeURIComponent(waMsg)}`;
+  document.getElementById('inv-send-btns').style.display='flex';
+}
 </script>
 </body>
 </html>
