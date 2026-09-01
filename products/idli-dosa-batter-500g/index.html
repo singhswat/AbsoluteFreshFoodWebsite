@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Idli Dosa Batter 500g | Absolute Fresh — Fresh Batter Lucknow</title>
-<meta name="description" content="Buy fresh stone-ground Idli & Dosa Batter 500g at ₹75. Makes 11 idlis or 6 dosas. No preservatives. Same-day delivery in Lucknow. Order on WhatsApp."/>
+<title>Complete Breakfast Kit 500g | Absolute Fresh — Batter + Podi + Peanut Chutney</title>
+<meta name="description" content="Complete South Indian Breakfast Kit 500g at ₹75 — Batter + Podi Chutney + Peanut Chutney. No preservatives. Same-day delivery in Lucknow. सब कुछ Ready, बस 5 min."/>
 <link rel="canonical" href="https://absolutefreshfood.com/products/idli-dosa-batter-500g/"/>
 <meta property="og:type" content="product"/>
 <meta property="og:url" content="https://absolutefreshfood.com/products/idli-dosa-batter-500g/"/>
@@ -16,8 +16,8 @@
 {
   "@context": "https://schema.org",
   "@type": "Product",
-  "name": "Idli & Dosa Batter 500g",
-  "description": "Fresh stone-ground Idli and Dosa Batter 500g. Made with 5 ingredients, no preservatives, naturally fermented. Delivered same day in Lucknow.",
+  "name": "Complete Breakfast Kit 500g — Batter + Podi Chutney + Peanut Chutney",
+  "description": "Complete South Indian Breakfast Kit 500g. Includes stone-ground batter, Podi Chutney and Peanut Chutney. No preservatives. Same-day delivery in Lucknow. Ready in 5 minutes.",
   "image": "https://absolutefreshfood.com/img/batter-500g.webp",
   "brand": {"@type": "Brand", "name": "Absolute Fresh Food"},
   "offers": {
@@ -72,9 +72,18 @@ nav{
 .nav-wa svg{width:16px;height:16px;fill:#fff;flex-shrink:0}
 @media(max-width:768px){
   .nav-links{display:none}
-  nav{padding:0 18px;height:60px}
+  nav{padding:0 18px;height:60px;position:relative}
+  .nav-logo{position:absolute;left:50%;transform:translateX(-50%)}
   .nav-logo img{height:30px}
+  .nav-wa{display:none}
 }
+.nav-hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:6px}
+.nav-hamburger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px}
+.mobile-menu{display:none;position:fixed;top:60px;left:0;right:0;background:var(--white);border-bottom:1px solid var(--border);z-index:99;padding:20px 18px;flex-direction:column;gap:0}
+.mobile-menu.open{display:flex}
+.mobile-menu a{padding:14px 0;font-size:15px;font-weight:500;color:var(--text2);border-bottom:1px solid var(--border)}
+.mobile-menu a:last-child{border-bottom:none}
+@media(max-width:768px){.nav-hamburger{display:flex}}
 
 /* HERO */
 .hero{
@@ -437,25 +446,35 @@ footer{background:var(--white);border-top:1px solid var(--border);padding:48px 6
     <li><a href="/order/">Order</a></li>
     <li><a href="/contact/">Contact</a></li>
   </ul>
+  <button class="nav-hamburger" id="hamburger" aria-label="Menu" onclick="document.getElementById('mobileMenu500').classList.toggle('open')">
+    <span></span><span></span><span></span>
+  </button>
   <button class="nav-wa" onclick="window.location='/order/'">
     <svg viewBox="0 0 448 512"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
     Order on WhatsApp
   </button>
 </nav>
+<div class="mobile-menu" id="mobileMenu500">
+  <a href="/" onclick="document.getElementById('mobileMenu500').classList.remove('open')">Home</a>
+  <a href="/products/" onclick="document.getElementById('mobileMenu500').classList.remove('open')">Products</a>
+  <a href="/about/" onclick="document.getElementById('mobileMenu500').classList.remove('open')">About Us</a>
+  <a href="/order/" onclick="document.getElementById('mobileMenu500').classList.remove('open')">Order</a>
+  <a href="/contact/" onclick="document.getElementById('mobileMenu500').classList.remove('open')">Contact</a>
+</div>
 <section style="max-width:900px;margin:0 auto;padding:40px 20px">
-  <p style="color:#888;font-size:.9rem;margin-bottom:16px"><a href="/" style="color:#888">Home</a> › <a href="/products/" style="color:#888">Products</a> › Idli & Dosa Batter 500g</p>
+  <p style="color:#888;font-size:.9rem;margin-bottom:16px"><a href="/" style="color:#888">Home</a> › <a href="/products/" style="color:#888">Products</a> › Complete Breakfast Kit 500g</p>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start">
     <div>
       <img src="/img/batter-500g.webp" alt="Absolute Fresh Idli Dosa Batter 500g" style="width:100%;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,.1)" width="400" height="400"/>
     </div>
     <div>
-      <h1 style="font-size:1.8rem;margin-bottom:8px">Idli & Dosa Batter 500g</h1>
-      <p style="color:#888;margin-bottom:16px">Perfect for couples and small families</p>
+      <h1 style="font-size:1.8rem;margin-bottom:8px">Complete Breakfast Kit 500g</h1>
+      <p style="color:#888;margin-bottom:16px">Batter + Podi Chutney + Peanut Chutney — for 2–3 people</p>
       <p style="font-size:2rem;font-weight:800;color:#CC0000;margin-bottom:20px">₹75</p>
-      <p style="line-height:1.8;color:#555;margin-bottom:20px">Makes ~11 idlis or ~6 dosas. Stone-ground fresh every day using only 5 ingredients. Naturally fermented for perfect texture. No preservatives, no chemicals.</p>
-      <ul style="list-style:none;padding:0;margin-bottom:28px"><li style="margin:6px 0">✅ ~11 idlis or ~6 dosas</li><li style="margin:6px 0">✅ 5 ingredients only</li><li style="margin:6px 0">✅ Naturally fermented</li><li style="margin:6px 0">✅ No preservatives</li><li style="margin:6px 0">✅ Same-day delivery in Lucknow</li><li style="margin:6px 0">🎁 Free Podi Chutney (30g) included</li></ul>
-      <div style="background:#FFF8E7;border:2px solid #F59E0B;border-radius:12px;padding:16px;margin-bottom:20px">🎁 <strong>Free Podi Chutney included</strong> — every batter order comes with our authentic 30g gunpowder spice. No extra charge.</div>
-      <a href="https://wa.me/918318767689?text=Hi!%20I%20want%20to%20order%20Idli%20Dosa%20Batter%20500g%20(₹75)." target="_blank" rel="noopener noreferrer"
+      <p style="line-height:1.8;color:#555;margin-bottom:20px">Everything for a complete South Indian breakfast — stone-ground batter (makes ~11 idlis or ~6 dosas), Podi Chutney, and Peanut Chutney. All included. No preservatives. सब कुछ Ready, बस 5 min.</p>
+      <ul style="list-style:none;padding:0;margin-bottom:28px"><li style="margin:6px 0">🫙 Stone-ground Batter — ~11 idlis or ~6 dosas</li><li style="margin:6px 0">🌶️ Podi Chutney — freshly ground, included</li><li style="margin:6px 0">🥜 Peanut Chutney — creamy & fresh, included</li><li style="margin:6px 0">✅ 5 ingredients, no preservatives</li><li style="margin:6px 0">✅ Naturally fermented</li><li style="margin:6px 0">✅ Same-day delivery in Lucknow</li><li style="margin:6px 0">✅ Pay on delivery</li></ul>
+      <div style="background:#FFF8E7;border:2px solid #F59E0B;border-radius:12px;padding:16px;margin-bottom:20px">🎁 <strong>Complete Kit — everything included</strong> — Batter + Podi Chutney + Peanut Chutney. One order, full breakfast. No add-ons needed.</div>
+      <a href="https://wa.me/918318767689?text=Hi!%20I%20want%20to%20order%20the%20Complete%20Breakfast%20Kit%20500g%20(₹75)%20—%20Batter%20%2B%20Podi%20%2B%20Peanut%20Chutney." target="_blank" rel="noopener noreferrer"
          style="display:inline-block;background:#25D366;color:#fff;padding:14px 28px;border-radius:50px;font-weight:700;font-size:1rem;text-decoration:none;margin-right:12px">
         📲 Order on WhatsApp
       </a>
