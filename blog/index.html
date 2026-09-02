@@ -59,7 +59,9 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 @media(max-width:600px){.blog-wrap{grid-template-columns:1fr}}
 .card{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:box-shadow .2s,transform .2s}
 .card:hover{box-shadow:0 8px 32px rgba(0,0,0,.1);transform:translateY(-3px)}
-.card-thumb{width:100%;aspect-ratio:16/9;background:var(--green-pale);display:flex;align-items:center;justify-content:center;font-size:48px}
+.card-thumb{width:100%;aspect-ratio:16/9;background:var(--green-pale);overflow:hidden}
+.card-thumb img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
+.card:hover .card-thumb img{transform:scale(1.04)}
 .card-body{padding:20px}
 .card-tag{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gold);margin-bottom:8px}
 .card-body h2{font-family:'Lora',serif;font-size:1.1rem;color:var(--text);line-height:1.45;margin-bottom:8px}
@@ -77,7 +79,11 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 @media(max-width:900px){.video-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.video-grid{grid-template-columns:1fr}}
 .video-card{background:var(--white);border-radius:12px;overflow:hidden;border:1px solid var(--border)}
-.video-card iframe{width:100%;aspect-ratio:16/9;display:block;border:none}
+.video-card a.yt-thumb{display:block;position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;background:#000}
+.video-card a.yt-thumb img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
+.video-card a.yt-thumb:hover img{transform:scale(1.04)}
+.video-card a.yt-thumb .yt-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:56px;height:56px;background:rgba(255,0,0,.9);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.video-card a.yt-thumb .yt-play svg{width:22px;height:22px;fill:#fff;margin-left:4px}
 .video-card-body{padding:14px 16px}
 .video-card-body h3{font-size:14px;font-weight:600;color:var(--text);line-height:1.4}
 .video-cta{margin-top:28px;text-align:center}
@@ -119,7 +125,7 @@ footer a{color:#fff;text-decoration:underline}
 <div class="blog-wrap">
 
   <article class="card">
-    <div class="card-thumb">🫙</div>
+    <div class="card-thumb"><img src="https://images.unsplash.com/photo-1567337710282-00832b415979?w=600&q=80" alt="Idli Dosa Batter" loading="lazy"/></div>
     <div class="card-body">
       <div class="card-tag">Batter Tips</div>
       <h2>Why Fresh Batter Makes Better Idlis Than Store Packets</h2>
@@ -130,7 +136,7 @@ footer a{color:#fff;text-decoration:underline}
   </article>
 
   <article class="card">
-    <div class="card-thumb">🌶️</div>
+    <div class="card-thumb"><img src="https://images.unsplash.com/photo-1610192244261-3f33de3f55e4?w=600&q=80" alt="Podi Chutney" loading="lazy"/></div>
     <div class="card-body">
       <div class="card-tag">Recipe</div>
       <h2>Podi Chutney 101: What Is It and How Do You Use It?</h2>
@@ -141,7 +147,7 @@ footer a{color:#fff;text-decoration:underline}
   </article>
 
   <article class="card">
-    <div class="card-thumb">🥜</div>
+    <div class="card-thumb"><img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&q=80" alt="Healthy Breakfast" loading="lazy"/></div>
     <div class="card-body">
       <div class="card-tag">Health</div>
       <h2>Is Idli Dosa Batter Good for You? What Nutritionists Say</h2>
@@ -152,7 +158,7 @@ footer a{color:#fff;text-decoration:underline}
   </article>
 
   <article class="card">
-    <div class="card-thumb">⏱️</div>
+    <div class="card-thumb"><img src="https://images.unsplash.com/photo-1630383249896-424e482df921?w=600&q=80" alt="South Indian Breakfast" loading="lazy"/></div>
     <div class="card-body">
       <div class="card-tag">Tips</div>
       <h2>5-Minute South Indian Breakfast: The Complete Kit Explained</h2>
@@ -163,7 +169,7 @@ footer a{color:#fff;text-decoration:underline}
   </article>
 
   <article class="card">
-    <div class="card-thumb">🪨</div>
+    <div class="card-thumb"><img src="https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=600&q=80" alt="Stone Ground Batter" loading="lazy"/></div>
     <div class="card-body">
       <div class="card-tag">Process</div>
       <h2>Stone-Ground vs. Machine-Ground Batter: What's the Difference?</h2>
@@ -174,7 +180,7 @@ footer a{color:#fff;text-decoration:underline}
   </article>
 
   <article class="card">
-    <div class="card-thumb">📍</div>
+    <div class="card-thumb"><img src="https://images.unsplash.com/photo-1626200419199-391ae4be7a41?w=600&q=80" alt="Lucknow South Indian Food" loading="lazy"/></div>
     <div class="card-body">
       <div class="card-tag">Lucknow</div>
       <h2>South Indian Breakfast in Lucknow: Why the City is Falling in Love</h2>
@@ -193,15 +199,24 @@ footer a{color:#fff;text-decoration:underline}
     <p>Science-backed videos on why South Indian breakfast is one of the healthiest in the world.</p>
     <div class="video-grid">
       <div class="video-card">
-        <iframe src="https://www.youtube.com/embed/BhRXc4efITo" loading="lazy" allowfullscreen title="Idli South Indian Superfood"></iframe>
+        <a class="yt-thumb" href="https://www.youtube.com/watch?v=BhRXc4efITo" target="_blank" rel="noopener" aria-label="Watch on YouTube">
+          <img src="https://img.youtube.com/vi/BhRXc4efITo/mqdefault.jpg" alt="Idli South Indian Superfood" loading="lazy"/>
+          <div class="yt-play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+        </a>
         <div class="video-card-body"><h3>Idli: The South Indian Superfood for Everyday Health</h3></div>
       </div>
       <div class="video-card">
-        <iframe src="https://www.youtube.com/embed/jj_TxQbsUj0" loading="lazy" allowfullscreen title="Science of Perfect Idlis"></iframe>
+        <a class="yt-thumb" href="https://www.youtube.com/watch?v=jj_TxQbsUj0" target="_blank" rel="noopener" aria-label="Watch on YouTube">
+          <img src="https://img.youtube.com/vi/jj_TxQbsUj0/mqdefault.jpg" alt="Science of Perfect Idlis" loading="lazy"/>
+          <div class="yt-play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+        </a>
         <div class="video-card-body"><h3>The Science of Perfect Idlis — Fermentation Explained</h3></div>
       </div>
       <div class="video-card">
-        <iframe src="https://www.youtube.com/embed/_6Lm6ZjJ8m8" loading="lazy" allowfullscreen title="Fermented Foods Gut Health"></iframe>
+        <a class="yt-thumb" href="https://www.youtube.com/watch?v=_6Lm6ZjJ8m8" target="_blank" rel="noopener" aria-label="Watch on YouTube">
+          <img src="https://img.youtube.com/vi/_6Lm6ZjJ8m8/mqdefault.jpg" alt="Fermented Foods Gut Health" loading="lazy"/>
+          <div class="yt-play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+        </a>
         <div class="video-card-body"><h3>Fermented Foods &amp; Gut Health — Ayurveda Perspective</h3></div>
       </div>
     </div>
