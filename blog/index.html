@@ -68,6 +68,20 @@ nav{background:var(--white);border-bottom:1px solid var(--border);position:stick
 .card-meta span{background:var(--green-pale);color:var(--green);padding:3px 10px;border-radius:20px;font-weight:500}
 .read-more{display:inline-block;margin-top:12px;font-size:13px;font-weight:600;color:var(--green);border-bottom:1px solid var(--green)}
 .coming-soon{grid-column:1/-1;text-align:center;padding:48px 24px;color:var(--muted);font-size:15px}
+.video-section{background:var(--green-pale);padding:56px 24px}
+.video-section-inner{max-width:1100px;margin:0 auto}
+.video-section-tag{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--green);margin-bottom:8px}
+.video-section h2{font-family:'Lora',serif;font-size:1.6rem;color:var(--text);margin-bottom:6px}
+.video-section p{font-size:14px;color:var(--muted);margin-bottom:32px}
+.video-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px}
+@media(max-width:900px){.video-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.video-grid{grid-template-columns:1fr}}
+.video-card{background:var(--white);border-radius:12px;overflow:hidden;border:1px solid var(--border)}
+.video-card iframe{width:100%;aspect-ratio:16/9;display:block;border:none}
+.video-card-body{padding:14px 16px}
+.video-card-body h3{font-size:14px;font-weight:600;color:var(--text);line-height:1.4}
+.video-cta{margin-top:28px;text-align:center}
+.video-cta a{display:inline-block;background:var(--green);color:#fff;font-weight:600;font-size:14px;padding:12px 28px;border-radius:8px}
 footer{background:var(--green);color:#fff;padding:32px 48px;text-align:center;font-size:13px}
 footer a{color:#fff;text-decoration:underline}
 </style>
@@ -171,6 +185,31 @@ footer a{color:#fff;text-decoration:underline}
   </article>
 
 </div>
+
+<section class="video-section">
+  <div class="video-section-inner">
+    <div class="video-section-tag">Watch &amp; Learn</div>
+    <h2>Health Benefits of Idli &amp; Fermented Foods</h2>
+    <p>Science-backed videos on why South Indian breakfast is one of the healthiest in the world.</p>
+    <div class="video-grid">
+      <div class="video-card">
+        <iframe src="https://www.youtube.com/embed/BhRXc4efITo" loading="lazy" allowfullscreen title="Idli South Indian Superfood"></iframe>
+        <div class="video-card-body"><h3>Idli: The South Indian Superfood for Everyday Health</h3></div>
+      </div>
+      <div class="video-card">
+        <iframe src="https://www.youtube.com/embed/jj_TxQbsUj0" loading="lazy" allowfullscreen title="Science of Perfect Idlis"></iframe>
+        <div class="video-card-body"><h3>The Science of Perfect Idlis — Fermentation Explained</h3></div>
+      </div>
+      <div class="video-card">
+        <iframe src="https://www.youtube.com/embed/_6Lm6ZjJ8m8" loading="lazy" allowfullscreen title="Fermented Foods Gut Health"></iframe>
+        <div class="video-card-body"><h3>Fermented Foods &amp; Gut Health — Ayurveda Perspective</h3></div>
+      </div>
+    </div>
+    <div class="video-cta">
+      <a href="https://www.youtube.com/@AbsoluteFreshFood" target="_blank" rel="noopener">See Our YouTube Channel →</a>
+    </div>
+  </div>
+</section>
 
 <footer>
   <p>© 2026 Absolute Fresh Food, Lucknow &nbsp;·&nbsp; FSSAI: 22726747000407 &nbsp;·&nbsp; <a href="/privacy/">Privacy Policy</a> &nbsp;·&nbsp; <a href="/blog/">Blog</a></p>
