@@ -132,8 +132,9 @@ nav{
 @media(max-width:768px){
   .nav-links{display:none}
   nav{padding:0 18px;height:60px;position:relative}
-  .nav-logo{position:absolute;left:50%;transform:translateX(-50%)}
-  .nav-logo img{height:30px}
+  .nav-logo{position:absolute;left:50%;transform:translateX(-50%);z-index:1;pointer-events:none}
+  .nav-logo img{height:30px;pointer-events:auto}
+  .nav-hamburger{position:relative;z-index:2}
 }
 /* HAMBURGER */
 .nav-hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:6px}
