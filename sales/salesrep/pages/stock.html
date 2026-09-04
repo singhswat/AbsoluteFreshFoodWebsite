@@ -454,18 +454,21 @@ async function completeSettle() {
 
     if (iErr) throw new Error('Invoice error: '+iErr.message);
 
-    // Show success sheet
-    closeSettle();
+    // Capture before closeSettle nulls settleTarget
+    const _t = settleTarget;
     const paid = collected >= amount_due;
-    document.getElementById('ss-outlet').textContent = settleTarget.name + ' · ' + settleTarget.area;
+    window._lastInvoice = {inv, outletName:_t.name, qty_sold, amount_due, collected, paid, product:_t.product, price:_t.price, rep:currentUser.name};
+
+    closeSettle();
+
+    // Show success sheet
+    document.getElementById('ss-outlet').textContent = (_t.name||'') + ' · ' + (_t.area||'');
     document.getElementById('ss-inv').textContent = inv;
     document.getElementById('ss-sold').textContent = qty_sold + ' pkts';
     document.getElementById('ss-amount').textContent = '₹' + amount_due.toFixed(2);
     document.getElementById('ss-collected').textContent = '₹' + collected.toFixed(2);
     document.getElementById('ss-status').textContent = paid ? '✅ Paid' : '⏳ Pending ₹'+(amount_due-collected).toFixed(2);
     document.getElementById('ss-status').style.color = paid ? '#4ADE80' : '#FBBF24';
-    // Store for WhatsApp share
-    window._lastInvoice = {inv, outletName:settleTarget.name, qty_sold, amount_due, collected, paid, product:settleTarget.product, price:settleTarget.price, rep:currentUser.name};
     document.getElementById('success-sheet').classList.add('open');
     await loadGrid();
   } catch(e) {
