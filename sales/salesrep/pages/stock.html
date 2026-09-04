@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stock — AFF</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <link rel="manifest" href="../manifest.json"/>
+  <meta name="theme-color" content="#1E293B"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <style>
+    body{background:#0F172A;color:#CBD5E1;font-family:system-ui,sans-serif;margin:0}
+    .top-bar{background:#1E293B;border-bottom:1px solid #334155;padding:10px 14px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:50}
+    .top-bar h1{font-size:.95rem;font-weight:700;color:#F1F5F9;flex:1}
+    .chip{background:#0c2340;color:#60A5FA;border-radius:6px;padding:2px 8px;font-size:.72rem;font-weight:600}
+    .page-wrap{padding:10px 12px 100px}
+
+    /* Stats */
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
+    .s-card{background:#1E293B;border:1px solid #334155;border-radius:8px;padding:10px;text-align:center}
+    .s-lbl{font-size:.6rem;color:#94A3B8;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+    .s-val{font-size:1.2rem;font-weight:700;font-family:monospace}
+    .s-val.green{color:#4ADE80}
+    .s-val.blue{color:#60A5FA}
+    .s-val.yellow{color:#FBBF24}
+    .s-val.red{color:#F87171}
+
+    /* Tabs */
+    .tabs{display:flex;gap:4px;margin-bottom:12px;background:#1E293B;border-radius:10px;padding:4px}
+    .tab{flex:1;text-align:center;padding:7px 4px;font-size:.75rem;font-weight:600;border-radius:7px;cursor:pointer;color:#94A3B8;border:none;background:none}
+    .tab.active{background:#2563EB;color:#fff}
+
+    /* Panels */
+    .panel{display:none}
+    .panel.active{display:block}
+
+    /* Cards */
+    .card{background:#1E293B;border:1px solid #334155;border-radius:12px;padding:14px;margin-bottom:10px}
+    .card-h{font-size:.8rem;font-weight:700;color:#F1F5F9;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+
+    /* Form elements */
+    .flbl{font-size:.7rem;color:#94A3B8;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
+    .finp{width:100%;background:#0F172A;border:1px solid #334155;color:#F1F5F9;border-radius:8px;padding:8px 10px;font-size:.85rem;outline:none;box-sizing:border-box}
+    .finp:focus{border-color:#60A5FA}
+    .fgrp{margin-bottom:10px}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+    /* Buttons */
+    .btn{width:100%;padding:11px;border-radius:9px;font-size:.85rem;font-weight:700;cursor:pointer;border:none;margin-top:6px}
+    .btn-blue{background:#2563EB;color:#fff}
+    .btn-green{background:#16A34A;color:#fff}
+    .btn-orange{background:#D97706;color:#fff}
+    .btn-red{background:#DC2626;color:#fff}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+
+    /* Movement list */
+    .mv-item{background:#0F172A;border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
+    .mv-left{}
+    .mv-name{font-size:.82rem;font-weight:600;color:#F1F5F9}
+    .mv-sub{font-size:.72rem;color:#64748B;margin-top:2px}
+    .mv-right{text-align:right}
+    .mv-qty{font-size:1rem;font-weight:700;font-family:monospace}
+    .mv-qty.out{color:#F87171}
+    .mv-qty.in{color:#4ADE80}
+    .mv-type{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:20px}
+    .type-warehouse_out{background:#1f2937;color:#F87171}
+    .type-delivered{background:#1f2937;color:#60A5FA}
+    .type-returned{background:#1f2937;color:#4ADE80}
+    .type-discarded{background:#1f2937;color:#94A3B8}
+
+    /* Outlet cards for pending settlements */
+    .outlet-card{background:#0F172A;border:1px solid #334155;border-radius:10px;padding:12px;margin-bottom:8px;cursor:pointer;transition:border-color .15s}
+    .outlet-card:hover{border-color:#60A5FA}
+    .outlet-name{font-size:.88rem;font-weight:700;color:#F1F5F9}
+    .outlet-meta{font-size:.72rem;color:#64748B;margin-top:3px}
+    .outlet-row{display:flex;justify-content:space-between;align-items:center}
+    .outlet-bal{font-size:.9rem;font-weight:700;color:#FBBF24;font-family:monospace}
+    .day-badge{font-size:.68rem;padding:2px 8px;border-radius:20px;font-weight:700}
+    .day-ok{background:#14532d;color:#4ADE80}
+    .day-warn{background:#78350f;color:#FBBF24}
+    .day-danger{background:#7f1d1d;color:#F87171}
+
+    /* Bottom nav */
+    .bot-nav{position:fixed;bottom:0;left:0;right:0;background:#1E293B;border-top:1px solid #334155;display:flex;z-index:100}
+    .bot-nav a{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 4px;font-size:.6rem;color:#64748B;text-decoration:none;gap:2px}
+    .bot-nav a.active{color:#60A5FA}
+    .bot-nav a span{font-size:1.1rem}
+
+    .empty{text-align:center;padding:32px 16px;color:#64748B;font-size:.82rem}
+    .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#16A34A;color:#fff;padding:10px 20px;border-radius:8px;font-size:.82rem;font-weight:600;z-index:200;display:none}
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <h1>📦 Stock & Settlements</h1>
+  <span class="chip" id="rep-name-chip">Rep</span>
+</div>
+
+<div class="page-wrap">
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="s-card"><div class="s-lbl">Picked Today</div><div class="s-val blue" id="stat-picked">0</div></div>
+    <div class="s-card"><div class="s-lbl">Delivered</div><div class="s-val yellow" id="stat-delivered">0</div></div>
+    <div class="s-card"><div class="s-lbl">In Hand</div><div class="s-val green" id="stat-inhand">0</div></div>
+    <div class="s-card"><div class="s-lbl">At Outlets</div><div class="s-val red" id="stat-outlets">0</div></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('pickup')">🏭 Pickup</button>
+    <button class="tab" onclick="switchTab('deliver')">🚚 Deliver</button>
+    <button class="tab" onclick="switchTab('return')">↩️ Return</button>
+    <button class="tab" onclick="switchTab('settle')">💰 Settle</button>
+  </div>
+
+  <!-- TAB: PICKUP FROM WAREHOUSE -->
+  <div class="panel active" id="panel-pickup">
+    <div class="card">
+      <div class="card-h">🏭 Pick from Warehouse</div>
+      <div class="fgrp">
+        <label class="flbl">Product</label>
+        <select class="finp" id="pickup-product"></select>
+      </div>
+      <div class="fgrp">
+        <label class="flbl">Packets Picked</label>
+        <input class="finp" type="number" id="pickup-qty" min="1" placeholder="e.g. 20"/>
+      </div>
+      <div class="fgrp">
+        <label class="flbl">Notes (optional)</label>
+        <input class="finp" type="text" id="pickup-notes" placeholder="e.g. morning batch"/>
+      </div>
+      <button class="btn btn-blue" onclick="logPickup()">✅ Log Pickup</button>
+    </div>
+
+    <div class="card">
+      <div class="card-h">Today's Movements</div>
+      <div id="movements-list"><div class="empty">No movements logged today</div></div>
+    </div>
+  </div>
+
+  <!-- TAB: DELIVER TO OUTLET -->
+  <div class="panel" id="panel-deliver">
+    <div class="card">
+      <div class="card-h">🚚 Log Delivery to Outlet</div>
+      <div class="fgrp">
+        <label class="flbl">Outlet</label>
+        <select class="finp" id="deliver-outlet"></select>
+      </div>
+      <div class="fgrp">
+        <label class="flbl">Product</label>
+        <select class="finp" id="deliver-product"></select>
+      </div>
+      <div class="fgrp">
+        <label class="flbl">Packets Delivered</label>
+        <input class="finp" type="number" id="deliver-qty" min="1" placeholder="e.g. 5"/>
+      </div>
+      <div class="fgrp">
+        <label class="flbl">Type</label>
+        <select class="finp" id="deliver-source">
+          <option value="beat">Beat plan visit</option>
+          <option value="ad_hoc">Store called / ad-hoc</option>
+        </select>
+      </div>
+      <div class="fgrp">
+        <label class="flbl">Notes (optional)</label>
+        <input class="finp" type="text" id="deliver-notes" placeholder=""/>
+      </div>
+      <button class="btn btn-blue" onclick="logDelivery()">✅ Log Delivery</button>
+    </div>
+  </div>
+
+  <!-- TAB: LOG RETURN FROM OUTLET -->
+  <div class="panel" id="panel-return">
+    <div class="card">
+      <div class="card-h">↩️ Log Return from Outlet</div>
+      <p style="font-size:.75rem;color:#94A3B8;margin-bottom:12px">Store called to return unsold packets, or you're picking up on a visit.</p>
+      <div class="fgrp">
+        <label class="flbl">Outlet</label>
+        <select class="finp" id="return-outlet"></select>
+      </div>
+      <div class="fgrp">
+        <label class="flbl">Product</label>
+        <select class="finp" id="return-product"></select>
+      </div>
+      <div class="fgrp">
+        <label class="flbl">Packets Returned</label>
+        <input class="finp" type="number" id="return-qty" min="1" placeholder="e.g. 2"/>
+      </div>
+      <div class="fgrp">
+        <label class="flbl">Condition</label>
+        <select class="finp" id="return-condition">
+          <option value="returned">Good — back to warehouse</option>
+          <option value="discarded">Expired / damaged — discard</option>
+        </select>
+      </div>
+      <div class="fgrp">
+        <label class="flbl">Notes (optional)</label>
+        <input class="finp" type="text" id="return-notes" placeholder=""/>
+      </div>
+      <button class="btn btn-orange" onclick="logReturn()">↩️ Log Return</button>
+    </div>
+  </div>
+
+  <!-- TAB: SETTLE OUTLET -->
+  <div class="panel" id="panel-settle">
+    <div class="card">
+      <div class="card-h">💰 Settle an Outlet</div>
+      <p style="font-size:.75rem;color:#94A3B8;margin-bottom:12px">Select outlet to see outstanding stock and generate invoice.</p>
+      <div class="fgrp">
+        <label class="flbl">Select Outlet</label>
+        <select class="finp" id="settle-outlet" onchange="loadSettlementPreview()"></select>
+      </div>
+      <div id="settle-preview" style="display:none">
+        <div style="background:#0F172A;border-radius:10px;padding:14px;margin:12px 0">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+            <span style="font-size:.75rem;color:#94A3B8">Total Delivered</span>
+            <span style="font-weight:700;font-family:monospace;color:#60A5FA" id="sp-delivered">0</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+            <span style="font-size:.75rem;color:#94A3B8">Already Returned</span>
+            <span style="font-weight:700;font-family:monospace;color:#4ADE80" id="sp-returned">0</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;padding-top:8px;border-top:1px solid #334155">
+            <span style="font-size:.75rem;color:#94A3B8">Outstanding at Outlet</span>
+            <span style="font-weight:700;font-family:monospace;color:#FBBF24" id="sp-outstanding">0</span>
+          </div>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">Packets Sold (collected now)</label>
+          <input class="finp" type="number" id="sp-sold" min="0" placeholder="0" oninput="calcSettle()"/>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">Packets Returning Now</label>
+          <input class="finp" type="number" id="sp-returning" min="0" placeholder="0" oninput="calcSettle()"/>
+        </div>
+        <div id="sp-product-prices" style="margin-bottom:10px"></div>
+        <div style="background:#0F172A;border-radius:10px;padding:14px;margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <span style="font-size:.75rem;color:#94A3B8">Amount Due</span>
+            <span style="font-weight:700;font-family:monospace;color:#FBBF24;font-size:1.1rem" id="sp-amount">₹0</span>
+          </div>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">Cash Collected (₹)</label>
+          <input class="finp" type="number" id="sp-collected" min="0" placeholder="0"/>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">Payment Method</label>
+          <select class="finp" id="sp-method">
+            <option value="cash">Cash</option>
+            <option value="upi">UPI</option>
+            <option value="pending">Pending / Credit</option>
+          </select>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">Notes</label>
+          <input class="finp" type="text" id="sp-notes" placeholder=""/>
+        </div>
+        <button class="btn btn-green" onclick="completeSettlement()">✅ Complete Settlement & Generate Invoice</button>
+      </div>
+      <div id="settle-empty" style="color:#64748B;font-size:.8rem;margin-top:12px">Select an outlet to begin</div>
+    </div>
+
+    <div class="card">
+      <div class="card-h">⏰ Outlets Needing Settlement</div>
+      <div id="pending-outlets"><div class="empty">Loading...</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Bottom Nav -->
+<div class="bot-nav">
+  <a href="beat.html"><span>📋</span>Beat</a>
+  <a href="outlets.html"><span>🏪</span>Outlets</a>
+  <a href="stock.html" class="active"><span>📦</span>Stock</a>
+  <a href="orders.html"><span>📝</span>Orders</a>
+  <a href="settings.html"><span>⚙️</span>Settings</a>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPA_URL = 'https://fbfopgzblqmsflkfejwa.supabase.co';
+const SUPA_KEY = 'sb_publishable_r7mYhsyIKtBjBKzxH8St9g_OHjTU-RQ';
+const db = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+let currentUser = null;
+let products = [];
+let outlets = [];
+let todayStr = new Date().toISOString().split('T')[0];
+
+// ── Init ──────────────────────────────────────────────────────────────
+async function init() {
+  const raw = sessionStorage.getItem('aff_session');
+  if (!raw) { location.href = '../index.html'; return; }
+  currentUser = JSON.parse(raw);
+  if (currentUser.role === 'admin') { location.href = 'dashboard.html'; return; }
+  document.getElementById('rep-name-chip').textContent = currentUser.name || 'Rep';
+
+  await Promise.all([loadProducts(), loadOutlets()]);
+  populateSelects();
+  loadStats();
+  loadMovements();
+  loadPendingOutlets();
+}
+
+// ── Load products ────────────────────────────────────────────────────
+async function loadProducts() {
+  const { data } = await db.from('products').select('id,name,base_price,mrp').eq('is_active', true);
+  products = data || [];
+}
+
+// ── Load outlets ─────────────────────────────────────────────────────
+async function loadOutlets() {
+  const { data } = await db.from('outlets').select('id,name,area').eq('status','active').order('name');
+  outlets = data || [];
+}
+
+// ── Populate selects ─────────────────────────────────────────────────
+function populateSelects() {
+  const productOpts = products.map(p => `<option value="${p.id}" data-price="${p.base_price}">${p.name} (₹${p.base_price})</option>`).join('');
+  const outletOpts = outlets.map(o => `<option value="${o.id}">${o.name} — ${o.area}</option>`).join('');
+
+  ['pickup-product','deliver-product','return-product'].forEach(id => {
+    document.getElementById(id).innerHTML = productOpts;
+  });
+  ['deliver-outlet','return-outlet','settle-outlet'].forEach(id => {
+    document.getElementById(id).innerHTML = '<option value="">-- Select Outlet --</option>' + outletOpts;
+  });
+}
+
+// ── Stats ─────────────────────────────────────────────────────────────
+async function loadStats() {
+  const { data } = await db.from('stock_movements')
+    .select('movement_type, qty_packets')
+    .eq('rep_id', currentUser.id)
+    .eq('date', todayStr);
+
+  let picked = 0, delivered = 0, returned = 0;
+  (data||[]).forEach(m => {
+    if (m.movement_type === 'warehouse_out') picked += m.qty_packets;
+    if (m.movement_type === 'delivered') delivered += m.qty_packets;
+    if (m.movement_type === 'returned') returned += m.qty_packets;
+  });
+
+  // Total at outlets (all time, unsettled) — simplified
+  const { data: allDel } = await db.from('stock_movements')
+    .select('qty_packets, movement_type')
+    .eq('rep_id', currentUser.id)
+    .in('movement_type', ['delivered','returned']);
+
+  let totalDel = 0, totalRet = 0;
+  (allDel||[]).forEach(m => {
+    if (m.movement_type === 'delivered') totalDel += m.qty_packets;
+    if (m.movement_type === 'returned') totalRet += m.qty_packets;
+  });
+
+  document.getElementById('stat-picked').textContent = picked;
+  document.getElementById('stat-delivered').textContent = delivered;
+  document.getElementById('stat-inhand').textContent = Math.max(0, picked - delivered);
+  document.getElementById('stat-outlets').textContent = Math.max(0, totalDel - totalRet);
+}
+
+// ── Today's movements list ────────────────────────────────────────────
+async function loadMovements() {
+  const { data } = await db.from('stock_movements')
+    .select('*, products(name), outlets(name)')
+    .eq('rep_id', currentUser.id)
+    .eq('date', todayStr)
+    .order('created_at', {ascending: false});
+
+  const el = document.getElementById('movements-list');
+  if (!data || !data.length) { el.innerHTML = '<div class="empty">No movements today</div>'; return; }
+
+  el.innerHTML = data.map(m => {
+    const typeLabel = {warehouse_out:'Warehouse Out', delivered:'Delivered', returned:'Returned', discarded:'Discarded'}[m.movement_type] || m.movement_type;
+    const qtyClass = m.movement_type === 'delivered' || m.movement_type === 'warehouse_out' ? 'out' : 'in';
+    const outlet = m.outlets ? ` → ${m.outlets.name}` : '';
+    const time = new Date(m.created_at).toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'});
+    return `<div class="mv-item">
+      <div class="mv-left">
+        <div class="mv-name">${m.products?.name || '—'}${outlet}</div>
+        <div class="mv-sub">${time} · <span class="mv-type type-${m.movement_type}">${typeLabel}</span></div>
+      </div>
+      <div class="mv-right">
+        <div class="mv-qty ${qtyClass}">${m.qty_packets} pkts</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Log Pickup ────────────────────────────────────────────────────────
+async function logPickup() {
+  const product_id = document.getElementById('pickup-product').value;
+  const qty = parseInt(document.getElementById('pickup-qty').value);
+  const notes = document.getElementById('pickup-notes').value;
+  if (!product_id || !qty || qty < 1) { alert('Select product and enter quantity.'); return; }
+
+  const { error } = await db.from('stock_movements').insert({
+    rep_id: currentUser.id, product_id, qty_packets: qty,
+    movement_type: 'warehouse_out', notes, date: todayStr
+  });
+  if (error) { alert('Error: ' + error.message); return; }
+  toast('✅ Pickup logged');
+  document.getElementById('pickup-qty').value = '';
+  document.getElementById('pickup-notes').value = '';
+  loadStats(); loadMovements();
+}
+
+// ── Log Delivery ──────────────────────────────────────────────────────
+async function logDelivery() {
+  const outlet_id = document.getElementById('deliver-outlet').value;
+  const product_id = document.getElementById('deliver-product').value;
+  const qty = parseInt(document.getElementById('deliver-qty').value);
+  const source = document.getElementById('deliver-source').value;
+  const notes = document.getElementById('deliver-notes').value;
+  if (!outlet_id || !product_id || !qty || qty < 1) { alert('Select outlet, product and quantity.'); return; }
+
+  const { error } = await db.from('stock_movements').insert({
+    rep_id: currentUser.id, product_id, outlet_id, qty_packets: qty,
+    movement_type: 'delivered', notes: notes || source, date: todayStr
+  });
+  if (error) { alert('Error: ' + error.message); return; }
+  toast('✅ Delivery logged');
+  document.getElementById('deliver-qty').value = '';
+  document.getElementById('deliver-notes').value = '';
+  loadStats();
+}
+
+// ── Log Return ────────────────────────────────────────────────────────
+async function logReturn() {
+  const outlet_id = document.getElementById('return-outlet').value;
+  const product_id = document.getElementById('return-product').value;
+  const qty = parseInt(document.getElementById('return-qty').value);
+  const condition = document.getElementById('return-condition').value;
+  const notes = document.getElementById('return-notes').value;
+  if (!outlet_id || !product_id || !qty || qty < 1) { alert('Select outlet, product and quantity.'); return; }
+
+  const { error } = await db.from('stock_movements').insert({
+    rep_id: currentUser.id, product_id, outlet_id, qty_packets: qty,
+    movement_type: condition, notes, date: todayStr
+  });
+  if (error) { alert('Error: ' + error.message); return; }
+  toast('↩️ Return logged');
+  document.getElementById('return-qty').value = '';
+  document.getElementById('return-notes').value = '';
+  loadStats(); loadPendingOutlets();
+}
+
+// ── Settlement Preview ────────────────────────────────────────────────
+let settleData = {};
+async function loadSettlementPreview() {
+  const outlet_id = document.getElementById('settle-outlet').value;
+  if (!outlet_id) {
+    document.getElementById('settle-preview').style.display = 'none';
+    document.getElementById('settle-empty').style.display = 'block';
+    return;
+  }
+
+  const { data: deliveries } = await db.from('stock_movements')
+    .select('qty_packets, product_id, products(name,base_price)')
+    .eq('outlet_id', outlet_id)
+    .eq('movement_type', 'delivered');
+
+  const { data: returns } = await db.from('stock_movements')
+    .select('qty_packets')
+    .eq('outlet_id', outlet_id)
+    .in('movement_type', ['returned','discarded']);
+
+  const totalDelivered = (deliveries||[]).reduce((s,m) => s + m.qty_packets, 0);
+  const totalReturned = (returns||[]).reduce((s,m) => s + m.qty_packets, 0);
+  const outstanding = totalDelivered - totalReturned;
+
+  // Group by product for price calc
+  const byProduct = {};
+  (deliveries||[]).forEach(m => {
+    const key = m.product_id;
+    if (!byProduct[key]) byProduct[key] = {name: m.products?.name, price: parseFloat(m.products?.base_price||0), qty: 0};
+    byProduct[key].qty += m.qty_packets;
+  });
+
+  settleData = { outlet_id, totalDelivered, totalReturned, outstanding, byProduct };
+
+  document.getElementById('sp-delivered').textContent = totalDelivered + ' pkts';
+  document.getElementById('sp-returned').textContent = totalReturned + ' pkts';
+  document.getElementById('sp-outstanding').textContent = outstanding + ' pkts';
+  document.getElementById('sp-sold').value = '';
+  document.getElementById('sp-returning').value = '';
+  document.getElementById('sp-collected').value = '';
+  document.getElementById('sp-amount').textContent = '₹0';
+
+  document.getElementById('settle-preview').style.display = 'block';
+  document.getElementById('settle-empty').style.display = 'none';
+}
+
+function calcSettle() {
+  const sold = parseInt(document.getElementById('sp-sold').value) || 0;
+  // Simple: use average price across delivered products
+  const totalQty = Object.values(settleData.byProduct||{}).reduce((s,p) => s+p.qty, 0);
+  const totalVal = Object.values(settleData.byProduct||{}).reduce((s,p) => s + (p.price * p.qty), 0);
+  const avgPrice = totalQty > 0 ? totalVal / totalQty : 0;
+  const amount = sold * avgPrice;
+  document.getElementById('sp-amount').textContent = '₹' + amount.toFixed(2);
+}
+
+// ── Complete Settlement ───────────────────────────────────────────────
+async function completeSettlement() {
+  const outlet_id = document.getElementById('settle-outlet').value;
+  const qty_sold = parseInt(document.getElementById('sp-sold').value) || 0;
+  const qty_returning = parseInt(document.getElementById('sp-returning').value) || 0;
+  const collected = parseFloat(document.getElementById('sp-collected').value) || 0;
+  const method = document.getElementById('sp-method').value;
+  const notes = document.getElementById('sp-notes').value;
+
+  if (!outlet_id) { alert('Select an outlet.'); return; }
+  if (qty_sold < 0 || qty_returning < 0) { alert('Quantities cannot be negative.'); return; }
+  if (qty_sold + qty_returning > settleData.outstanding) {
+    alert(`Total (${qty_sold + qty_returning}) exceeds outstanding (${settleData.outstanding}).`);
+    return;
+  }
+
+  // Calc amount
+  const totalQty = Object.values(settleData.byProduct||{}).reduce((s,p) => s+p.qty, 0);
+  const totalVal = Object.values(settleData.byProduct||{}).reduce((s,p) => s + (p.price * p.qty), 0);
+  const avgPrice = totalQty > 0 ? totalVal / totalQty : 0;
+  const amount_due = qty_sold * avgPrice;
+
+  // Log returning packets
+  let return_movement_id = null;
+  if (qty_returning > 0) {
+    const productId = Object.keys(settleData.byProduct)[0]; // primary product
+    const { data: rm } = await db.from('stock_movements').insert({
+      rep_id: currentUser.id, outlet_id, qty_packets: qty_returning,
+      product_id: productId, movement_type: 'returned',
+      notes: 'settlement return', date: todayStr
+    }).select().single();
+    return_movement_id = rm?.id;
+  }
+
+  // Create settlement
+  const outlet = outlets.find(o => o.id === outlet_id);
+  const { data: settlement, error: sErr } = await db.from('settlements').insert({
+    rep_id: currentUser.id, outlet_id,
+    qty_delivered: settleData.totalDelivered,
+    qty_sold, qty_returned: settleData.totalReturned + qty_returning,
+    amount_due, amount_collected: collected,
+    payment_method: method, notes,
+    return_movement_id
+  }).select().single();
+
+  if (sErr) { alert('Settlement error: ' + sErr.message); return; }
+
+  // Auto-generate invoice
+  const invoiceNum = 'AFF-' + Date.now().toString().slice(-6);
+  const items = Object.values(settleData.byProduct).map(p => ({
+    name: p.name, qty: qty_sold, rate: p.price,
+    amount: (qty_sold * p.price).toFixed(2)
+  }));
+
+  await db.from('b2b_invoices').insert({
+    invoice_number: invoiceNum,
+    invoice_date: todayStr,
+    due_date: todayStr,
+    company_name: outlet?.name || '',
+    subtotal: amount_due,
+    gst_total: 0,
+    grand_total: amount_due,
+    items: items,
+    status: collected >= amount_due ? 'paid' : 'pending',
+    settlement_id: settlement.id,
+    outlet_id,
+    rep_name: currentUser.name,
+    created_by: currentUser.id,
+    notes: `Settlement. Sold: ${qty_sold} pkts. Returned: ${qty_returning} pkts. Collected: ₹${collected}`
+  });
+
+  toast(`✅ Settled! Invoice ${invoiceNum} created. ₹${amount_due.toFixed(2)}`);
+  document.getElementById('settle-outlet').value = '';
+  document.getElementById('settle-preview').style.display = 'none';
+  loadStats(); loadPendingOutlets();
+}
+
+// ── Pending Outlets ───────────────────────────────────────────────────
+async function loadPendingOutlets() {
+  const { data } = await db.from('stock_movements')
+    .select('outlet_id, qty_packets, movement_type, created_at, outlets(name,area)')
+    .in('movement_type', ['delivered','returned'])
+    .not('outlet_id', 'is', null);
+
+  const byOutlet = {};
+  (data||[]).forEach(m => {
+    const id = m.outlet_id;
+    if (!byOutlet[id]) byOutlet[id] = {name: m.outlets?.name, area: m.outlets?.area, delivered: 0, returned: 0, firstDelivery: m.created_at};
+    if (m.movement_type === 'delivered') byOutlet[id].delivered += m.qty_packets;
+    if (m.movement_type === 'returned') byOutlet[id].returned += m.qty_packets;
+    if (new Date(m.created_at) < new Date(byOutlet[id].firstDelivery)) byOutlet[id].firstDelivery = m.created_at;
+  });
+
+  const el = document.getElementById('pending-outlets');
+  const pending = Object.entries(byOutlet).filter(([,o]) => o.delivered > o.returned);
+
+  if (!pending.length) { el.innerHTML = '<div class="empty">No outstanding stock at outlets 🎉</div>'; return; }
+
+  el.innerHTML = pending.map(([id, o]) => {
+    const outstanding = o.delivered - o.returned;
+    const days = Math.floor((Date.now() - new Date(o.firstDelivery)) / 86400000);
+    const badgeClass = days >= 9 ? 'day-danger' : days >= 7 ? 'day-warn' : 'day-ok';
+    return `<div class="outlet-card" onclick="document.getElementById('settle-outlet').value='${id}';switchTab('settle');loadSettlementPreview()">
+      <div class="outlet-row">
+        <div>
+          <div class="outlet-name">${o.name}</div>
+          <div class="outlet-meta">${o.area} · ${outstanding} pkts outstanding</div>
+        </div>
+        <div style="text-align:right">
+          <div class="day-badge ${badgeClass}">Day ${days}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Tab switch ────────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  const tabs = ['pickup','deliver','return','settle'];
+  const idx = tabs.indexOf(name);
+  document.querySelectorAll('.tab')[idx].classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 3000);
+}
+
+init();
+</script>
+</body>
+</html>
