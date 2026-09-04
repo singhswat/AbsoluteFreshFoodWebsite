@@ -110,7 +110,6 @@
   <!-- Tabs -->
   <div class="tabs">
     <button class="tab active" onclick="switchTab('pickup')">🏭 Pickup</button>
-    <button class="tab" onclick="switchTab('deliver')">🚚 Deliver</button>
     <button class="tab" onclick="switchTab('return')">↩️ Return</button>
     <button class="tab" onclick="switchTab('settle')">💰 Settle</button>
   </div>
@@ -128,8 +127,8 @@
         <input class="finp" type="number" id="pickup-qty" min="1" placeholder="e.g. 20"/>
       </div>
       <div class="fgrp">
-        <label class="flbl">For Outlet <span style="color:#64748B;font-weight:400">(optional — e.g. sample)</span></label>
-        <select class="finp" id="pickup-outlet"></select>
+        <label class="flbl">Store / Outlet <span style="color:#F87171">*</span></label>
+        <select class="finp" id="pickup-outlet"><option value="">-- Select Store --</option></select>
       </div>
       <div class="fgrp">
         <label class="flbl">Notes (optional)</label>
@@ -144,66 +143,30 @@
     </div>
   </div>
 
-  <!-- TAB: DELIVER TO OUTLET -->
-  <div class="panel" id="panel-deliver">
-    <div class="card">
-      <div class="card-h">🚚 Log Delivery to Outlet</div>
-      <div class="fgrp">
-        <label class="flbl">Outlet</label>
-        <select class="finp" id="deliver-outlet"></select>
-      </div>
-      <div class="fgrp">
-        <label class="flbl">Product</label>
-        <select class="finp" id="deliver-product"></select>
-      </div>
-      <div class="fgrp">
-        <label class="flbl">Packets Delivered</label>
-        <input class="finp" type="number" id="deliver-qty" min="1" placeholder="e.g. 5"/>
-      </div>
-      <div class="fgrp">
-        <label class="flbl">Type</label>
-        <select class="finp" id="deliver-source">
-          <option value="beat">Beat plan visit</option>
-          <option value="ad_hoc">Store called / ad-hoc</option>
-        </select>
-      </div>
-      <div class="fgrp">
-        <label class="flbl">Notes (optional)</label>
-        <input class="finp" type="text" id="deliver-notes" placeholder=""/>
-      </div>
-      <button class="btn btn-blue" onclick="logDelivery()">✅ Log Delivery</button>
-    </div>
-  </div>
-
   <!-- TAB: LOG RETURN FROM OUTLET -->
   <div class="panel" id="panel-return">
-    <div class="card">
-      <div class="card-h">↩️ Log Return from Outlet</div>
-      <p style="font-size:.75rem;color:#94A3B8;margin-bottom:12px">Store called to return unsold packets, or you're picking up on a visit.</p>
-      <div class="fgrp">
-        <label class="flbl">Outlet</label>
-        <select class="finp" id="return-outlet"></select>
+    <p style="font-size:.76rem;color:#94A3B8;margin-bottom:10px">Tap a store to log how many packets are coming back.</p>
+    <div id="return-grid"><div class="empty">Loading...</div></div>
+
+    <!-- Return modal -->
+    <div id="return-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:flex-end" onclick="if(event.target===this)closeReturnModal()">
+      <div style="background:#1E293B;border-radius:16px 16px 0 0;padding:20px 16px 32px;width:100%;box-sizing:border-box">
+        <div style="font-size:.9rem;font-weight:700;color:#F1F5F9;margin-bottom:4px" id="rm-outlet-name">Outlet</div>
+        <div style="font-size:.75rem;color:#64748B;margin-bottom:16px">Outstanding: <span id="rm-outstanding" style="color:#FBBF24;font-weight:700">0</span> pkts</div>
+        <div class="fgrp"><label class="flbl">Packets Returning</label>
+          <input class="finp" type="number" id="rm-qty" min="1" placeholder="0"/>
+        </div>
+        <div class="fgrp"><label class="flbl">Condition</label>
+          <select class="finp" id="rm-condition">
+            <option value="returned">Good — back to warehouse</option>
+            <option value="discarded">Expired / damaged — discard</option>
+          </select>
+        </div>
+        <div class="fgrp"><label class="flbl">Notes (optional)</label>
+          <input class="finp" type="text" id="rm-notes" placeholder=""/>
+        </div>
+        <button class="btn btn-orange" style="margin-top:8px" onclick="submitReturn()">↩️ Confirm Return</button>
       </div>
-      <div class="fgrp">
-        <label class="flbl">Product</label>
-        <select class="finp" id="return-product"></select>
-      </div>
-      <div class="fgrp">
-        <label class="flbl">Packets Returned</label>
-        <input class="finp" type="number" id="return-qty" min="1" placeholder="e.g. 2"/>
-      </div>
-      <div class="fgrp">
-        <label class="flbl">Condition</label>
-        <select class="finp" id="return-condition">
-          <option value="returned">Good — back to warehouse</option>
-          <option value="discarded">Expired / damaged — discard</option>
-        </select>
-      </div>
-      <div class="fgrp">
-        <label class="flbl">Notes (optional)</label>
-        <input class="finp" type="text" id="return-notes" placeholder=""/>
-      </div>
-      <button class="btn btn-orange" onclick="logReturn()">↩️ Log Return</button>
     </div>
   </div>
 
@@ -403,6 +366,7 @@ async function logPickup() {
   const qty = parseInt(document.getElementById('pickup-qty').value);
   const notes = document.getElementById('pickup-notes').value;
   const outlet_id = document.getElementById('pickup-outlet').value || null;
+  if (!outlet_id) { alert('Select a store for this pickup.'); return; }
   if (!product_id || !qty || qty < 1) { alert('Select product and enter quantity.'); return; }
 
   const { error } = await db.from('stock_movements').insert({
@@ -417,44 +381,75 @@ async function logPickup() {
   loadStats(); loadMovements();
 }
 
-// ── Log Delivery ──────────────────────────────────────────────────────
-async function logDelivery() {
-  const outlet_id = document.getElementById('deliver-outlet').value;
-  const product_id = document.getElementById('deliver-product').value;
-  const qty = parseInt(document.getElementById('deliver-qty').value);
-  const source = document.getElementById('deliver-source').value;
-  const notes = document.getElementById('deliver-notes').value;
-  if (!outlet_id || !product_id || !qty || qty < 1) { alert('Select outlet, product and quantity.'); return; }
+// ── Return Grid ──────────────────────────────────────────────────────
+let returnGridData = {};
+async function loadReturnGrid() {
+  const { data: movs } = await db.from('stock_movements')
+    .select('outlet_id, qty_packets, movement_type, product_id, outlets(name,area), products(name)')
+    .eq('rep_id', currentUser.id)
+    .in('movement_type', ['warehouse_out','returned','discarded']);
 
-  const { error } = await db.from('stock_movements').insert({
-    rep_id: currentUser.id, product_id, outlet_id, qty_packets: qty,
-    movement_type: 'delivered', notes: notes || source, date: todayStr
+  const byOutlet = {};
+  (movs||[]).forEach(m => {
+    if (!m.outlet_id) return;
+    const id = m.outlet_id;
+    if (!byOutlet[id]) byOutlet[id] = {name:m.outlets?.name, area:m.outlets?.area, product_id:m.product_id, product:m.products?.name, delivered:0, returned:0};
+    if (m.movement_type === 'warehouse_out') byOutlet[id].delivered += m.qty_packets;
+    else byOutlet[id].returned += m.qty_packets;
   });
-  if (error) { alert('Error: ' + error.message); return; }
-  toast('✅ Delivery logged');
-  document.getElementById('deliver-qty').value = '';
-  document.getElementById('deliver-notes').value = '';
-  loadStats();
+
+  returnGridData = byOutlet;
+  const outstanding = Object.entries(byOutlet).filter(([,o]) => o.delivered > o.returned);
+  const el = document.getElementById('return-grid');
+
+  if (!outstanding.length) { el.innerHTML = '<div class="empty">✅ No outstanding stock at any store</div>'; return; }
+
+  el.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">` +
+    outstanding.map(([id, o]) => {
+      const qty = o.delivered - o.returned;
+      return `<div onclick="openReturnModal('${id}')" style="background:#1E293B;border:1px solid #334155;border-radius:12px;padding:14px;cursor:pointer;active:opacity:.7">
+        <div style="font-size:.82rem;font-weight:700;color:#F1F5F9;margin-bottom:4px">${o.name}</div>
+        <div style="font-size:.7rem;color:#64748B;margin-bottom:10px">${o.area}</div>
+        <div style="font-size:1.4rem;font-weight:700;font-family:monospace;color:#FBBF24">${qty}</div>
+        <div style="font-size:.65rem;color:#94A3B8;margin-top:2px">pkts outstanding</div>
+        <div style="margin-top:10px;background:#2563EB;color:#fff;border-radius:6px;padding:5px;text-align:center;font-size:.72rem;font-weight:700">↩️ Log Return</div>
+      </div>`;
+    }).join('') + `</div>`;
 }
 
-// ── Log Return ────────────────────────────────────────────────────────
-async function logReturn() {
-  const outlet_id = document.getElementById('return-outlet').value;
-  const product_id = document.getElementById('return-product').value;
-  const qty = parseInt(document.getElementById('return-qty').value);
-  const condition = document.getElementById('return-condition').value;
-  const notes = document.getElementById('return-notes').value;
-  if (!outlet_id || !product_id || !qty || qty < 1) { alert('Select outlet, product and quantity.'); return; }
+let activeReturnOutlet = null;
+function openReturnModal(outlet_id) {
+  const o = returnGridData[outlet_id];
+  activeReturnOutlet = {id: outlet_id, ...o};
+  document.getElementById('rm-outlet-name').textContent = o.name;
+  document.getElementById('rm-outstanding').textContent = (o.delivered - o.returned);
+  document.getElementById('rm-qty').value = '';
+  document.getElementById('rm-notes').value = '';
+  document.getElementById('return-modal').style.display = 'flex';
+}
+function closeReturnModal() {
+  document.getElementById('return-modal').style.display = 'none';
+  activeReturnOutlet = null;
+}
+async function submitReturn() {
+  if (!activeReturnOutlet) return;
+  const qty = parseInt(document.getElementById('rm-qty').value);
+  const condition = document.getElementById('rm-condition').value;
+  const notes = document.getElementById('rm-notes').value;
+  if (!qty || qty < 1) { alert('Enter quantity.'); return; }
 
   const { error } = await db.from('stock_movements').insert({
-    rep_id: currentUser.id, product_id, outlet_id, qty_packets: qty,
-    movement_type: condition, notes, date: todayStr
+    rep_id: currentUser.id,
+    outlet_id: activeReturnOutlet.id,
+    product_id: activeReturnOutlet.product_id,
+    qty_packets: qty,
+    movement_type: condition,
+    notes, date: todayStr
   });
   if (error) { alert('Error: ' + error.message); return; }
   toast('↩️ Return logged');
-  document.getElementById('return-qty').value = '';
-  document.getElementById('return-notes').value = '';
-  loadStats(); loadPendingOutlets();
+  closeReturnModal();
+  loadStats(); loadReturnGrid(); loadPendingOutlets();
 }
 
 // ── Settlement Preview ────────────────────────────────────────────────
@@ -631,12 +626,13 @@ async function loadPendingOutlets() {
 
 // ── Tab switch ────────────────────────────────────────────────────────
 function switchTab(name) {
-  document.querySelectorAll('.tab').forEach((t,i) => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  const tabs = ['pickup','deliver','return','settle'];
+  const tabs = ['pickup','return','settle'];
   const idx = tabs.indexOf(name);
   document.querySelectorAll('.tab')[idx].classList.add('active');
   document.getElementById('panel-'+name).classList.add('active');
+  if (name === 'return') loadReturnGrid();
 }
 
 // ── Toast ─────────────────────────────────────────────────────────────
