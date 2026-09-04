@@ -128,8 +128,12 @@
         <input class="finp" type="number" id="pickup-qty" min="1" placeholder="e.g. 20"/>
       </div>
       <div class="fgrp">
+        <label class="flbl">For Outlet <span style="color:#64748B;font-weight:400">(optional — e.g. sample)</span></label>
+        <select class="finp" id="pickup-outlet"></select>
+      </div>
+      <div class="fgrp">
         <label class="flbl">Notes (optional)</label>
-        <input class="finp" type="text" id="pickup-notes" placeholder="e.g. morning batch"/>
+        <input class="finp" type="text" id="pickup-notes" placeholder="e.g. morning batch / sample for new store"/>
       </div>
       <button class="btn btn-blue" onclick="logPickup()">✅ Log Pickup</button>
     </div>
@@ -328,7 +332,7 @@ function populateSelects() {
   ['pickup-product','deliver-product','return-product'].forEach(id => {
     document.getElementById(id).innerHTML = productOpts;
   });
-  ['deliver-outlet','return-outlet','settle-outlet'].forEach(id => {
+  ['pickup-outlet','deliver-outlet','return-outlet','settle-outlet'].forEach(id => {
     document.getElementById(id).innerHTML = '<option value="">-- Select Outlet --</option>' + outletOpts;
   });
 }
@@ -398,11 +402,13 @@ async function logPickup() {
   const product_id = document.getElementById('pickup-product').value;
   const qty = parseInt(document.getElementById('pickup-qty').value);
   const notes = document.getElementById('pickup-notes').value;
+  const outlet_id = document.getElementById('pickup-outlet').value || null;
   if (!product_id || !qty || qty < 1) { alert('Select product and enter quantity.'); return; }
 
   const { error } = await db.from('stock_movements').insert({
     rep_id: currentUser.id, product_id, qty_packets: qty,
-    movement_type: 'warehouse_out', notes, date: todayStr
+    movement_type: 'warehouse_out', notes, date: todayStr,
+    outlet_id
   });
   if (error) { alert('Error: ' + error.message); return; }
   toast('✅ Pickup logged');
