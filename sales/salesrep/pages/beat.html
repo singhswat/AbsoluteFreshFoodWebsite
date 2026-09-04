@@ -24,7 +24,7 @@
     .icon-btn{background:#1E293B;border:1px solid #334155;color:#94A3B8;border-radius:6px;
               padding:5px 10px;font-size:.8rem;cursor:pointer;white-space:nowrap}
     .icon-btn:hover{border-color:#60A5FA;color:#60A5FA}
-    .page-wrap{padding:10px 12px 80px}
+    .page-wrap{padding:10px 12px 90px}
 
     /* Stats row */
     .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
@@ -786,13 +786,33 @@
   </div>
 </div>
 
-<style>.page-wrap-beat{padding-bottom:70px}</style>
-<div class="bot-nav" style="position:fixed;bottom:0;left:0;right:0;background:#1E293B;border-top:1px solid #334155;display:flex;z-index:100">
-  <a href="beat.html" style="flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 4px;font-size:.6rem;color:#60A5FA;text-decoration:none;gap:2px"><span style="font-size:1.1rem">📋</span>Beat</a>
-  <a href="outlets.html" style="flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 4px;font-size:.6rem;color:#64748B;text-decoration:none;gap:2px"><span style="font-size:1.1rem">🏪</span>Outlets</a>
-  <a href="stock.html" style="flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 4px;font-size:.6rem;color:#64748B;text-decoration:none;gap:2px"><span style="font-size:1.1rem">📦</span>Stock</a>
-  <a href="orders.html" style="flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 4px;font-size:.6rem;color:#64748B;text-decoration:none;gap:2px"><span style="font-size:1.1rem">📝</span>Orders</a>
-  <a href="settings.html" style="flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 4px;font-size:.6rem;color:#64748B;text-decoration:none;gap:2px"><span style="font-size:1.1rem">⚙️</span>More</a>
-</div>
+
+<style>
+  html,body{height:100%;overflow-x:hidden}
+  .rep-bot-nav{
+    position:fixed;bottom:0;left:0;right:0;
+    background:#1E293B;
+    border-top:1px solid #334155;
+    display:flex;
+    z-index:9999;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .rep-bot-nav a{
+    flex:1;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    padding:8px 4px;font-size:.6rem;
+    color:#64748B;text-decoration:none;gap:2px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .rep-bot-nav a.active{color:#60A5FA}
+  .rep-bot-nav a span{font-size:1.2rem;line-height:1}
+</style>
+<nav class="rep-bot-nav">
+  <a href="beat.html" class="active"><span>📋</span>Beat</a>
+  <a href="outlets.html"><span>🏪</span>Outlets</a>
+  <a href="stock.html"><span>📦</span>Stock</a>
+  <a href="orders.html"><span>📝</span>Orders</a>
+  <a href="settings.html"><span>⚙️</span>More</a>
+</nav>
 </body>
 </html>
