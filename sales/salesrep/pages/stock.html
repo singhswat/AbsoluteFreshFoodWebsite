@@ -217,7 +217,7 @@ async function init() {
 async function loadGrid() {
   const selDate = document.getElementById('sel-date').value || today;
   const { data: movs } = await db.from('stock_movements')
-    .select('id,outlet_id,qty_packets,movement_type,product_id,notes,outlets(name,area),products(name,base_price)')
+    .select('id,outlet_id,qty_packets,movement_type,product_id,notes,date,created_at,outlets(name,area),products(name,base_price)')
     .eq('rep_id', currentUser.id)
     .eq('date', selDate)
     .not('outlet_id','is',null);
@@ -230,8 +230,9 @@ async function loadGrid() {
       name:m.outlets?.name, area:m.outlets?.area,
       product_id:m.product_id, product:m.products?.name,
       price:parseFloat(m.products?.base_price||0),
-      picked:0, returned:0
+      picked:0, returned:0, lastActivity: m.date
     };
+    if (m.date > (rowData[id].lastActivity||'')) rowData[id].lastActivity = m.date;
     if (m.movement_type==='warehouse_out') rowData[id].picked += m.qty_packets;
     if (m.movement_type==='returned'||m.movement_type==='discarded') rowData[id].returned += m.qty_packets;
   });
@@ -278,6 +279,7 @@ function renderGrid(data, settledMap) {
     const outCls = outstanding===0 ? 'zero' : 'pos';
     return `<tr>
       <td class="store-col">${r.name}<div class="area">${r.area}</div></td>
+      <td style="font-size:.72rem;color:#64748B;white-space:nowrap">${r.lastActivity||'—'}</td>
       <td><input class="n-inp" type="number" value="${r.picked}" min="0" onchange="markDirty(this,'${id}','picked',${r.price})" oninput="markDirty(this,'${id}','picked',${r.price})"/></td>
       <td><input class="n-inp" type="number" value="${r.returned}" min="0" onchange="markDirty(this,'${id}','returned',${r.price})" oninput="markDirty(this,'${id}','returned',${r.price})"/></td>
       <td><span class="out-badge ${outCls}">${outstanding}</span></td>
@@ -290,7 +292,7 @@ function renderGrid(data, settledMap) {
 
   gc.innerHTML = `<table>
     <thead><tr>
-      <th>Store</th><th>Picked</th><th>Returned</th><th>Out</th><th>Action</th>
+      <th>Store</th><th>Date</th><th>Picked</th><th>Returned</th><th>Out</th><th>Action</th>
     </tr></thead>
     <tbody>${rows}</tbody>
   </table>`;
