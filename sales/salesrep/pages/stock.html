@@ -219,16 +219,22 @@ async function loadGrid() {
   // Check settled outlets
   const { data: settles } = await db.from('settlements').select('outlet_id,qty_sold,qty_returned,amount_collected').eq('rep_id',currentUser.id);
   const settledMap = {};
-  (settles||[]).forEach(s => { settledMap[s.outlet_id] = s; });
+  const settledSold = {}; // total qty_sold per outlet across all settlements
+  (settles||[]).forEach(s => {
+    settledMap[s.outlet_id] = s;
+    settledSold[s.outlet_id] = (settledSold[s.outlet_id]||0) + (s.qty_sold||0);
+  });
 
   // Stats
   let totalPicked=0, totalOutlets=0, totalReturned=0, totalSettled=0;
   Object.entries(rowData).forEach(([id,r]) => {
     totalPicked += r.picked;
     totalReturned += r.returned;
-    const outstanding = r.picked - r.returned;
-    if (settledMap[id]) totalSettled += settledMap[id].qty_sold;
-    else totalOutlets += outstanding;
+    const prevSold = settledSold[id]||0;
+    const outstanding = r.picked - r.returned - prevSold;
+    r.prevSold = prevSold; // store for settle sheet
+    totalSettled += prevSold;
+    if (outstanding > 0) totalOutlets += outstanding;
   });
   document.getElementById('s-picked').textContent = totalPicked;
   document.getElementById('s-outlets').textContent = totalOutlets;
@@ -244,7 +250,7 @@ function renderGrid(data, settledMap) {
   if (!entries.length) { gc.innerHTML = '<div class="empty">No pickups yet today.<br>Tap "+ Add Store" to begin.</div>'; return; }
 
   const rows = entries.map(([id, r]) => {
-    const outstanding = r.picked - r.returned;
+    const outstanding = r.picked - r.returned - (r.prevSold||0);
     const settled = !!settledMap[id];
     const outCls = outstanding===0 ? 'zero' : 'pos';
     return `<tr>
@@ -371,7 +377,8 @@ async function completeSettle() {
   const amount_due = qty_sold * settleTarget.price;
 
   if (qty_sold + qty_returning > settleTarget.outstanding) {
-    alert(`Total (${qty_sold+qty_returning}) exceeds outstanding (${settleTarget.outstanding}).`); return;
+    const ok = confirm(`Total (${qty_sold+qty_returning}) exceeds outstanding (${settleTarget.outstanding}). Proceed anyway?`);
+    if (!ok) return;
   }
 
   if (qty_returning > 0) {
