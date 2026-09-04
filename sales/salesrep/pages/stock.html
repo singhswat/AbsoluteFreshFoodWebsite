@@ -230,9 +230,10 @@ async function loadGrid() {
       name:m.outlets?.name, area:m.outlets?.area,
       product_id:m.product_id, product:m.products?.name,
       price:parseFloat(m.products?.base_price||0),
-      picked:0, returned:0, lastActivity: m.date
+      picked:0, returned:0, lastActivity: m.date, firstPickup: m.date
     };
     if (m.date > (rowData[id].lastActivity||'')) rowData[id].lastActivity = m.date;
+    if (m.movement_type==='warehouse_out' && m.date < (rowData[id].firstPickup||'9999')) rowData[id].firstPickup = m.date;
     if (m.movement_type==='warehouse_out') rowData[id].picked += m.qty_packets;
     if (m.movement_type==='returned'||m.movement_type==='discarded') rowData[id].returned += m.qty_packets;
   });
@@ -283,6 +284,15 @@ function renderGrid(data, settledMap) {
     return `<tr style="${settled && !isAdmin ? 'opacity:.75' : ''}">
       <td class="store-col">${r.name}<div class="area">${r.area}</div></td>
       <td style="font-size:.72rem;color:#64748B;white-space:nowrap">${r.lastActivity||'—'}</td>
+      <td style="font-size:.72rem;font-weight:700;white-space:nowrap">${(()=>{
+        if (!r.firstPickup) return '<span style="color:#64748B">—</span>';
+        const exp = new Date(r.firstPickup);
+        exp.setDate(exp.getDate()+10);
+        const daysLeft = Math.ceil((exp - new Date()) / 86400000);
+        const expStr = exp.toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+        const col = daysLeft <= 2 ? '#F87171' : daysLeft <= 5 ? '#FBBF24' : '#4ADE80';
+        return '<span style="color:'+col+'">'+expStr+' ('+daysLeft+'d)</span>';
+      })()}</td>
       <td><input class="n-inp" type="number" value="${r.picked}" min="0" ${disAttr} onchange="markDirty(this,'${id}','picked',${r.price})" oninput="markDirty(this,'${id}','picked',${r.price})"/></td>
       <td><input class="n-inp" type="number" value="${r.returned}" min="0" ${disAttr} onchange="markDirty(this,'${id}','returned',${r.price})" oninput="markDirty(this,'${id}','returned',${r.price})"/></td>
       <td><span class="out-badge ${outCls}">${outstanding}</span></td>
@@ -295,7 +305,7 @@ function renderGrid(data, settledMap) {
 
   gc.innerHTML = `<table>
     <thead><tr>
-      <th>Store</th><th>Date</th><th>Picked</th><th>Returned</th><th>Out</th><th>Action</th>
+      <th>Store</th><th>Date</th><th>Expiry</th><th>Picked</th><th>Returned</th><th>Out</th><th>Action</th>
     </tr></thead>
     <tbody>${rows}</tbody>
   </table>`;
