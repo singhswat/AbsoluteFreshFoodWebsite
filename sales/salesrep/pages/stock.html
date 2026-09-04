@@ -347,10 +347,11 @@ function openSettle(outletId) {
   settleTarget = {id:outletId, ...r, outstanding};
   document.getElementById('sh-name').textContent = r.name;
   document.getElementById('sh-sub').textContent = r.area + ' · ' + outstanding + ' pkts outstanding';
-  document.getElementById('sh-sold').value='';
-  document.getElementById('sh-returning').value='';
-  document.getElementById('sh-collected').value='';
-  document.getElementById('sh-due').textContent='₹0';
+  // Pre-fill with outstanding qty and expected amount
+  document.getElementById('sh-sold').value = outstanding > 0 ? outstanding : '';
+  document.getElementById('sh-returning').value = '';
+  document.getElementById('sh-collected').value = outstanding > 0 ? (outstanding * r.price).toFixed(0) : '';
+  document.getElementById('sh-due').textContent = outstanding > 0 ? '₹'+(outstanding * r.price).toFixed(2) : '₹0';
   document.getElementById('sh-info').innerHTML = `
     <div class="info-row"><span style="color:#94A3B8">Delivered</span><span class="info-val">${r.picked} pkts</span></div>
     <div class="info-row"><span style="color:#94A3B8">Returned so far</span><span class="info-val">${r.returned} pkts</span></div>
@@ -370,43 +371,78 @@ function calcSheet() {
 
 async function completeSettle() {
   if (!settleTarget) return;
-  const qty_sold = parseInt(document.getElementById('sh-sold').value)||0;
-  const qty_returning = parseInt(document.getElementById('sh-returning').value)||0;
-  const collected = parseFloat(document.getElementById('sh-collected').value)||0;
-  const method = document.getElementById('sh-method').value;
-  const amount_due = qty_sold * settleTarget.price;
 
-  if (qty_sold + qty_returning > settleTarget.outstanding) {
-    const ok = confirm(`Total (${qty_sold+qty_returning}) exceeds outstanding (${settleTarget.outstanding}). Proceed anyway?`);
-    if (!ok) return;
-  }
+  // Disable button to prevent double-tap
+  const btn = document.querySelector('.btn-green-full');
+  if (btn.disabled) return;
+  btn.disabled = true;
+  btn.textContent = '⏳ Saving...';
 
-  if (qty_returning > 0) {
-    await db.from('stock_movements').insert({
-      rep_id:currentUser.id, outlet_id:settleTarget.id, product_id:settleTarget.product_id,
-      qty_packets:qty_returning, movement_type:'returned', date:today, notes:'settlement return'
+  try {
+    const qty_sold = parseInt(document.getElementById('sh-sold').value)||0;
+    const qty_returning = parseInt(document.getElementById('sh-returning').value)||0;
+    const collected = parseFloat(document.getElementById('sh-collected').value)||0;
+    const method = document.getElementById('sh-method').value;
+    const amount_due = qty_sold * settleTarget.price;
+
+    if (qty_sold + qty_returning > settleTarget.outstanding) {
+      const ok = confirm(`Total (${qty_sold+qty_returning}) exceeds outstanding (${settleTarget.outstanding}). Proceed anyway?`);
+      if (!ok) { btn.disabled=false; btn.textContent='✅ Settle & Generate Invoice'; return; }
+    }
+
+    // Duplicate check — same outlet, same date, same qty_sold
+    const { data: existing } = await db.from('settlements')
+      .select('id,invoice_id')
+      .eq('outlet_id', settleTarget.id)
+      .eq('rep_id', currentUser.id)
+      .gte('settled_at', today+'T00:00:00')
+      .lte('settled_at', today+'T23:59:59');
+
+    if (existing && existing.length > 0) {
+      const proceed = confirm(`A settlement for ${settleTarget.name} already exists today. Create another one?`);
+      if (!proceed) { btn.disabled=false; btn.textContent='✅ Settle & Generate Invoice'; return; }
+    }
+
+    // Log return movement
+    if (qty_returning > 0) {
+      await db.from('stock_movements').insert({
+        rep_id:currentUser.id, outlet_id:settleTarget.id, product_id:settleTarget.product_id,
+        qty_packets:qty_returning, movement_type:'returned', date:today, notes:'settlement return'
+      });
+    }
+
+    // Create settlement
+    const { data: s, error: sErr } = await db.from('settlements').insert({
+      rep_id:currentUser.id, outlet_id:settleTarget.id,
+      qty_delivered:settleTarget.picked, qty_sold,
+      qty_returned:settleTarget.returned+qty_returning,
+      amount_due, amount_collected:collected, payment_method:method
+    }).select().single();
+
+    if (sErr) throw new Error(sErr.message);
+
+    // Generate invoice with settlement_id as idempotency anchor
+    const inv = 'AFF-'+today.replace(/-/g,'')+'-'+settleTarget.id.slice(0,4).toUpperCase();
+    const { error: iErr } = await db.from('b2b_invoices').insert({
+      invoice_number:inv, invoice_date:today, due_date:today,
+      company_name:settleTarget.name, subtotal:amount_due, gst_total:0, grand_total:amount_due,
+      items:[{name:settleTarget.product, qty:qty_sold, rate:settleTarget.price, amount:(qty_sold*settleTarget.price).toFixed(2)}],
+      status:collected>=amount_due?'paid':'pending',
+      settlement_id:s.id, outlet_id:settleTarget.id,
+      rep_name:currentUser.name, created_by:currentUser.id,
+      notes:`Sold:${qty_sold} Returned:${qty_returning} Collected:₹${collected}`
     });
+
+    if (iErr) throw new Error('Invoice error: '+iErr.message);
+
+    toast('✅ Invoice '+inv+' created!');
+    closeSettle();
+    await loadGrid();
+  } catch(e) {
+    alert('Error: '+e.message);
+    btn.disabled=false;
+    btn.textContent='✅ Settle & Generate Invoice';
   }
-
-  const { data: s } = await db.from('settlements').insert({
-    rep_id:currentUser.id, outlet_id:settleTarget.id,
-    qty_delivered:settleTarget.picked, qty_sold,
-    qty_returned:settleTarget.returned+qty_returning,
-    amount_due, amount_collected:collected, payment_method:method
-  }).select().single();
-
-  const inv = 'AFF-'+Date.now().toString().slice(-6);
-  await db.from('b2b_invoices').insert({
-    invoice_number:inv, invoice_date:today, due_date:today,
-    company_name:settleTarget.name, subtotal:amount_due, gst_total:0, grand_total:amount_due,
-    items:[{name:settleTarget.product, qty:qty_sold, rate:settleTarget.price, amount:(qty_sold*settleTarget.price).toFixed(2)}],
-    status:collected>=amount_due?'paid':'pending',
-    settlement_id:s?.id, outlet_id:settleTarget.id, rep_name:currentUser.name, created_by:currentUser.id
-  });
-
-  toast('✅ Settled! Invoice '+inv);
-  closeSettle();
-  await loadGrid();
 }
 
 function toast(msg) {
