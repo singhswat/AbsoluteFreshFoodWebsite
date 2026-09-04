@@ -108,7 +108,7 @@
 <div class="grid-wrap">
   <div class="grid-label">
     <span>Today's Stores</span>
-    <button class="btn-add-row" onclick="toggleAddRow()">+ Add Store</button>
+    <button class="btn-add-row" onclick="toggleAddRow()">+ Log Pickup</button>
   </div>
 
   <!-- Add row form -->
@@ -271,7 +271,7 @@ async function loadGrid() {
 function renderGrid(data, settledMap) {
   const entries = Object.entries(data);
   const gc = document.getElementById('grid-container');
-  if (!entries.length) { gc.innerHTML = '<div class="empty">No pickups yet today.<br>Tap "+ Add Store" to begin.</div>'; return; }
+  if (!entries.length) { gc.innerHTML = '<div class="empty">No pickups yet today.<br>Tap "+ Log Pickup" to begin.</div>'; return; }
 
   const rows = entries.map(([id, r]) => {
     const outstanding = r.picked - r.returned - (r.prevSold||0);
