@@ -408,21 +408,17 @@ async function completeSettle() {
     const method = document.getElementById('sh-method').value;
     const amount_due = qty_sold * settleTarget.price;
 
-    if (qty_sold + qty_returning > settleTarget.outstanding) {
-      const ok = confirm(`Total (${qty_sold+qty_returning}) exceeds outstanding (${settleTarget.outstanding}). Proceed anyway?`);
-      if (!ok) { btn.disabled=false; btn.textContent='✅ Settle & Generate Invoice'; return; }
-    }
-
-    // Duplicate check — same outlet, same date, same qty_sold
+    // Duplicate check — same outlet, same date
     const { data: existing } = await db.from('settlements')
-      .select('id,invoice_id')
+      .select('id')
       .eq('outlet_id', settleTarget.id)
       .eq('rep_id', currentUser.id)
       .gte('settled_at', today+'T00:00:00')
-      .lte('settled_at', today+'T23:59:59');
+      .lte('settled_at', today+'T23:59:59')
+      .limit(1);
 
     if (existing && existing.length > 0) {
-      const proceed = confirm(`A settlement for ${settleTarget.name} already exists today. Create another one?`);
+      const proceed = confirm(`Already settled ${settleTarget.name} today. Add another settlement?`);
       if (!proceed) { btn.disabled=false; btn.textContent='✅ Settle & Generate Invoice'; return; }
     }
 
