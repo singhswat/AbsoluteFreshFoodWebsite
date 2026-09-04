@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stock Dashboard — AFF Admin</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <meta name="theme-color" content="#1E293B"/>
+  <style>
+    body{background:#0F172A;color:#CBD5E1;font-family:system-ui,sans-serif;margin:0}
+    .top-bar{background:#1E293B;border-bottom:1px solid #334155;padding:10px 14px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:50}
+    .top-bar h1{font-size:.95rem;font-weight:700;color:#F1F5F9;flex:1}
+    .chip{background:#312e81;color:#a5b4fc;border-radius:6px;padding:2px 8px;font-size:.72rem;font-weight:600}
+    .page-wrap{padding:10px 12px 100px}
+
+    /* Date bar */
+    .date-bar{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+    .date-bar input{background:#1E293B;border:1px solid #334155;color:#F1F5F9;border-radius:8px;padding:6px 10px;font-size:.8rem;outline:none;flex:1}
+    .date-bar button{background:#2563EB;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:.8rem;font-weight:600;cursor:pointer}
+
+    /* Big stats */
+    .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px}
+    .s-card{background:#1E293B;border:1px solid #334155;border-radius:10px;padding:14px}
+    .s-lbl{font-size:.65rem;color:#94A3B8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+    .s-val{font-size:1.5rem;font-weight:700;font-family:monospace}
+    .s-val.green{color:#4ADE80}
+    .s-val.blue{color:#60A5FA}
+    .s-val.yellow{color:#FBBF24}
+    .s-val.red{color:#F87171}
+    .s-val.purple{color:#a78bfa}
+    .s-sub{font-size:.7rem;color:#64748B;margin-top:4px}
+
+    /* Section */
+    .section{margin-bottom:18px}
+    .sec-hd{font-size:.78rem;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+
+    /* Card */
+    .card{background:#1E293B;border:1px solid #334155;border-radius:12px;padding:14px;margin-bottom:10px}
+    .card-h{font-size:.82rem;font-weight:700;color:#F1F5F9;margin-bottom:12px}
+
+    /* Form */
+    .flbl{font-size:.7rem;color:#94A3B8;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
+    .finp{width:100%;background:#0F172A;border:1px solid #334155;color:#F1F5F9;border-radius:8px;padding:8px 10px;font-size:.85rem;outline:none;box-sizing:border-box}
+    .finp:focus{border-color:#60A5FA}
+    .fgrp{margin-bottom:10px}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .btn{width:100%;padding:10px;border-radius:9px;font-size:.85rem;font-weight:700;cursor:pointer;border:none;margin-top:4px}
+    .btn-blue{background:#2563EB;color:#fff}
+    .btn-green{background:#16A34A;color:#fff}
+
+    /* Rep rows */
+    .rep-row{background:#0F172A;border-radius:9px;padding:11px 13px;margin-bottom:6px}
+    .rep-name{font-size:.85rem;font-weight:700;color:#F1F5F9;margin-bottom:8px}
+    .rep-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+    .rs-item{text-align:center}
+    .rs-lbl{font-size:.58rem;color:#64748B;text-transform:uppercase}
+    .rs-val{font-size:.9rem;font-weight:700;font-family:monospace}
+
+    /* Outlet expiry rows */
+    .outlet-row{background:#0F172A;border-radius:9px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
+    .outlet-name{font-size:.82rem;font-weight:600;color:#F1F5F9}
+    .outlet-meta{font-size:.7rem;color:#64748B;margin-top:2px}
+    .day-badge{font-size:.7rem;padding:3px 10px;border-radius:20px;font-weight:700}
+    .day-ok{background:#14532d;color:#4ADE80}
+    .day-warn{background:#78350f;color:#FBBF24}
+    .day-danger{background:#7f1d1d;color:#F87171}
+
+    /* Settlement rows */
+    .settle-row{background:#0F172A;border-radius:9px;padding:10px 12px;margin-bottom:6px}
+    .settle-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}
+    .settle-outlet{font-size:.82rem;font-weight:600;color:#F1F5F9}
+    .settle-amt{font-size:.9rem;font-weight:700;font-family:monospace;color:#FBBF24}
+    .settle-meta{font-size:.7rem;color:#64748B}
+    .status-badge{font-size:.65rem;padding:2px 8px;border-radius:20px;font-weight:600}
+    .s-paid{background:#14532d;color:#4ADE80}
+    .s-pending{background:#78350f;color:#FBBF24}
+
+    /* Tabs */
+    .tabs{display:flex;gap:4px;margin-bottom:12px;background:#1E293B;border-radius:10px;padding:4px}
+    .tab{flex:1;text-align:center;padding:7px 4px;font-size:.72rem;font-weight:600;border-radius:7px;cursor:pointer;color:#94A3B8;border:none;background:none}
+    .tab.active{background:#7C3AED;color:#fff}
+    .panel{display:none}
+    .panel.active{display:block}
+
+    /* Production log list */
+    .prod-item{background:#0F172A;border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+    .prod-name{font-size:.82rem;font-weight:600;color:#F1F5F9}
+    .prod-meta{font-size:.7rem;color:#64748B;margin-top:2px}
+    .prod-qty{font-size:1.1rem;font-weight:700;font-family:monospace;color:#4ADE80}
+
+    .empty{text-align:center;padding:28px;color:#64748B;font-size:.82rem}
+    .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#16A34A;color:#fff;padding:10px 20px;border-radius:8px;font-size:.82rem;font-weight:600;z-index:200;display:none}
+
+    /* Bottom nav */
+    .bot-nav{position:fixed;bottom:0;left:0;right:0;background:#1E293B;border-top:1px solid #334155;display:flex;z-index:100}
+    .bot-nav a{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 4px;font-size:.6rem;color:#64748B;text-decoration:none;gap:2px}
+    .bot-nav a.active{color:#a78bfa}
+    .bot-nav a span{font-size:1.1rem}
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <h1>🏭 Stock Dashboard</h1>
+  <span class="chip">Admin</span>
+</div>
+
+<div class="page-wrap">
+
+  <!-- Date selector -->
+  <div class="date-bar">
+    <input type="date" id="sel-date"/>
+    <button onclick="loadAll()">Load</button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('overview')">📊 Overview</button>
+    <button class="tab" onclick="switchTab('production')">🏭 Production</button>
+    <button class="tab" onclick="switchTab('alerts')">⏰ Alerts</button>
+    <button class="tab" onclick="switchTab('settlements')">💰 Settlements</button>
+  </div>
+
+  <!-- OVERVIEW TAB -->
+  <div class="panel active" id="panel-overview">
+    <div class="stats-grid">
+      <div class="s-card"><div class="s-lbl">Produced Today</div><div class="s-val blue" id="stat-produced">—</div><div class="s-sub">packets</div></div>
+      <div class="s-card"><div class="s-lbl">Picked by Reps</div><div class="s-val yellow" id="stat-picked">—</div><div class="s-sub">from warehouse</div></div>
+      <div class="s-card"><div class="s-lbl">At Outlets</div><div class="s-val red" id="stat-at-outlets">—</div><div class="s-sub">unsettled</div></div>
+      <div class="s-card"><div class="s-lbl">Returned Today</div><div class="s-val green" id="stat-returned">—</div><div class="s-sub">packets</div></div>
+      <div class="s-card"><div class="s-lbl">Sold (settled)</div><div class="s-val green" id="stat-sold">—</div><div class="s-sub">packets</div></div>
+      <div class="s-card"><div class="s-lbl">Revenue Collected</div><div class="s-val purple" id="stat-revenue">—</div><div class="s-sub">₹ today</div></div>
+    </div>
+
+    <div class="section">
+      <div class="sec-hd">👤 Rep-wise Stock Position</div>
+      <div id="rep-list"><div class="empty">Loading...</div></div>
+    </div>
+  </div>
+
+  <!-- PRODUCTION TAB -->
+  <div class="panel" id="panel-production">
+    <div class="card">
+      <div class="card-h">📝 Log Production</div>
+      <div class="fgrp">
+        <label class="flbl">Product</label>
+        <select class="finp" id="prod-product"></select>
+      </div>
+      <div class="form-row">
+        <div class="fgrp">
+          <label class="flbl">Packets Produced</label>
+          <input class="finp" type="number" id="prod-qty" min="1" placeholder="e.g. 50"/>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">Date</label>
+          <input class="finp" type="date" id="prod-date"/>
+        </div>
+      </div>
+      <div class="fgrp">
+        <label class="flbl">Notes (batch, variant, etc.)</label>
+        <input class="finp" type="text" id="prod-notes" placeholder="e.g. Morning batch, idli batter"/>
+      </div>
+      <button class="btn btn-green" onclick="logProduction()">✅ Log Production</button>
+    </div>
+
+    <div class="section">
+      <div class="sec-hd">📋 Production History</div>
+      <div id="prod-history"><div class="empty">Loading...</div></div>
+    </div>
+  </div>
+
+  <!-- ALERTS TAB -->
+  <div class="panel" id="panel-alerts">
+    <div class="section">
+      <div class="sec-hd">🔴 Approaching Expiry (Day 7+)</div>
+      <div id="expiry-list"><div class="empty">Loading...</div></div>
+    </div>
+    <div class="section">
+      <div class="sec-hd">🟡 Pending Settlements</div>
+      <div id="pending-settle-list"><div class="empty">Loading...</div></div>
+    </div>
+  </div>
+
+  <!-- SETTLEMENTS TAB -->
+  <div class="panel" id="panel-settlements">
+    <div class="section">
+      <div class="sec-hd">💰 Recent Settlements</div>
+      <div id="settle-list"><div class="empty">Loading...</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Bottom Nav -->
+<div class="bot-nav">
+  <a href="dashboard.html"><span>📊</span>Dashboard</a>
+  <a href="outlets.html"><span>🏪</span>Outlets</a>
+  <a href="stock-admin.html" class="active"><span>🏭</span>Stock</a>
+  <a href="orders.html"><span>📝</span>Orders</a>
+  <a href="settings.html"><span>⚙️</span>Settings</a>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPA_URL = 'https://fbfopgzblqmsflkfejwa.supabase.co';
+const SUPA_KEY = 'sb_publishable_r7mYhsyIKtBjBKzxH8St9g_OHjTU-RQ';
+const db = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+let currentUser = null;
+let products = [];
+let todayStr = new Date().toISOString().split('T')[0];
+
+async function init() {
+  const raw = sessionStorage.getItem('aff_session');
+  if (!raw) { location.href = '../index.html'; return; }
+  currentUser = JSON.parse(raw);
+  if (currentUser.role !== 'admin') { location.href = 'stock.html'; return; }
+
+  document.getElementById('sel-date').value = todayStr;
+  document.getElementById('prod-date').value = todayStr;
+
+  const { data } = await db.from('products').select('id,name,base_price').eq('is_active', true);
+  products = data || [];
+  const opts = products.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+  document.getElementById('prod-product').innerHTML = opts;
+
+  loadAll();
+}
+
+async function loadAll() {
+  const date = document.getElementById('sel-date').value || todayStr;
+  await Promise.all([loadOverview(date), loadProductionHistory(), loadAlerts(), loadSettlements()]);
+}
+
+// ── Overview ─────────────────────────────────────────────────────────
+async function loadOverview(date) {
+  // Production today
+  const { data: prods } = await db.from('production_logs').select('qty_produced').eq('date', date);
+  const produced = (prods||[]).reduce((s,p) => s + p.qty_produced, 0);
+
+  // Movements today
+  const { data: movs } = await db.from('stock_movements').select('movement_type, qty_packets, rep_id, users(name)').eq('date', date);
+
+  let picked = 0, delivered = 0, returned = 0;
+  const byRep = {};
+  (movs||[]).forEach(m => {
+    const rname = m.users?.name || m.rep_id?.slice(0,6);
+    if (!byRep[m.rep_id]) byRep[m.rep_id] = {name: rname, picked:0, delivered:0, returned:0};
+    if (m.movement_type === 'warehouse_out') { picked += m.qty_packets; byRep[m.rep_id].picked += m.qty_packets; }
+    if (m.movement_type === 'delivered') { delivered += m.qty_packets; byRep[m.rep_id].delivered += m.qty_packets; }
+    if (m.movement_type === 'returned') { returned += m.qty_packets; byRep[m.rep_id].returned += m.qty_packets; }
+  });
+
+  // All-time outstanding
+  const { data: allMovs } = await db.from('stock_movements').select('movement_type, qty_packets');
+  let totalDel = 0, totalRet = 0, totalPicked = 0;
+  (allMovs||[]).forEach(m => {
+    if (m.movement_type === 'warehouse_out') totalPicked += m.qty_packets;
+    if (m.movement_type === 'delivered') totalDel += m.qty_packets;
+    if (m.movement_type === 'returned' || m.movement_type === 'discarded') totalRet += m.qty_packets;
+  });
+  const atOutlets = Math.max(0, totalDel - totalRet);
+
+  // Settlements today
+  const { data: settles } = await db.from('settlements').select('qty_sold, amount_collected').gte('settled_at', date + 'T00:00:00').lte('settled_at', date + 'T23:59:59');
+  const sold = (settles||[]).reduce((s,x) => s + (x.qty_sold||0), 0);
+  const revenue = (settles||[]).reduce((s,x) => s + parseFloat(x.amount_collected||0), 0);
+
+  document.getElementById('stat-produced').textContent = produced;
+  document.getElementById('stat-picked').textContent = picked;
+  document.getElementById('stat-at-outlets').textContent = atOutlets;
+  document.getElementById('stat-returned').textContent = returned;
+  document.getElementById('stat-sold').textContent = sold;
+  document.getElementById('stat-revenue').textContent = '₹' + revenue.toFixed(0);
+
+  // Rep list
+  const repEl = document.getElementById('rep-list');
+  const repEntries = Object.values(byRep);
+  if (!repEntries.length) { repEl.innerHTML = '<div class="empty">No movements on this date</div>'; return; }
+  repEl.innerHTML = repEntries.map(r => `
+    <div class="rep-row">
+      <div class="rep-name">👤 ${r.name}</div>
+      <div class="rep-stats">
+        <div class="rs-item"><div class="rs-lbl">Picked</div><div class="rs-val" style="color:#60A5FA">${r.picked}</div></div>
+        <div class="rs-item"><div class="rs-lbl">Delivered</div><div class="rs-val" style="color:#FBBF24">${r.delivered}</div></div>
+        <div class="rs-item"><div class="rs-lbl">In Hand</div><div class="rs-val" style="color:#4ADE80">${Math.max(0,r.picked-r.delivered)}</div></div>
+        <div class="rs-item"><div class="rs-lbl">Returned</div><div class="rs-val" style="color:#F87171">${r.returned}</div></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Production history ────────────────────────────────────────────────
+async function loadProductionHistory() {
+  const { data } = await db.from('production_logs')
+    .select('*, products(name), users(name)')
+    .order('created_at', {ascending: false})
+    .limit(30);
+
+  const el = document.getElementById('prod-history');
+  if (!data || !data.length) { el.innerHTML = '<div class="empty">No production logs yet</div>'; return; }
+  el.innerHTML = data.map(p => {
+    const d = new Date(p.created_at).toLocaleDateString('en-IN', {day:'numeric',month:'short'});
+    return `<div class="prod-item">
+      <div>
+        <div class="prod-name">${p.products?.name || '—'}</div>
+        <div class="prod-meta">${d} · by ${p.users?.name || 'Admin'}${p.notes ? ' · ' + p.notes : ''}</div>
+      </div>
+      <div class="prod-qty">+${p.qty_produced}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── Log production ────────────────────────────────────────────────────
+async function logProduction() {
+  const product_id = document.getElementById('prod-product').value;
+  const qty = parseInt(document.getElementById('prod-qty').value);
+  const date = document.getElementById('prod-date').value || todayStr;
+  const notes = document.getElementById('prod-notes').value;
+  if (!product_id || !qty || qty < 1) { alert('Select product and enter quantity.'); return; }
+
+  const { error } = await db.from('production_logs').insert({
+    product_id, qty_produced: qty, date, notes, logged_by: currentUser.id
+  });
+  if (error) { alert('Error: ' + error.message); return; }
+  toast('✅ Production logged');
+  document.getElementById('prod-qty').value = '';
+  document.getElementById('prod-notes').value = '';
+  loadOverview(document.getElementById('sel-date').value || todayStr);
+  loadProductionHistory();
+}
+
+// ── Alerts ────────────────────────────────────────────────────────────
+async function loadAlerts() {
+  const { data: movs } = await db.from('stock_movements')
+    .select('outlet_id, qty_packets, movement_type, created_at, outlets(name,area), products(name)')
+    .in('movement_type', ['delivered','returned','discarded'])
+    .not('outlet_id', 'is', null)
+    .order('created_at', {ascending: true});
+
+  const byOutlet = {};
+  (movs||[]).forEach(m => {
+    const id = m.outlet_id;
+    if (!byOutlet[id]) byOutlet[id] = {name: m.outlets?.name, area: m.outlets?.area, product: m.products?.name, delivered:0, returned:0, firstDelivery: m.created_at};
+    if (m.movement_type === 'delivered') byOutlet[id].delivered += m.qty_packets;
+    else byOutlet[id].returned += m.qty_packets;
+    if (new Date(m.created_at) < new Date(byOutlet[id].firstDelivery)) byOutlet[id].firstDelivery = m.created_at;
+  });
+
+  const outstanding = Object.entries(byOutlet).filter(([,o]) => o.delivered > o.returned).map(([id,o]) => {
+    const days = Math.floor((Date.now() - new Date(o.firstDelivery)) / 86400000);
+    return {...o, id, days, qty: o.delivered - o.returned};
+  }).sort((a,b) => b.days - a.days);
+
+  const expiryEl = document.getElementById('expiry-list');
+  const danger = outstanding.filter(o => o.days >= 7);
+  if (!danger.length) { expiryEl.innerHTML = '<div class="empty">✅ No outlets approaching expiry</div>'; }
+  else expiryEl.innerHTML = danger.map(o => {
+    const cls = o.days >= 9 ? 'day-danger' : 'day-warn';
+    return `<div class="outlet-row">
+      <div>
+        <div class="outlet-name">${o.name}</div>
+        <div class="outlet-meta">${o.area} · ${o.qty} pkts · ${o.product||''}</div>
+      </div>
+      <div class="day-badge ${cls}">Day ${o.days}</div>
+    </div>`;
+  }).join('');
+
+  const pendingEl = document.getElementById('pending-settle-list');
+  if (!outstanding.length) { pendingEl.innerHTML = '<div class="empty">✅ All outlets settled</div>'; }
+  else pendingEl.innerHTML = outstanding.map(o => {
+    const cls = o.days >= 9 ? 'day-danger' : o.days >= 7 ? 'day-warn' : 'day-ok';
+    return `<div class="outlet-row">
+      <div>
+        <div class="outlet-name">${o.name}</div>
+        <div class="outlet-meta">${o.area} · ${o.qty} pkts outstanding</div>
+      </div>
+      <div class="day-badge ${cls}">Day ${o.days}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── Settlements ───────────────────────────────────────────────────────
+async function loadSettlements() {
+  const { data } = await db.from('settlements')
+    .select('*, outlets(name,area), users(name)')
+    .order('settled_at', {ascending: false})
+    .limit(50);
+
+  const el = document.getElementById('settle-list');
+  if (!data || !data.length) { el.innerHTML = '<div class="empty">No settlements yet</div>'; return; }
+  el.innerHTML = data.map(s => {
+    const d = new Date(s.settled_at).toLocaleDateString('en-IN', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+    const paid = s.amount_collected >= s.amount_due;
+    const cls = paid ? 's-paid' : 's-pending';
+    const label = paid ? 'Paid' : 'Pending';
+    return `<div class="settle-row">
+      <div class="settle-top">
+        <div class="settle-outlet">${s.outlets?.name || '—'} <span style="color:#64748B;font-weight:400">· ${s.outlets?.area||''}</span></div>
+        <div class="settle-amt">₹${parseFloat(s.amount_due||0).toFixed(0)}</div>
+      </div>
+      <div class="settle-meta">${d} · by ${s.users?.name||'Rep'} · Sold ${s.qty_sold} pkts · <span class="status-badge ${cls}">${label}</span></div>
+    </div>`;
+  }).join('');
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────
+function switchTab(name) {
+  const tabs = ['overview','production','alerts','settlements'];
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', tabs[i]===name));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 3000);
+}
+
+init();
+</script>
+</body>
+</html>
