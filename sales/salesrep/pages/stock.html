@@ -92,7 +92,7 @@
 
 <div class="top-bar">
   <h1>📦 Stock</h1>
-  <span class="top-date" id="top-date"></span>
+  <input type="date" id="sel-date" style="background:#0F172A;border:1px solid #334155;color:#F1F5F9;border-radius:6px;padding:4px 8px;font-size:.78rem;outline:none;max-width:130px" onchange="loadGrid()"/>
   <span class="chip" id="rep-chip">Rep</span>
 </div>
 
@@ -178,7 +178,7 @@ async function init() {
   currentUser = JSON.parse(raw);
   if (currentUser.role==='admin') { location.href='stock-admin.html'; return; }
   document.getElementById('rep-chip').textContent = currentUser.name||'Rep';
-  document.getElementById('top-date').textContent = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+  document.getElementById('sel-date').value = today;
 
   const [pd, od] = await Promise.all([
     db.from('products').select('id,name,base_price').eq('is_active',true),
@@ -197,9 +197,11 @@ async function init() {
 
 // ── Load grid data ────────────────────────────────────────────────────
 async function loadGrid() {
+  const selDate = document.getElementById('sel-date').value || today;
   const { data: movs } = await db.from('stock_movements')
     .select('id,outlet_id,qty_packets,movement_type,product_id,notes,outlets(name,area),products(name,base_price)')
     .eq('rep_id', currentUser.id)
+    .eq('date', selDate)
     .not('outlet_id','is',null);
 
   // Group by outlet
@@ -216,8 +218,11 @@ async function loadGrid() {
     if (m.movement_type==='returned'||m.movement_type==='discarded') rowData[id].returned += m.qty_packets;
   });
 
-  // Check settled outlets
-  const { data: settles } = await db.from('settlements').select('outlet_id,qty_sold,qty_returned,amount_collected').eq('rep_id',currentUser.id);
+  // Check settled outlets for selected date
+  const { data: settles } = await db.from('settlements').select('outlet_id,qty_sold,qty_returned,amount_collected')
+    .eq('rep_id',currentUser.id)
+    .gte('settled_at', selDate+'T00:00:00')
+    .lte('settled_at', selDate+'T23:59:59');
   const settledMap = {};
   const settledSold = {}; // total qty_sold per outlet across all settlements
   (settles||[]).forEach(s => {
@@ -329,7 +334,7 @@ async function addRow() {
 
   const { error } = await db.from('stock_movements').insert({
     rep_id:currentUser.id, outlet_id, product_id,
-    qty_packets:qty, movement_type:'warehouse_out', notes, date:today
+    qty_packets:qty, movement_type:'warehouse_out', notes, date:document.getElementById('sel-date').value||today
   });
   if (error) { alert(error.message); return; }
   document.getElementById('ar-qty').value='';
