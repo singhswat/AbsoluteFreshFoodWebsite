@@ -155,13 +155,31 @@
   </div>
 </div>
 
+<!-- Success Sheet -->
+<div class="sheet-overlay" id="success-sheet">
+  <div class="sheet" style="text-align:center">
+    <div style="font-size:2.5rem;margin-bottom:8px">✅</div>
+    <div style="font-size:1rem;font-weight:700;color:#4ADE80;margin-bottom:4px">Settlement Done!</div>
+    <div style="font-size:.8rem;color:#94A3B8;margin-bottom:16px" id="ss-outlet"></div>
+    <div style="background:#0F172A;border-radius:10px;padding:14px;margin-bottom:16px;text-align:left">
+      <div class="info-row"><span style="color:#94A3B8">Invoice</span><span class="info-val" id="ss-inv" style="color:#60A5FA"></span></div>
+      <div class="info-row"><span style="color:#94A3B8">Sold</span><span class="info-val" id="ss-sold"></span></div>
+      <div class="info-row"><span style="color:#94A3B8">Amount</span><span class="info-val" id="ss-amount" style="color:#FBBF24"></span></div>
+      <div class="info-row"><span style="color:#94A3B8">Collected</span><span class="info-val" id="ss-collected"></span></div>
+      <div class="info-row"><span style="color:#94A3B8">Status</span><span class="info-val" id="ss-status"></span></div>
+    </div>
+    <button onclick="shareWhatsApp()" style="width:100%;padding:13px;background:#25D366;color:#fff;border:none;border-radius:10px;font-size:.9rem;font-weight:700;cursor:pointer;margin-bottom:8px">📱 Share Invoice on WhatsApp</button>
+    <button onclick="document.getElementById('success-sheet').classList.remove('open')" style="width:100%;padding:10px;background:#334155;color:#CBD5E1;border:none;border-radius:10px;font-size:.82rem;font-weight:700;cursor:pointer">Close</button>
+  </div>
+</div>
+
 <!-- Bottom nav -->
 <nav class="rep-bot-nav">
   <a href="beat.html"><span>📋</span>Beat</a>
   <a href="rep-outlets.html"><span>🏪</span>Outlets</a>
   <a href="stock.html" class="active"><span>📦</span>Stock</a>
   <a href="rep-orders.html"><span>📝</span>Orders</a>
-  <a href="settings.html"><span>⚙️</span>More</a>
+  <a href="rep-more.html"><span>⚙️</span>More</a>
 </nav>
 
 <div class="toast" id="toast"></div>
@@ -440,14 +458,57 @@ async function completeSettle() {
 
     if (iErr) throw new Error('Invoice error: '+iErr.message);
 
-    toast('✅ Invoice '+inv+' created!');
+    // Show success sheet
     closeSettle();
+    const paid = collected >= amount_due;
+    document.getElementById('ss-outlet').textContent = settleTarget.name + ' · ' + settleTarget.area;
+    document.getElementById('ss-inv').textContent = inv;
+    document.getElementById('ss-sold').textContent = qty_sold + ' pkts';
+    document.getElementById('ss-amount').textContent = '₹' + amount_due.toFixed(2);
+    document.getElementById('ss-collected').textContent = '₹' + collected.toFixed(2);
+    document.getElementById('ss-status').textContent = paid ? '✅ Paid' : '⏳ Pending ₹'+(amount_due-collected).toFixed(2);
+    document.getElementById('ss-status').style.color = paid ? '#4ADE80' : '#FBBF24';
+    // Store for WhatsApp share
+    window._lastInvoice = {inv, outletName:settleTarget.name, qty_sold, amount_due, collected, paid, product:settleTarget.product, price:settleTarget.price, rep:currentUser.name};
+    document.getElementById('success-sheet').classList.add('open');
     await loadGrid();
   } catch(e) {
     alert('Error: '+e.message);
     btn.disabled=false;
     btn.textContent='✅ Settle & Generate Invoice';
   }
+}
+
+function shareWhatsApp() {
+  const d = window._lastInvoice;
+  if (!d) return;
+  const date = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+  const msg = `🧾 *Invoice from Absolute Fresh Food*
+
+` +
+    `Invoice No: *${d.inv}*
+` +
+    `Date: ${date}
+` +
+    `Store: ${d.outletName}
+
+` +
+    `Product: ${d.product}
+` +
+    `Qty: ${d.qty_sold} packets × ₹${d.price}
+` +
+    `*Total: ₹${d.amount_due.toFixed(2)}*
+` +
+    `Collected: ₹${d.collected.toFixed(2)}
+` +
+    (d.paid ? `Status: ✅ Paid
+` : `Pending: ₹${(d.amount_due-d.collected).toFixed(2)}
+`) +
+    `
+Thank you for your business!
+_Absolute Fresh Food, Lucknow_
+📞 83187 67689`;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg), '_blank');
 }
 
 function toast(msg) {

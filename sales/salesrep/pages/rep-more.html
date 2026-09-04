@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>More — AFF</title>
+  <meta name="theme-color" content="#1E293B"/>
+  <style>
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:#0F172A;color:#CBD5E1;font-family:system-ui,sans-serif}
+    .top-bar{background:#1E293B;border-bottom:1px solid #334155;padding:12px 16px;position:sticky;top:0;z-index:50}
+    .top-bar h1{font-size:.95rem;font-weight:700;color:#F1F5F9;margin:0}
+    .page-wrap{padding:12px 14px 90px}
+
+    /* Profile card */
+    .profile-card{background:#1E293B;border:1px solid #334155;border-radius:14px;padding:18px;margin-bottom:16px;display:flex;align-items:center;gap:14px}
+    .avatar{width:48px;height:48px;border-radius:50%;background:#2563EB;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+    .profile-name{font-size:1rem;font-weight:700;color:#F1F5F9}
+    .profile-role{font-size:.74rem;color:#64748B;margin-top:2px}
+
+    /* Menu items */
+    .menu-section{margin-bottom:14px}
+    .menu-label{font-size:.65rem;color:#64748B;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;padding:0 4px}
+    .menu-item{background:#1E293B;border:1px solid #334155;border-radius:10px;padding:13px 16px;margin-bottom:6px;display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;color:#CBD5E1}
+    .menu-item:active{background:#334155}
+    .menu-icon{font-size:1.1rem;width:24px;text-align:center}
+    .menu-text{flex:1;font-size:.87rem;font-weight:500}
+    .menu-arrow{color:#334155;font-size:.8rem}
+    .menu-item.danger{color:#F87171;border-color:#7f1d1d}
+
+    /* Invoice list */
+    .inv-card{background:#1E293B;border:1px solid #334155;border-radius:10px;padding:12px 14px;margin-bottom:6px}
+    .inv-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}
+    .inv-num{font-size:.8rem;font-weight:700;color:#60A5FA}
+    .inv-amt{font-size:.9rem;font-weight:700;font-family:monospace;color:#FBBF24}
+    .inv-meta{font-size:.72rem;color:#64748B;margin-bottom:8px}
+    .inv-footer{display:flex;justify-content:space-between;align-items:center}
+    .status-paid{font-size:.65rem;padding:2px 8px;border-radius:20px;background:#14532d;color:#4ADE80;font-weight:700}
+    .status-pending{font-size:.65rem;padding:2px 8px;border-radius:20px;background:#78350f;color:#FBBF24;font-weight:700}
+    .share-btn{background:#25D366;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer}
+    .empty{text-align:center;padding:24px;color:#64748B;font-size:.82rem}
+
+    .rep-bot-nav{position:fixed;bottom:0;left:0;right:0;background:#1E293B;border-top:1px solid #334155;display:flex;z-index:9999;padding-bottom:env(safe-area-inset-bottom)}
+    .rep-bot-nav a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px;font-size:.6rem;color:#64748B;text-decoration:none;gap:2px;-webkit-tap-highlight-color:transparent}
+    .rep-bot-nav a.active{color:#60A5FA}
+    .rep-bot-nav a span{font-size:1.2rem;line-height:1}
+  </style>
+</head>
+<body>
+
+<div class="top-bar"><h1>⚙️ More</h1></div>
+
+<div class="page-wrap">
+
+  <!-- Profile -->
+  <div class="profile-card">
+    <div class="avatar">👤</div>
+    <div>
+      <div class="profile-name" id="p-name">—</div>
+      <div class="profile-role" id="p-role">Sales Rep · Absolute Fresh Food</div>
+    </div>
+  </div>
+
+  <!-- Invoices -->
+  <div class="menu-section">
+    <div class="menu-label">My Invoices</div>
+    <div id="invoice-list"><div class="empty">Loading...</div></div>
+  </div>
+
+  <!-- Links -->
+  <div class="menu-section">
+    <div class="menu-label">Quick Links</div>
+    <a class="menu-item" href="beat.html"><span class="menu-icon">📋</span><span class="menu-text">Beat Plan</span><span class="menu-arrow">›</span></a>
+    <a class="menu-item" href="rep-outlets.html"><span class="menu-icon">🏪</span><span class="menu-text">My Outlets</span><span class="menu-arrow">›</span></a>
+    <a class="menu-item" href="stock.html"><span class="menu-icon">📦</span><span class="menu-text">Stock & Settlements</span><span class="menu-arrow">›</span></a>
+    <a class="menu-item" href="rep-orders.html"><span class="menu-icon">📝</span><span class="menu-text">My Orders</span><span class="menu-arrow">›</span></a>
+  </div>
+
+  <!-- Actions -->
+  <div class="menu-section">
+    <div class="menu-label">Account</div>
+    <div class="menu-item danger" onclick="signOut()"><span class="menu-icon">🚪</span><span class="menu-text">Sign Out</span></div>
+  </div>
+
+</div>
+
+<nav class="rep-bot-nav">
+  <a href="beat.html"><span>📋</span>Beat</a>
+  <a href="rep-outlets.html"><span>🏪</span>Outlets</a>
+  <a href="stock.html"><span>📦</span>Stock</a>
+  <a href="rep-orders.html"><span>📝</span>Orders</a>
+  <a href="rep-more.html" class="active"><span>⚙️</span>More</a>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const db = supabase.createClient('https://fbfopgzblqmsflkfejwa.supabase.co','sb_publishable_r7mYhsyIKtBjBKzxH8St9g_OHjTU-RQ');
+let currentUser;
+
+async function init() {
+  const raw = sessionStorage.getItem('aff_session');
+  if (!raw) { location.href='../index.html'; return; }
+  currentUser = JSON.parse(raw);
+  document.getElementById('p-name').textContent = currentUser.name || 'Rep';
+  document.getElementById('p-role').textContent = (currentUser.role==='admin'?'Admin':'Sales Rep') + ' · Absolute Fresh Food';
+  loadInvoices();
+}
+
+async function loadInvoices() {
+  const { data } = await db.from('b2b_invoices')
+    .select('invoice_number,invoice_date,company_name,grand_total,status,notes,items')
+    .eq('created_by', currentUser.id)
+    .order('invoice_date', {ascending:false})
+    .limit(20);
+
+  const el = document.getElementById('invoice-list');
+  if (!data || !data.length) { el.innerHTML = '<div class="empty">No invoices yet</div>'; return; }
+
+  el.innerHTML = data.map(inv => {
+    const d = new Date(inv.invoice_date).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+    const paid = inv.status === 'paid';
+    return `<div class="inv-card">
+      <div class="inv-top">
+        <div>
+          <div class="inv-num">${inv.invoice_number}</div>
+          <div class="inv-meta">${inv.company_name} · ${d}</div>
+        </div>
+        <div class="inv-amt">₹${parseFloat(inv.grand_total||0).toFixed(0)}</div>
+      </div>
+      <div class="inv-footer">
+        <span class="${paid?'status-paid':'status-pending'}">${paid?'Paid':'Pending'}</span>
+        <button class="share-btn" onclick="shareInvoice(${JSON.stringify(inv).replace(/"/g,'&quot;')})">📱 Share</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function shareInvoice(inv) {
+  const items = (inv.items||[]).map(i=>`  ${i.name} × ${i.qty} pkts @ ₹${i.rate} = ₹${i.amount}`).join('\n');
+  const date = new Date(inv.invoice_date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+  const msg = `🧾 *Invoice from Absolute Fresh Food*\n\n` +
+    `Invoice No: *${inv.invoice_number}*\nDate: ${date}\nStore: ${inv.company_name}\n\n` +
+    `${items}\n\n*Total: ₹${parseFloat(inv.grand_total||0).toFixed(2)}*\n` +
+    `Status: ${inv.status==='paid'?'✅ Paid':'⏳ Pending'}\n\n` +
+    `Thank you!\n_Absolute Fresh Food, Lucknow · 📞 83187 67689_`;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+
+function signOut() {
+  if (confirm('Sign out?')) { sessionStorage.clear(); location.href='../index.html'; }
+}
+
+init();
+</script>
+</body>
+</html>
