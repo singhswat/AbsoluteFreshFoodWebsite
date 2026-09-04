@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Outlets — AFF</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <meta name="theme-color" content="#1E293B"/>
+  <style>
+    body{background:#0F172A;color:#CBD5E1;font-family:system-ui,sans-serif;margin:0}
+    .top-bar{background:#1E293B;border-bottom:1px solid #334155;padding:10px 14px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:50}
+    .top-bar h1{font-size:.95rem;font-weight:700;color:#F1F5F9;flex:1}
+    .page-wrap{padding:10px 12px 90px}
+    .search-bar{display:flex;gap:8px;margin-bottom:12px}
+    .search-bar input{flex:1;background:#1E293B;border:1px solid #334155;color:#F1F5F9;border-radius:8px;padding:8px 12px;font-size:.85rem;outline:none}
+    .search-bar input:focus{border-color:#60A5FA}
+    .btn-add{background:#2563EB;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap}
+    .outlet-card{background:#1E293B;border:1px solid #334155;border-radius:12px;padding:14px;margin-bottom:8px}
+    .outlet-name{font-size:.9rem;font-weight:700;color:#F1F5F9;margin-bottom:4px}
+    .outlet-meta{font-size:.74rem;color:#64748B;margin-bottom:8px}
+    .outlet-tags{display:flex;gap:6px;flex-wrap:wrap}
+    .tag{font-size:.65rem;padding:2px 8px;border-radius:20px;font-weight:600}
+    .tag-area{background:#1e3a5f;color:#60A5FA}
+    .tag-tier{background:#1a2e1a;color:#4ADE80}
+    .tag-status{background:#1e293b;color:#94A3B8;border:1px solid #334155}
+    .empty{text-align:center;padding:40px 16px;color:#64748B;font-size:.85rem}
+
+    /* Add outlet modal */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:flex-end}
+    .modal-overlay.open{display:flex}
+    .modal{background:#1E293B;border-radius:16px 16px 0 0;padding:20px 16px 32px;width:100%;max-height:85vh;overflow-y:auto}
+    .modal-h{font-size:.95rem;font-weight:700;color:#F1F5F9;margin-bottom:16px}
+    .flbl{font-size:.7rem;color:#94A3B8;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
+    .finp{width:100%;background:#0F172A;border:1px solid #334155;color:#F1F5F9;border-radius:8px;padding:8px 10px;font-size:.85rem;outline:none;box-sizing:border-box}
+    .finp:focus{border-color:#60A5FA}
+    .fgrp{margin-bottom:10px}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .btn-row{display:flex;gap:8px;margin-top:12px}
+    .btn{flex:1;padding:10px;border-radius:9px;font-size:.85rem;font-weight:700;cursor:pointer;border:none}
+    .btn-blue{background:#2563EB;color:#fff}
+    .btn-ghost{background:#334155;color:#CBD5E1}
+
+    /* Bottom nav */
+    html,body{height:100%;overflow-x:hidden}
+    .rep-bot-nav{position:fixed;bottom:0;left:0;right:0;background:#1E293B;border-top:1px solid #334155;display:flex;z-index:9999;padding-bottom:env(safe-area-inset-bottom)}
+    .rep-bot-nav a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px;font-size:.6rem;color:#64748B;text-decoration:none;gap:2px;-webkit-tap-highlight-color:transparent}
+    .rep-bot-nav a.active{color:#60A5FA}
+    .rep-bot-nav a span{font-size:1.2rem;line-height:1}
+
+    .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#16A34A;color:#fff;padding:10px 20px;border-radius:8px;font-size:.82rem;font-weight:600;z-index:300;display:none}
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <h1>🏪 My Outlets</h1>
+  <span id="outlet-count" style="font-size:.72rem;color:#64748B"></span>
+</div>
+
+<div class="page-wrap">
+  <div class="search-bar">
+    <input type="text" id="search" placeholder="Search outlet or area..." oninput="renderOutlets()"/>
+    <button class="btn-add" onclick="openModal()">+ Add</button>
+  </div>
+  <div id="outlet-list"><div class="empty">Loading...</div></div>
+</div>
+
+<!-- Add Outlet Modal -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-h">➕ Add New Outlet</div>
+    <div class="fgrp"><label class="flbl">Outlet / Store Name</label><input class="finp" id="f-name" placeholder="e.g. Sharma General Store"/></div>
+    <div class="form-row">
+      <div class="fgrp"><label class="flbl">Area</label><input class="finp" id="f-area" placeholder="e.g. Ashiyana"/></div>
+      <div class="fgrp"><label class="flbl">Price Tier</label>
+        <select class="finp" id="f-tier">
+          <option value="1">T1 — Wholesale</option>
+          <option value="2">T2 — Distributor</option>
+          <option value="3">T3 — Retailer</option>
+          <option value="4" selected>T4 — MRP</option>
+        </select>
+      </div>
+    </div>
+    <div class="fgrp"><label class="flbl">Owner Name</label><input class="finp" id="f-owner" placeholder="Optional"/></div>
+    <div class="fgrp"><label class="flbl">Phone</label><input class="finp" id="f-phone" type="tel" placeholder="Optional"/></div>
+    <div class="fgrp"><label class="flbl">Address / Landmark</label><input class="finp" id="f-addr" placeholder="Optional"/></div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-blue" onclick="saveOutlet()">Save Outlet</button>
+    </div>
+  </div>
+</div>
+
+<nav class="rep-bot-nav">
+  <a href="beat.html"><span>📋</span>Beat</a>
+  <a href="rep-outlets.html" class="active"><span>🏪</span>Outlets</a>
+  <a href="stock.html"><span>📦</span>Stock</a>
+  <a href="rep-orders.html"><span>📝</span>Orders</a>
+  <a href="settings.html"><span>⚙️</span>More</a>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const db = supabase.createClient('https://fbfopgzblqmsflkfejwa.supabase.co','sb_publishable_r7mYhsyIKtBjBKzxH8St9g_OHjTU-RQ');
+let currentUser, allOutlets = [];
+
+const TIERS = {1:'T1 Wholesale',2:'T2 Distributor',3:'T3 Retailer',4:'T4 MRP'};
+
+async function init() {
+  const raw = sessionStorage.getItem('aff_session');
+  if (!raw) { location.href = '../index.html'; return; }
+  currentUser = JSON.parse(raw);
+  await loadOutlets();
+}
+
+async function loadOutlets() {
+  const isAdmin = currentUser.role === 'admin';
+  let q = db.from('outlets').select('id,name,area,price_tier,status,owner_name,phone').order('name');
+  if (!isAdmin) q = q.eq('rep_id', currentUser.id);
+  const { data } = await q;
+  allOutlets = data || [];
+  document.getElementById('outlet-count').textContent = allOutlets.length + ' outlets';
+  renderOutlets();
+}
+
+function renderOutlets() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const filtered = allOutlets.filter(o =>
+    o.name.toLowerCase().includes(q) || (o.area||'').toLowerCase().includes(q)
+  );
+  const el = document.getElementById('outlet-list');
+  if (!filtered.length) { el.innerHTML = '<div class="empty">No outlets found</div>'; return; }
+  el.innerHTML = filtered.map(o => `
+    <div class="outlet-card">
+      <div class="outlet-name">${o.name}</div>
+      <div class="outlet-meta">${o.owner_name ? o.owner_name + ' · ' : ''}${o.phone || ''}</div>
+      <div class="outlet-tags">
+        <span class="tag tag-area">${o.area || '—'}</span>
+        <span class="tag tag-tier">${TIERS[o.price_tier]||'T4 MRP'}</span>
+        <span class="tag tag-status">${o.status||'active'}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openModal() {
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  ['f-name','f-area','f-owner','f-phone','f-addr'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-tier').value = '4';
+}
+
+async function saveOutlet() {
+  const name = document.getElementById('f-name').value.trim();
+  const area = document.getElementById('f-area').value.trim();
+  if (!name || !area) { alert('Name and area are required.'); return; }
+  const { error } = await db.from('outlets').insert({
+    name, area,
+    price_tier: parseInt(document.getElementById('f-tier').value),
+    owner_name: document.getElementById('f-owner').value.trim() || null,
+    phone: document.getElementById('f-phone').value.trim() || null,
+    address: document.getElementById('f-addr').value.trim() || null,
+    rep_id: currentUser.id,
+    status: 'active'
+  });
+  if (error) { alert('Error: ' + error.message); return; }
+  toast('✅ Outlet added!');
+  closeModal();
+  await loadOutlets();
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 3000);
+}
+
+init();
+</script>
+</body>
+</html>
