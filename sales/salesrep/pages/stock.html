@@ -276,12 +276,15 @@ function renderGrid(data, settledMap) {
   const rows = entries.map(([id, r]) => {
     const outstanding = r.picked - r.returned - (r.prevSold||0);
     const settled = !!settledMap[id];
+    const isAdmin = currentUser.role === 'admin';
+    const canEdit = !settled || isAdmin;
     const outCls = outstanding===0 ? 'zero' : 'pos';
-    return `<tr>
+    const disAttr = canEdit ? '' : 'disabled style="opacity:.4;cursor:not-allowed"';
+    return `<tr style="${settled && !isAdmin ? 'opacity:.75' : ''}">
       <td class="store-col">${r.name}<div class="area">${r.area}</div></td>
       <td style="font-size:.72rem;color:#64748B;white-space:nowrap">${r.lastActivity||'—'}</td>
-      <td><input class="n-inp" type="number" value="${r.picked}" min="0" onchange="markDirty(this,'${id}','picked',${r.price})" oninput="markDirty(this,'${id}','picked',${r.price})"/></td>
-      <td><input class="n-inp" type="number" value="${r.returned}" min="0" onchange="markDirty(this,'${id}','returned',${r.price})" oninput="markDirty(this,'${id}','returned',${r.price})"/></td>
+      <td><input class="n-inp" type="number" value="${r.picked}" min="0" ${disAttr} onchange="markDirty(this,'${id}','picked',${r.price})" oninput="markDirty(this,'${id}','picked',${r.price})"/></td>
+      <td><input class="n-inp" type="number" value="${r.returned}" min="0" ${disAttr} onchange="markDirty(this,'${id}','returned',${r.price})" oninput="markDirty(this,'${id}','returned',${r.price})"/></td>
       <td><span class="out-badge ${outCls}">${outstanding}</span></td>
       <td>
         <button class="act-btn btn-save" id="save-btn-${id}" onclick="saveRow('${id}')" style="display:none;margin-right:4px">💾</button>
