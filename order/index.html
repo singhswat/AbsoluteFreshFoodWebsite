@@ -1580,7 +1580,7 @@ function payWithRazorpay(){
   const isBogo=_appliedCoupon&&_appliedCoupon.discount_type==='bogo';
   const itemDesc=items.map(i=>`${i.name}x${i.qty}`).join(', ');
   const options={
-    key:'RAZORPAY_KEY_ID',
+    key:'rzp_live_TYgyzYo7bzNTp7',
     amount:final*100,
     currency:'INR',
     name:'Absolute Fresh Food',
