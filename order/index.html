@@ -1544,19 +1544,20 @@ async function sendWA(e){
   const totalLine=base>0?`%0ATotal: ₹${final}${isBogo&&freeValue>0?` + FREE packs worth ₹${freeValue}`:saving>0?` (saved ₹${saving})`:''}`:'' ;
   let orderRef='WEB-'+Date.now().toString(36).toUpperCase();
   try{
-    const{data:ex}=await _db.from('web_orders').select('order_ref').eq('customer_phone',ph).eq('delivery_date',_tomorrow.iso).gte('created_at',new Date(Date.now()-600000).toISOString()).limit(1);
-    if(ex&&ex.length){orderRef=ex[0].order_ref;}
-    else{
-      await _db.from('web_orders').insert({
-        order_ref:orderRef,customer_name:n,customer_phone:ph,customer_address:ad,
-        items:[...items,...(isBogo?freeItems.map(i=>({...i,name:`FREE ${i.name}`,price:0})):[])].concat(_wantSubscription?[{name:'Subscription/Bulk',qty:1,price:0}]:[]),
-        coupon_code:_appliedCoupon?_appliedCoupon.code:null,coupon_id:_appliedCoupon?_appliedCoupon.id:null,
-        subtotal:base||null,discount_amount:saving||null,total:final||null,
-        customer_pincode:pin,status:'new',source:'website_preview',delivery_date:_tomorrow.iso,
-        admin_notes:_upiPaid?`✅ PAID via UPI · Ref: ${window._pendingOrderRef}`:null
-      });
-    }
-  }catch(err){console.warn('Save failed:',err);}
+    const allItems=[...items,...(isBogo?freeItems.map(i=>({...i,name:`FREE ${i.name}`,price:0})):[])].concat(_wantSubscription?[{name:'Subscription/Bulk',qty:1,price:0}]:[]);
+    const coRes=await fetch('https://fbfopgzblqmsflkfejwa.supabase.co/functions/v1/create-order',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        customer_name:n,customer_phone:ph,customer_address:ad,customer_pincode:pin,
+        items:allItems,amount:final||0,payment_method:'COD',
+        coupon_code:_appliedCoupon?_appliedCoupon.code:null,
+        delivery_date:_tomorrow.iso
+      })
+    });
+    const coData=await coRes.json();
+    if(coData.order_ref) orderRef=coData.order_ref;
+  }catch(err){console.warn('create-order failed:',err);}
   const payLine=_upiPaid?`✅ PAID via UPI · Ref: ${window._pendingOrderRef||'—'}`:'COD / UPI on delivery';
   const msg=`Hi Absolute Fresh! 🌿%0A%0AName: ${encodeURIComponent(n)}%0APhone: +91${ph}%0AAddress: ${encodeURIComponent(ad)} - ${pin}%0ADelivery: ${_tomorrow.display}%0A%0AOrder:${itemLines}${freeLines}${subLine}${cpnLine}${totalLine}%0APayment: ${encodeURIComponent(payLine)}%0ARef: ${orderRef}`;
   const waUrl=`https://wa.me/${WA}?text=${msg}`;
@@ -1568,7 +1569,7 @@ async function sendWA(e){
   _orderSubmitting=false;
 }
 
-function payWithRazorpay(){
+async function payWithRazorpay(){
   const n=document.getElementById('f-name').value.trim();
   const ph=document.getElementById('f-phone').value.trim().replace(/[\s\-]/g,'').replace(/^\+91/,'').replace(/^0/,'');
   const ad=document.getElementById('f-addr').value.trim();
@@ -1581,47 +1582,81 @@ function payWithRazorpay(){
   if(!items.length&&!_wantSubscription){alert('Please add at least one pack.');return;}
   if(final<=0){alert('Please select at least one item.');return;}
   const isBogo=_appliedCoupon&&_appliedCoupon.discount_type==='bogo';
-  const itemDesc=items.map(i=>`${i.name}x${i.qty}`).join(', ');
-  const options={
-    key:'rzp_live_TYgyzYo7bzNTp7',
-    amount:final*100,
-    currency:'INR',
-    name:'Absolute Fresh Food',
-    description:itemDesc,
-    image:'https://absolutefreshfood.com/img/logo.webp',
-    prefill:{name:n,contact:'91'+ph},
-    theme:{color:'#1B5224'},
-    modal:{backdropclose:false},
-    handler:async function(response){
-      const payId=response.razorpay_payment_id;
-      let orderRef='WEB-'+Date.now().toString(36).toUpperCase();
-      try{
-        const{data:ex}=await _db.from('web_orders').select('order_ref').eq('customer_phone',ph).eq('delivery_date',_tomorrow.iso).gte('created_at',new Date(Date.now()-600000).toISOString()).limit(1);
-        if(ex&&ex.length){orderRef=ex[0].order_ref;}
-        else{
-          await _db.from('web_orders').insert({
-            order_ref:orderRef,customer_name:n,customer_phone:ph,customer_address:ad,
-            items:[...items,...(isBogo?freeItems.map(i=>({...i,name:'FREE '+i.name,price:0})):[])].concat(_wantSubscription?[{name:'Subscription/Bulk',qty:1,price:0}]:[]),
-            coupon_code:_appliedCoupon?_appliedCoupon.code:null,coupon_id:_appliedCoupon?_appliedCoupon.id:null,
-            subtotal:base||null,discount_amount:saving||null,total:final||null,
-            customer_pincode:pin,status:'paid',source:'website_razorpay',delivery_date:_tomorrow.iso,
-            admin_notes:'✅ PAID via Razorpay · Payment ID: '+payId
+  const allItems=[...items,...(isBogo?freeItems.map(i=>({...i,name:'FREE '+i.name,price:0})):[])].concat(_wantSubscription?[{name:'Subscription/Bulk',qty:1,price:0}]:[]);
+
+  // Disable button
+  ['rzp-pay-btn','rzp-pay-btn2'].forEach(id=>{const b=document.getElementById(id);if(b){b.disabled=true;b.textContent='Creating order…';}});
+
+  try{
+    // Step 1: Create order server-side
+    const res=await fetch('https://fbfopgzblqmsflkfejwa.supabase.co/functions/v1/create-order',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        customer_name:n,customer_phone:ph,customer_address:ad,customer_pincode:pin,
+        items:allItems,amount:final,payment_method:'RAZORPAY',
+        coupon_code:_appliedCoupon?_appliedCoupon.code:null,
+        delivery_date:_tomorrow.iso
+      })
+    });
+    const data=await res.json();
+    if(!res.ok||!data.razorpay_order_id){throw new Error(data.error||'Order creation failed');}
+
+    // Step 2: Open Razorpay Checkout with server-created order
+    const options={
+      key:data.razorpay_key_id,
+      amount:final*100,
+      currency:'INR',
+      order_id:data.razorpay_order_id,
+      name:'Absolute Fresh Food',
+      description:allItems.map(i=>i.name+'x'+i.qty).join(', '),
+      image:'https://absolutefreshfood.com/img/logo.webp',
+      prefill:{name:n,contact:'91'+ph},
+      theme:{color:'#1B5224'},
+      modal:{backdropclose:false,escape:false},
+      handler:async function(response){
+        // Step 3: Verify signature server-side
+        try{
+          const vRes=await fetch('https://fbfopgzblqmsflkfejwa.supabase.co/functions/v1/verify-payment',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({
+              razorpay_order_id:response.razorpay_order_id,
+              razorpay_payment_id:response.razorpay_payment_id,
+              razorpay_signature:response.razorpay_signature
+            })
           });
+          const vData=await vRes.json();
+          const orderRef=vData.order_ref||data.order_ref;
+          if(vRes.ok&&vData.verified){
+            showSuccess('✅ Paid · Order '+orderRef+' · '+_tomorrow.display, null);
+          } else {
+            showSuccess('⚠️ Payment received but verification pending · Order '+orderRef, null);
+          }
+        }catch(err){
+          console.warn('Verify failed:',err);
+          showSuccess('Payment done · Order '+data.order_ref, null);
         }
-      }catch(err){console.warn('Save failed:',err);}
-      const itemLines=items.map(i=>`%0A  • ${i.name} ×${i.qty} = ₹${i.price*i.qty}`).join('');
-      const msg=`Hi Absolute Fresh! 🌿%0A%0A✅ ONLINE PAYMENT DONE%0APayment ID: ${payId}%0A%0AName: ${encodeURIComponent(n)}%0APhone: +91${ph}%0AAddress: ${encodeURIComponent(ad)} - ${pin}%0ADelivery: ${_tomorrow.display}%0A%0AOrder:${itemLines}%0ATotal Paid: ₹${final}%0ARef: ${orderRef}`;
-      const waUrl='https://wa.me/'+WA+'?text='+msg;
-      window.open(waUrl,'_blank');
-      document.getElementById('order-form-inner').style.display='none';
-      const sc=document.getElementById('order-success');sc.style.display='block';
-      document.getElementById('order-ref-badge').textContent='✅ Paid · Order '+orderRef+' · '+_tomorrow.display;
-      document.getElementById('order-wa-fallback').href=waUrl;
-      document.getElementById('order-wa-fallback').textContent='📲 Notify us on WhatsApp';
-    }
-  };
-  const rzp=new Razorpay(options);
-  rzp.open();
+      }
+    };
+    const rzp=new Razorpay(options);
+    rzp.on('payment.failed',function(resp){
+      alert('Payment failed: '+resp.error.description+'. Please try again.');
+    });
+    rzp.open();
+  }catch(err){
+    alert('Could not create order: '+err.message);
+  }finally{
+    ['rzp-pay-btn','rzp-pay-btn2'].forEach(id=>{const b=document.getElementById(id);if(b){b.disabled=false;b.innerHTML='💳 Pay Online — ₹<span class="rzp-lbl">'+final+'</span>';}});
+  }
+}
+
+function showSuccess(badgeText, waUrl){
+  document.getElementById('order-form-inner').style.display='none';
+  const sc=document.getElementById('order-success');sc.style.display='block';
+  document.getElementById('order-ref-badge').textContent=badgeText;
+  if(waUrl){document.getElementById('order-wa-fallback').href=waUrl;document.getElementById('order-wa-fallback').textContent='📲 Notify us on WhatsApp';}
+  else{const fb=document.getElementById('order-wa-fallback');if(fb)fb.style.display='none';}
 }
 </script>
 
