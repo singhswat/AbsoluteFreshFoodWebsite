@@ -799,6 +799,7 @@
         <button class="act-btn" onclick="bulkStatus('out_for_delivery')" style="background:#A78BFA22;color:#A78BFA">🚴 Out for Delivery</button>
         <button class="act-btn" onclick="bulkStatus('delivered')" style="background:#34D39922;color:#34D399">✅ Delivered</button>
         <button class="act-btn danger" onclick="bulkStatus('cancelled')">✕ Cancel</button>
+        <button class="act-btn danger" onclick="bulkDelete()" style="background:#7f1d1d;color:#fca5a5;border-color:#991b1b">🗑 Delete Selected</button>
         <button onclick="clearSelection()" style="margin-left:auto;background:none;border:none;color:#64748B;cursor:pointer;font-size:.8rem">Clear</button>
       </div>
 
@@ -2667,6 +2668,15 @@
     ));
     clearSelection();
     loadWebOrders('today');
+  }
+
+  async function bulkDelete() {
+    const ids = getSelectedIds();
+    if (!ids.length) return;
+    if (!confirm(`Permanently delete ${ids.length} order(s)? This cannot be undone.`)) return;
+    await Promise.all(ids.map(id => db.from('web_orders').delete().eq('id', id)));
+    clearSelection();
+    loadWebOrders();
   }
 
   async function deleteWebOrder(id, ref) {
