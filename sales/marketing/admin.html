@@ -2604,6 +2604,7 @@
         <td style="display:flex;gap:6px;flex-wrap:wrap">
           ${nextBtn}
           <button class="action-btn" style="background:#1E40AF22;color:#60A5FA" onclick="openEditWO('${o.id}')">Edit</button>
+          <button class="action-btn" style="background:#7f1d1d33;color:#f87171;border-color:#7f1d1d" onclick="deleteWebOrder('${o.id}','${o.order_ref}')">Delete</button>
         </td>
       </tr>`;
     }).join('');
@@ -2666,6 +2667,13 @@
     ));
     clearSelection();
     loadWebOrders('today');
+  }
+
+  async function deleteWebOrder(id, ref) {
+    if (!confirm(`Delete order ${ref}? This cannot be undone.`)) return;
+    const { error } = await _supabase.from('web_orders').delete().eq('id', id);
+    if (error) { alert('Delete failed: ' + error.message); return; }
+    loadWebOrders();
   }
 
   async function openEditWO(id) {
