@@ -2671,7 +2671,7 @@
 
   async function deleteWebOrder(id, ref) {
     if (!confirm(`Delete order ${ref}? This cannot be undone.`)) return;
-    const { error } = await _supabase.from('web_orders').delete().eq('id', id);
+    const { error } = await db.from('web_orders').delete().eq('id', id);
     if (error) { alert('Delete failed: ' + error.message); return; }
     loadWebOrders();
   }
